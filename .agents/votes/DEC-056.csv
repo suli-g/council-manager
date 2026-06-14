@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;YES (Option 1);Explicit data flow, improves testability.
+B;OOP Specialists;YES (Option 1);Clearer data source, better encapsulation.
+C;Imperative Specialists;NO (Option 2);Favors direct env var manipulation.
+D;Declarative Specialists;YES (Option 1);Explicit data source makes configuration more declarative.
+E;Dynamic Specialists;YES (Option 1);Flexible adaptation to various input sources.
+F;Auditors/Project Managers;YES (Option 1);Better control over settings source for auditing.
+G;Contrarians;NO (Option 3);Prefers true decoupling via abstract provider.

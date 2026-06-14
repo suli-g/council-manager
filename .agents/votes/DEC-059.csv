@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;YES (Option 2);Supports declarative configuration over procedural logic.
+B;OOP Specialists;NO (Option 1);Preferred the custom decorator for better domain encapsulation.
+C;Imperative Specialists;NO (Option 3);Preferred explicit state control via context managers.
+D;Declarative Specialists;YES (Option 2);Standard compliance is critical for long-term maintainability.
+E;Dynamic Specialists;NO (Option 1);Liked the flexibility of the custom decorator pattern.
+F;Auditors/Project Managers;YES (Option 2);Standardization reduces the risk of bespoke configuration bugs.
+G;Contrarians;NO (Option 1);Argued that third-party library bloat should be avoided where possible.

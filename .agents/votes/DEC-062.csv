@@ -1,0 +1,8 @@
+voter_id;team_id;vote;rationale
+V-001;A;Alt D;Modular mixins allow for composable configuration pipelines.
+V-002;B;Alt D;Inheritance segregation is a superior OOP pattern for complex settings.
+V-003;C;Alt D;Un-hides the configuration structure, making it easier to reason about the procedural flow.
+V-004;D;Alt D;Declarative blocks for functional units (GitHub, AI) improve readability.
+V-005;E;Alt D;Unpack provides type safety without the friction of a separate DTO class for every call.
+V-006;F;Alt D;Explicitly categorized settings improve auditability and quality control.
+V-007;G;Alt D;Solves the 'obfuscation' concern while leveraging modern Python standards.

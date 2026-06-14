@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;YES (Option 3);Agrees with user that urllib ensures strict data-pipeline integrity for URLs.
+B;OOP Specialists;NO (Option 2);Preferred pathlib for OO ergonomics, but accepts urllib for standard compliance.
+C;Imperative Specialists;YES (Option 3);Supports explicit, procedural control over URL segment resolution.
+D;Declarative Specialists;NO (Option 3);Concerned about complexity but supports case-sensitivity mandate.
+E;Dynamic Specialists;NO (Option 3);Accepts user choice to prioritize standard-compliance over brevity.
+F;Auditors/Project Managers;YES (Option 3);Ensures consistency between CLI and future Django implementation via standard URI handling.
+G;Contrarians;YES (Option 3);Strict urllib avoids 'magic' normalization and correctly reflects GitHub's case-sensitive nature.

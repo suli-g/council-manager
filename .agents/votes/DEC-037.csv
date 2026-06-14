@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;YES;Stateless configuration via environment variables is ideal.
+B;OOP Specialists;YES;Encapsulated Settings model provides clean abstraction.
+C;Imperative Specialists;YES;Maintains simple execution flow without heavy CLI overhead.
+D;Declarative Specialists;YES;Schema-driven configuration (Pydantic) ensures validity.
+E;Dynamic Specialists;YES;Enables rapid reconfiguration for testing and prototyping.
+F;Auditors/Project Managers;YES;Addresses non-interactive requirement while staying lightweight.
+G;Contrarians;YES;Proposed strategy: keeps core engine focused and isolated.

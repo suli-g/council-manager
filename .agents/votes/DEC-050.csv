@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;NO (Option 1);Prefers content-hashing.
+B;OOP Specialists;NO (Option 1);Prefers content-hashing.
+C;Imperative Specialists;NO (Option 1);Generally favors state, but agrees to defer.
+D;Declarative Specialists;NO (Option 2);Prefers relational mapping.
+E;Dynamic Specialists;NO (Option 1);Generally favors speed, but agrees to defer.
+F;Auditors/Project Managers;YES (Option 3);Agrees to prioritize core engine before persistence.
+G;Contrarians;YES (Option 3);Favors minimalist approach to avoid premature optimization.

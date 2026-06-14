@@ -1,0 +1,8 @@
+audit_id;decision_id;status;re_audit_date;notes
+AUDIT-001;DEC-027;FIXED;2026-05-15;Refactored system to use Repository pattern, Pydantic models, and httpx. Purged PyGitHub.
+AUDIT-002;ISSUE-3;PENDING;2026-05-18;GitHubStrategy auth bypass and missing tests. Created GH Issue #3.
+AUDIT-003;DEC-036;RESOLVED;2026-05-26;P1-02 implemented with ratified hierarchical extraction and versioning logic.
+AUDIT-004;DEC-037;RESOLVED;2026-05-26;P1-06 implemented with validated Settings model and full architectural alignment.
+AUDIT-005;DEC-038;RESOLVED;2026-05-26;CSVs migrated to semi-colon delimiter to prevent formatting errors.
+AUDIT-005;DEC-040;RESOLVED;2026-05-26;P1-10 implemented with decoupled exploration and targeted download logic.
+AUDIT-006;DEC-043;RESOLVED;2026-05-27;P1-03 implemented with structured Gemini output and requirement caching.

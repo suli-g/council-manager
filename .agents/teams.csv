@@ -1,0 +1,8 @@
+team_id;team_name;count;paradigm_specialty
+A;Functional Specialists;10;Functional Programming (Immutability, Pure Functions, Pipelines)
+B;OOP Specialists;10;Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns)
+C;Imperative Specialists;10;Imperative Programming (Explicit State, Procedural logic, Performance)
+D;Declarative Specialists;10;Declarative Programming (Logic engines, Config-driven, DSLs)
+E;Dynamic Specialists;10;Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping)
+F;Auditors/Project Managers;10;Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment)
+G;Contrarians;10;Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives)

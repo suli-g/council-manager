@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;YES;Explicit configuration loading reduces implicit dependencies and side effects.
+B;OOP Specialists;YES;Encapsulates configuration loading logic, improving testability and clarity.
+C;Imperative Specialists;YES;Directly addresses a blocking issue for development workflow, improving efficiency.
+D;Declarative Specialists;YES;Allows configuration to be specified declaratively via a CLI argument, aligning with config-driven principles.
+E;Dynamic Specialists;YES;Enables dynamic switching of environments for rapid iteration and testing.
+F;Auditors/Project Managers;YES;Resolves a critical usability issue for local development and unblocks AUDIT-007.
+G;Contrarians;YES;Pragmatic solution to a clear user pain point, balancing flexibility with minimal complexity.

@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;YES;Separating discovery from downloading enables cleaner data pipelines.
+B;OOP Specialists;YES;Decouples structural mapping from content state management.
+C;Imperative Specialists;YES;Significantly improves performance by avoiding unnecessary downloads.
+D;Declarative Specialists;YES;Allows for declarative filtering of repository trees before action.
+E;Dynamic Specialists;YES;Enables interactive exploration of unknown repo structures.
+F;Auditors/Project Managers;YES;Reduces API bandwidth and storage overhead for large projects.
+G;Contrarians;YES;Directly addresses the 'Massive Download' pain point identified in research.

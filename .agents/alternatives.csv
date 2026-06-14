@@ -1,0 +1,22 @@
+id;decision_id;option;pros;cons
+ALT-001;DEC-001;Django;Built-in admin and ORM;High overhead for simple automation/CLI needs.
+ALT-002;DEC-002;Re-download/Parse everything;Simple implementation;Slow performance and wasted API/bandwidth.
+ALT-003;DEC-003;Single monolithic AI prompt;Lower token usage;Less precise feedback; harder to debug specific failures.
+ALT-004;DEC-018;Composable Fetching Pipeline (Functional);Pure functions / Easy testing;Can be abstract / Harder to manage stateful caching.
+ALT-005;DEC-018;Centralized Procedural Controller (Imperative);Performance / Simple flow;Tight coupling / Hard to extend.
+ALT-006;DEC-018;Source Configuration Engine (Declarative);Very extensible / No code for new sources;Complex to build engine / Harder to debug.
+ALT-007;DEC-018;Registry-based Plugin System (Dynamic);Runtime discovery;"Magic" behavior / Type safety risks.
+ALT-008;DEC-021;Domain-Driven Modular;High separation / Scalability;Higher friction for prototyping / Nested complexity.
+ALT-009;DEC-021;Service-Oriented Flat;Simpler than Modular;Still carries some "service" boilerplate.
+ALT-010;DEC-021;Data-Centric Pipeline;Predictable data flow;Rigid for exploration phase.
+ALT-011;DEC-021;Subsystem Packages;Organized;More overhead than flat modules for early playing around.
+ALT-012;DEC-028;Protocols/TypedDicts;Structural typing / No Pydantic req;Lacks runtime validation and consistency with model stack.
+ALT-013;DEC-029;Future: prefix;Custom intent label;Deprecated in favor of standard TODO/FIXME for tool compatibility.
+ALT-014;DEC-028;Inheritance DAOs;Less boilerplate;Tighter coupling between models and interfaces.
+ALT-015;DEC-030;Pyright;Native @computed_field support / Speed;Violates DEC-030 / Requires dev reconfig.
+ALT-016;DEC-047;Flexible .env Loading with CLI;Allows dynamic environment switching and isolated testing.;No longer necessary due to new organizational API key management.
+ALT-017;DEC-048;Dedicated docs branch;Focused documentation review, separates code from prose.;Merge overhead, potential for doc drift.
+ALT-018;DEC-048;Inline README updates;Docs always in working context, no extra branching.;Cluttered README, UML remains inaccurate during Phase 1.
+ALT-019;DEC-048;Minimalist Documentation;Zero overhead, prevents drift.;High orientation cost for new agents, violates standards.
+ALT-020;DEC-064;Git-Ops CSV/Text;Zero infrastructure, human-readable audit trail.;Incapable of scaling to multi-project isolation/queries.
+ALT-021;DEC-064;SQLite Event Sourcing;Strict immutability and audit logs.;High architectural complexity; overkill for initial prototyping.

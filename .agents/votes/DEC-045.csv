@@ -1,0 +1,8 @@
+voter_id;team_id;vote;rationale
+V-001;A;Alt A;Aligns with declarative transformation of the file list.
+V-002;B;Alt A;Improves strategy predictability; should eventually be a service.
+V-003;C;Alt A;Simplest and fastest procedural flow for the user.
+V-004;D;Alt A;Fits the configuration-driven goal without manual overhead.
+V-005;E;Alt A;Heuristics are good for rapid prototyping phase.
+V-006;F;Alt A;Solves the quality degradation issue identified in the audit.
+V-007;G;Alt C;Dissent: Human selection is safer for expensive AI operations.

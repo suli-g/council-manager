@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;NO (Option 2);Prefers data-first approach but accepts isolation mandate.
+B;OOP Specialists;NO (Option 1);Prefers strong runtime validation at the boundary.
+C;Imperative Specialists;NO (Option 2);Prefers direct mapping to database structures.
+D;Declarative Specialists;NO (Option 1);Prefers Pydantic as a schema-first standard.
+E;Dynamic Specialists;NO (Option 2);Prefers minimal boilerplate.
+F;Auditors/Project Managers;NO (Option 1);Prefers strict boundary validation.
+G;Contrarians;YES (Option 3);Correctly identified that total decoupling via Protocols/Adapters provides the best long-term resilience against framework churn.

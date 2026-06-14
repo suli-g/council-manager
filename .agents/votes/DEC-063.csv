@@ -1,0 +1,8 @@
+voter_id;team_id;vote;rationale
+V-001;A;Alt A;Aligns with functional consistency across persistence boundaries.
+V-002;B;Alt A;Properly encapsulates submission identity within the hash value.
+V-003;C;Alt A;Improves runtime performance by skipping redundant work.
+V-004;D;Alt A;Consistent hashing logic is a core declarative requirement.
+V-005;E;Alt A;Persistent caching is essential for real-world CLI tools.
+V-006;F;Alt A;Reduces API costs and ensures audit repeatability.
+V-007;G;Alt A;Accepts the context-aware hash as a necessary compromise for data integrity.

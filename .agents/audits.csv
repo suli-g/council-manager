@@ -1,0 +1,12 @@
+timestamp;audit_id;summary;alignment_score;auditor_team
+2026-05-07T14:30:00;AUDIT-001;P1-01 alignment assessment: 60%. Architecture/Spec divergence noted in models and auth.;60%;F
+2026-05-18T11:00:00;AUDIT-002;P1-01 & P1-05 alignment: 75%. GitHubStrategy bypasses APIHandler auth for file downloads; missing unit tests for core logic.;75%;F
+2026-05-26T16:00:00;AUDIT-003;P1-02 alignment assessment: 90%. Hierarchical extraction and versioning implemented; full unit test coverage. Heading detection uses heuristics.;90%;F
+2026-05-26T18:00:00;AUDIT-004;P1-06 & Project Health assessment: 100%. Structured config implemented; all logic errors and linting issues resolved; 100% test pass rate.;100%;F
+2026-05-26T22:00:00;AUDIT-005;P1-10 & CSV Migration assessment: 100%. Decoupled retrieval implemented; CSVs migrated to semi-colon standard; all tooling checks pass.;100%;F
+2026-05-27T11:00:00;AUDIT-006;P1-03 AI Analysis assessment: 100%. Structured Gemini output and requirement caching implemented; all tooling checks pass.;100%;F
+2026-05-27T14:00:00;AUDIT-007;Retrieval Optimization Assessment: 85%. Transition to Git Trees/Blobs API identified as architectural drift from Phase 1 spec.;85%;F
+2026-05-27T15:00:00;AUDIT-008;Gemini API Rate Limit & Token Usage Assessment: Resolved by new organizational setup, eliminating the need for dynamic API key switching.;100%;F
+2026-05-31T12:45:00;AUDIT-009;P1-11 alignment assessment: 100%. Deterministic task normalization implemented in utils and integrated into GitHub retrieval with path resolution logic; full unit and integration test coverage.;100%;F
+2026-06-01T12:00:00;AUDIT-010;Plan p1-20 (Local Storage) assessment: 95%. Architecture aligns with DEC-052/053. Strong data integrity via hashing and AI logging. Recommendation to ensure SourceFile mime_type is persisted.;95%;F
+2026-06-01T23:59:00;AUDIT-011;Phase 1 Final Milestone Assessment: 100%. All Core Engine tasks (P1-01 to P1-16) completed and verified. Test suite passed (43/43). Persistence layer successfully integrated with main workflow. Ready for Phase 2.;100%;F

@@ -1,0 +1,15 @@
+voter_id;team_id;vote;rationale
+V-001;A;Alt 1;Functional purity prefers local immutability for all records.
+V-002;A;Alt 1;Consistent mapping is easier to track than conditional mapping.
+V-003;B;Alt 3;Encapsulates failure state; no need to expose passing audits to the global namespace.
+V-004;B;Alt 3;Conditional logic reduces noise in the issue tracker object.
+V-005;C;Alt 3;Performant for human devs: only act on what is broken.
+V-006;C;Alt 3;Explicit state change (failure) triggers the explicit action.
+V-007;D;Alt 1;Declarative approach: if audit exists, then issue exists. No conditionals.
+V-008;D;Alt 1;Standardization is better for system logic.
+V-009;E;Alt 3;Rapid iteration: don't waste time on green audits.
+V-010;E;Alt 3;Focus energy on fixing red states.
+V-011;F;Alt 3;Selective reporting reduces management overhead.
+V-012;F;Alt 3;Aligns with PMP best practices for exception-based reporting.
+V-013;G;Alt 2;Skeptical of dual-entry; risk of data drift between CSV and GitHub is high.
+V-014;G;Alt 2;Keep them separate or don't do it at all.

@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;NO (Option 1);Prefers pure CAS.
+B;OOP Specialists;YES (Option 1);Supports relational integrity and clean encapsulation.
+C;Imperative Specialists;YES (Option 1);Supports consistent state management.
+D;Declarative Specialists;YES (Option 1);SQLAlchemy models provide a clear declarative schema.
+E;Dynamic Specialists;NO (Option 1);Prefers flexible document stores.
+F;Auditors/Project Managers;YES (Option 1);Ensures comprehensive audit trails and relational history tracking.
+G;Contrarians;YES (Option 1);Agrees to SQLite only if governance data remains decoupled in simple CSVs.

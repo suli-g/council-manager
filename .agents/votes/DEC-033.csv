@@ -1,0 +1,8 @@
+voter_id;team_id;vote;rationale
+V-001;A;Alt A;Ensures data integrity from raw request to Pydantic model.
+V-002;B;Alt A;Validates every interface boundary in the retrieval chain.
+V-003;C;Alt A;High-performance validation of all procedural logic.
+V-004;D;Alt A;Comprehensive verification of the retrieval DSL.
+V-005;E;Alt A;Allows for rapid refactoring with safety nets.
+V-006;F;Alt A;Maximum alignment with quality assurance requirements.
+V-007;G;Alt B;Team G dissent: Alt A is over-engineered; handlers are too simple to test.

@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;NO (Option 1);Prefers consolidated metadata.
+B;OOP Specialists;NO (Option 1);Prefers consolidated metadata.
+C;Imperative Specialists;YES (Option 2);Avoids documentation bloat.
+D;Declarative Specialists;NO (Option 1);Prefers explicit behavior specs.
+E;Dynamic Specialists;YES (Option 2);Avoids unnecessary prose updates.
+F;Auditors/Project Managers;NO (Option 1);Prefers ease of verification.
+G;Contrarians;NO (Option 3);Prefers separation of testing docs.

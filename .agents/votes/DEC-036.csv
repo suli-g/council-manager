@@ -1,0 +1,8 @@
+team_id;team_name;vote;rationale
+A;Functional Specialists;YES;Clean hierarchical transformation fits functional models.
+B;OOP Specialists;YES;Structured InstructionSection models align with design patterns.
+C;Imperative Specialists;YES;pypdf is performant; binary versioning is efficient.
+D;Declarative Specialists;YES;Schema-driven extraction facilitates comparison logic.
+E;Dynamic Specialists;YES;Enables rapid prototyping of instruction-based analysis.
+F;Auditors/Project Managers;YES;Strict adherence to testing and alignment mandates.
+G;Contrarians;YES;Supports hierarchical clarity for both humans and LLMs.
