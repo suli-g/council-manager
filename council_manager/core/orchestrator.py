@@ -118,4 +118,125 @@ class CouncilOrchestrator:
         finally:
             session.close()
 
+    async def run_voting(
+        self,
+        workspace_dir: str | Path,
+        proposal_id: str,
+        max_cycles: int = 5
+    ) -> Proposal:
+        """Run Phase 2 (Voting): Conduct up to 5 cycles of blind weighted voting with feedback."""
+        workspace_path = Path(workspace_dir).resolve()
+        
+        # 1. Fetch proposal details
+        session = db_manager.get_session(workspace_path)
+        try:
+            proposal = session.query(Proposal).filter_by(id=proposal_id).first()
+            if not proposal:
+                raise ValueError(f"Proposal '{proposal_id}' not found.")
+            topic = proposal.topic
+            desc = proposal.description
+            opts = proposal.options
+            delib_rationales = proposal.rationales
+        finally:
+            session.close()
+
+        # 2. Get registered teams
+        teams = agent_registry.get_teams(workspace_path)
+        if not teams:
+            raise ValueError(f"No active teams registered in database at {workspace_path}")
+
+        # Map team IDs to weights
+        team_weight_map = {t.id: t.vote_weight for t in teams}
+        total_active_weight = sum(team_weight_map.values())
+
+        # Initialize debate context with Phase 1 deliberations
+        rationales_context = "Deliberation Justifications:\n" + "\n".join(
+            f"- {r['team_id']}: {r['rationale']}" for r in delib_rationales
+        )
+
+        final_votes = []
+        final_status = "RATIFICATION_PENDING"
+        prev_votes = []
+
+        # 3. 5-Cycle Voting Loop
+        for cycle in range(1, max_cycles + 1):
+            if cycle > 1:
+                # Compile previous cycle tallies and rationales into context
+                tally = {}
+                for v in prev_votes:
+                    w = team_weight_map.get(v["team_id"], 10)
+                    tally[v["vote"]] = tally.get(v["vote"], 0) + w
+                
+                tally_str = ", ".join(f"'{opt}': {wt} weight ({int(wt/total_active_weight*100)}%)" for opt, wt in tally.items())
+                rationales_str = "\n".join(f"- {v['team_id']}: {v['rationale']}" for v in prev_votes)
+                
+                rationales_context = (
+                    f"--- DEBATE CONTEXT (Cycle {cycle - 1} Results) ---\n"
+                    f"Previous anonymous vote distribution: {tally_str}\n"
+                    f"Previous rationales:\n{rationales_str}\n"
+                    f"Reflect on opposing points of view and consider compromise."
+                )
+
+            # Query all team agents concurrently
+            async def query_team_vote(team):
+                res = await self.prompter.generate_vote_async(
+                    team_name=team.name,
+                    paradigm_specialty=team.paradigm_specialty,
+                    title=topic,
+                    description=desc,
+                    options=opts,
+                    rationales_context=rationales_context
+                )
+                return {
+                    "voter_id": f"V-{team.id}",
+                    "team_id": team.id,
+                    "vote": res.vote,
+                    "rationale": res.rationale,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+
+            tasks = [query_team_vote(t) for t in teams]
+            cycle_votes = await asyncio.gather(*tasks)
+            prev_votes = cycle_votes
+
+            # Tally votes for this cycle
+            tally = {}
+            for v in cycle_votes:
+                w = team_weight_map.get(v["team_id"], 10)
+                tally[v["vote"]] = tally.get(v["vote"], 0) + w
+
+            # Check for consensus (>70% weight)
+            consensus_reached = False
+            for opt, wt in tally.items():
+                if wt >= 0.7 * total_active_weight:
+                    final_votes = cycle_votes
+                    consensus_reached = True
+                    break
+
+            if consensus_reached:
+                break
+        else:
+            # Fallback if no consensus met after max_cycles: choose highest weighted option
+            tally = {}
+            for v in prev_votes:
+                w = team_weight_map.get(v["team_id"], 10)
+                tally[v["vote"]] = tally.get(v["vote"], 0) + w
+            
+            # Select majority winner
+            majority_choice = max(tally, key=tally.get)
+            final_votes = prev_votes
+
+        # 4. Commit final votes and update proposal status
+        session = db_manager.get_session(workspace_path)
+        try:
+            proposal = session.query(Proposal).filter_by(id=proposal_id).first()
+            proposal.votes = final_votes
+            proposal.status = final_status
+            session.commit()
+            session.refresh(proposal)
+            return proposal
+        finally:
+            session.close()
+
 council_orchestrator = CouncilOrchestrator()
+

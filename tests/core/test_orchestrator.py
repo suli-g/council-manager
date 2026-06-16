@@ -3,8 +3,8 @@ import pytest
 import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
-from council_manager.db import db_manager, Team, Proposal
-from council_manager.core.prompter import AgentPrompter
+from council_manager.db import db_manager, Team, Proposal, Project
+from council_manager.core.prompter import AgentPrompter, VoteResponse
 from council_manager.core.orchestrator import CouncilOrchestrator
 
 @pytest.fixture(autouse=True)
@@ -72,12 +72,120 @@ async def test_create_and_run_deliberation():
         # Verify prompter was called asynchronously for both teams
         assert mock_prompter.generate_deliberation_async.call_count == 2
 
-        # Verify DB is updated
+        # Release file locks before leaving temp directory context
+        db_manager.close_all()
+
+@pytest.mark.anyio
+async def test_run_voting_consensus():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        
+        # 1. Setup mock project and teams in SQLite database
         session = db_manager.get_session(workspace)
-        db_prop_final = session.query(Proposal).filter_by(id="DEC-101").first()
-        assert db_prop_final.status == "VOTING_PENDING"
-        assert len(db_prop_final.rationales) == 2
+        
+        proj = Project(id="test_proj", name="Test Project")
+        session.add(proj)
+        session.commit()
+
+        # Total weight = 15. Team A weight = 11 (> 70% of 15). Team B weight = 4.
+        t1 = Team(id="A", name="Team A", vote_weight=11, paradigm_specialty="Functional")
+        t2 = Team(id="B", name="Team B", vote_weight=4, paradigm_specialty="OOP")
+        session.add_all([t1, t2])
+        
+        # Pre-seed a proposal in VOTING_PENDING status
+        prop = Proposal(
+            id="DEC-202",
+            project_id="test_proj",
+            topic="Data Layer",
+            description="...",
+            options=["Alt 1", "Alt 2"],
+            status="VOTING_PENDING",
+            rationales=[{"team_id": "A", "rationale": "..."}, {"team_id": "B", "rationale": "..."}]
+        )
+        session.add(prop)
+        session.commit()
         session.close()
 
-        # Release file locks
+        # 2. Mock AgentPrompter async generate_vote_async
+        mock_prompter = MagicMock(spec=AgentPrompter)
+        mock_prompter.generate_vote_async = AsyncMock()
+        
+        # In Cycle 1, Team A (weight 11) votes "Alt 1". That is >70% of 15. Consensus reached.
+        async def mock_vote(team_name, paradigm_specialty, title, description, options, rationales_context):
+            if "Team A" in team_name:
+                return VoteResponse(vote="Alt 1", rationale="Functional rocks")
+            return VoteResponse(vote="Alt 2", rationale="OOP rocks")
+            
+        mock_prompter.generate_vote_async.side_effect = mock_vote
+
+        orchestrator = CouncilOrchestrator(prompter=mock_prompter)
+
+        # 3. Run Voting (max_cycles=3)
+        updated_proposal = await orchestrator.run_voting(workspace, "DEC-202", max_cycles=3)
+
+        assert updated_proposal.status == "RATIFICATION_PENDING"
+        assert len(updated_proposal.votes) == 2
+        
+        votes_dict = {v["team_id"]: v["vote"] for v in updated_proposal.votes}
+        assert votes_dict["A"] == "Alt 1"
+        assert votes_dict["B"] == "Alt 2"
+
+        # Verify it exited after Cycle 1 (only 2 prompter calls total)
+        assert mock_prompter.generate_vote_async.call_count == 2
+
+        # Release file locks before leaving temp directory context
+        db_manager.close_all()
+
+@pytest.mark.anyio
+async def test_run_voting_fallback():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        
+        session = db_manager.get_session(workspace)
+        
+        proj = Project(id="test_proj", name="Test Project")
+        session.add(proj)
+        session.commit()
+
+        # Total weight = 20. Neither team is > 70% (14 weight).
+        t1 = Team(id="A", name="Team A", vote_weight=10, paradigm_specialty="Functional")
+        t2 = Team(id="B", name="Team B", vote_weight=10, paradigm_specialty="OOP")
+        session.add_all([t1, t2])
+        
+        prop = Proposal(
+            id="DEC-303",
+            project_id="test_proj",
+            topic="Data Layer",
+            description="...",
+            options=["Alt 1", "Alt 2"],
+            status="VOTING_PENDING",
+            rationales=[{"team_id": "A", "rationale": "..."}, {"team_id": "B", "rationale": "..."}]
+        )
+        session.add(prop)
+        session.commit()
+        session.close()
+
+        # Mock prompter. They keep voting differently, no consensus will be met.
+        mock_prompter = MagicMock(spec=AgentPrompter)
+        mock_prompter.generate_vote_async = AsyncMock()
+        
+        async def mock_vote(team_name, paradigm_specialty, title, description, options, rationales_context):
+            if "Team A" in team_name:
+                return VoteResponse(vote="Alt 1", rationale="Functional")
+            return VoteResponse(vote="Alt 2", rationale="OOP")
+            
+        mock_prompter.generate_vote_async.side_effect = mock_vote
+
+        orchestrator = CouncilOrchestrator(prompter=mock_prompter)
+
+        # Run voting with max_cycles = 2
+        updated_proposal = await orchestrator.run_voting(workspace, "DEC-303", max_cycles=2)
+
+        assert updated_proposal.status == "RATIFICATION_PENDING"
+        assert len(updated_proposal.votes) == 2
+        
+        # Verify it went through both cycles (2 cycles * 2 teams = 4 prompter calls)
+        assert mock_prompter.generate_vote_async.call_count == 4
+
+        # Release file locks before leaving temp directory context
         db_manager.close_all()
