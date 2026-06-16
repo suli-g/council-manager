@@ -107,22 +107,22 @@ def import_csv_to_db(workspace_dir: str | Path, project_id: str):
         # 5. Import Audits
         audits_csv = agents_dir / "audits.csv"
         if audits_csv.exists():
+            session.query(AuditLog).filter_by(project_id=project_id).delete()
             with open(audits_csv, mode="r", encoding="utf-8", newline="") as f:
                 reader = csv.DictReader(f, delimiter=";")
                 for row in reader:
                     audit_id = row["audit_id"].strip()
-                    audit = session.query(AuditLog).filter_by(id=audit_id).first()
-                    if not audit:
-                        audit = AuditLog(
-                            id=audit_id,
-                            project_id=project_id,
-                            timestamp=safe_parse_datetime(row["timestamp"]),
-                            summary=row["summary"].strip(),
-                            alignment_score=safe_parse_score(row["alignment_score"]),
-                            auditor_team=row["auditor_team"].strip(),
-                        )
-                        session.add(audit)
+                    audit = AuditLog(
+                        id=audit_id,
+                        project_id=project_id,
+                        timestamp=safe_parse_datetime(row["timestamp"]),
+                        summary=row["summary"].strip(),
+                        alignment_score=safe_parse_score(row["alignment_score"]),
+                        auditor_team=row["auditor_team"].strip(),
+                    )
+                    session.add(audit)
             session.commit()
+
 
         # 6. Parse and Build Proposals & Votes from individual votes CSVs
         for dec_id in decisions_list:
