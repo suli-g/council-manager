@@ -34,6 +34,9 @@ ALT-032;DEC-070;Flat Agent Module with raw httpx;Lightweight footprint without g
 ALT-033;DEC-070;Unified Orchestrator Client;Simplifies file count.;Pollutes the database package with prompt rendering and external network boundaries.
 ALT-034;DEC-071;Synchronous Deliberation Engine;Simple sequential code flow, easy to debug.;High latency (~15-20s) because queries run one after another.
 ALT-035;DEC-071;ThreadPoolExecutor Deliberation;Allows parallel requests while keeping code synchronous.;Introduces thread management overhead and potential resource locks.
+ALT-036;DEC-072;Pre-Voted and Fallback Override;User votes once, AI loops, fallback prompts on failure.;User cannot change vote or comment dynamically during AI debate cycles.
+ALT-037;DEC-072;Interactive Round-by-Round;Provides high-fidelity human steerage during debate rounds.;Blocks task queues and asynchronous background execution.
+
 
 
 

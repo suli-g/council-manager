@@ -1,0 +1,9 @@
+voter_id;team_id;vote;rationale
+V-001;A;Proposal;Stateless coroutine flow is cleaner when user input is not injected inside the loop.
+V-002;B;Proposal;Option 3 provides a clean boundary: AI core engine handles consensus, UI handles ratification.
+V-003;C;Proposal;Non-blocking execution enables running background deliberations in task queues.
+V-004;D;Proposal;Declarative ratification schemas fit the pipeline standard.
+V-005;E;Proposal;Eases mocking: testing the 5-cycle loop doesn't require interactive terminal prompts.
+V-006;F;Proposal;Clear separation of concerns makes auditing the AI consensus metrics highly reliable.
+V-007;G;Proposal;Avoids interrupting the developer for intermediate votes during long runs.
+V-008;User;Proposal;Selected autonomous AI 5-cycle deliberation with final human Approve/Reject signature.
