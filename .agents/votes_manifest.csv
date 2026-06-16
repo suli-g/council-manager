@@ -32,6 +32,8 @@ DEC-064;New System Data Architecture;docs/.agents/votes/DEC-064.csv;2026-06-14T1
 DEC-065;Two-Phase Voting Subsystem;docs/.agents/votes/DEC-065.csv;2026-06-15T00:15:00
 DEC-066;Unified SQLite Data Architecture;docs/.agents/votes/DEC-066.csv;2026-06-15T18:10:00
 DEC-067;High-Level Component Diagram;docs/.agents/votes/DEC-067.csv;2026-06-15T18:23:00
+DEC-068;SQLAlchemy & Workspace File Isolation;docs/.agents/votes/DEC-068.csv;2026-06-16T11:45:00
+
 
 
 

@@ -1,7 +1,7 @@
 phase;id;task;status;notes
-1;P1-01;Database Layer Initialization (SQLAlchemy - Unified SQLite);TODO;Setup core SQLAlchemy models with JSON column mapping for Projects, Teams, and Governance records.
-1;P1-02;Project Isolation Logic;TODO;Implement tenant-style isolation for multiple projects within the same engine.
-1;P1-03;Governance CSV Import/Export;TODO;Migration tools to bridge current .agents/*.csv logic into the new database engine.
+1;P1-01;Database Layer Initialization (SQLAlchemy - Unified SQLite);DONE;Setup core SQLAlchemy models with JSON column mapping for Projects, Teams, and Governance records.
+1;P1-02;Project Isolation Logic;DONE;Implement tenant-style isolation for multiple projects within the same engine.
+1;P1-03;Governance CSV Import/Export;DONE;Migration tools to bridge current .agents/*.csv logic into the new database engine.
 2;P2-01;Council Orchestration Engine;TODO;Core logic for multi-team perspective gathering and voting.
 2;P2-02;Asynchronous Task Queue;TODO;Handle long-running AI deliberations without blocking.
 3;P3-01;External Integration API;TODO;REST/gRPC interfaces for other projects to consume council services.

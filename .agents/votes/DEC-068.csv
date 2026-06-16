@@ -1,0 +1,9 @@
+voter_id;team_id;vote;rationale
+V-001;A;Proposal;Mapping JSON columns directly to static types is clean and functional.
+V-002;B;Proposal;SQLAlchemy ORM models provide a strong OOP domain model.
+V-003;C;Proposal;Physical file isolation avoids concurrency contention across different projects.
+V-004;D;Proposal;Declarative SQLAlchemy class definitions are excellent.
+V-005;E;Proposal;Dynamic directory connection mapping works perfectly.
+V-006;F;Proposal;Physical SQLite file isolation is the easiest structure to audit and verify.
+V-007;G;Proposal;SQLAlchemy is more Pythonic and maintainable than writing raw SQL strings.
+V-008;User;Proposal;Selected modern ORM with physical workspace-based SQLite databases.
