@@ -3,7 +3,7 @@ from datetime import datetime, date
 from pathlib import Path
 import tempfile
 from sqlalchemy.exc import IntegrityError
-from council_manager.db import db_manager, Project, Team, Proposal, Decision, Alternative, AuditLog
+from council_manager.db import db_manager, Project, Team, Proposal, Decision, Alternative, AuditLog, RoadmapTask
 
 def test_models_crud():
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -86,6 +86,24 @@ def test_models_crud():
         db_audit = session.query(AuditLog).filter_by(id="AUDIT-100").first()
         assert db_audit is not None
         assert db_audit.alignment_score == 95.0
+
+        # 5b. RoadmapTask CRUD
+        task = RoadmapTask(
+            id="P1-01",
+            project_id="cm",
+            phase=1,
+            task="DB Init",
+            status="DONE",
+            notes="Completed"
+        )
+        session.add(task)
+        session.commit()
+
+        db_task = session.query(RoadmapTask).filter_by(id="P1-01").first()
+        assert db_task is not None
+        assert db_task.task == "DB Init"
+        assert db_task.status == "DONE"
+
 
         # 6. Foreign Key Constraint Enforcement
         invalid_proposal = Proposal(

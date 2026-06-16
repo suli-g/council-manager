@@ -4,7 +4,7 @@ import tempfile
 import pytest
 from pathlib import Path
 from council_manager.db import db_manager, Project, Team, Proposal, Decision, Alternative, AuditLog
-from council_manager.db.migration import import_csv_to_db, export_db_to_csv
+from council_manager.db.migration import import_csv_to_db, export_db_to_csv, initialize_new_project
 
 @pytest.fixture(autouse=True)
 def cleanup_connections():
@@ -162,4 +162,32 @@ def test_migration_legacy_votes_dynamic_voter():
         finally:
             session.close()
             db_manager.close_all()
+
+def test_initialize_new_project():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        
+        # Initialize
+        initialize_new_project(workspace, "my_new_project")
+        
+        # Verify files were created
+        assert (workspace / ".agents" / "teams.csv").exists()
+        assert (workspace / ".agents" / "decisions.csv").exists()
+        assert (workspace / ".agents" / "roadmap.csv").exists()
+        
+        # Verify DB was created and seeded
+        assert (workspace / ".agents" / "governance.db").exists()
+        
+        session = db_manager.get_session(workspace)
+        try:
+            # Check default teams
+            teams = session.query(Team).all()
+            assert len(teams) == 7
+            team_ids = {t.id for t in teams}
+            assert "A" in team_ids
+            assert "G" in team_ids
+        finally:
+            session.close()
+            db_manager.close_all()
+
 

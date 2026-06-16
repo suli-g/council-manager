@@ -16,6 +16,8 @@ class Project(Base):
     proposals: Mapped[List["Proposal"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     decisions: Mapped[List["Decision"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     audit_logs: Mapped[List["AuditLog"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+    roadmap_tasks: Mapped[List["RoadmapTask"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+
 
 
 class Team(Base):
@@ -81,4 +83,18 @@ class AuditLog(Base):
     auditor_team: Mapped[str] = mapped_column(String, default="F")
 
     project: Mapped["Project"] = relationship(back_populates="audit_logs")
+
+
+class RoadmapTask(Base):
+    __tablename__ = "roadmap_tasks"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)  # e.g., 'P1-01'
+    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"), primary_key=True)
+    phase: Mapped[int] = mapped_column(Integer, nullable=False)
+    task: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False)  # 'TODO', 'DONE'
+    notes: Mapped[str] = mapped_column(String, nullable=True)
+
+    project: Mapped["Project"] = relationship(back_populates="roadmap_tasks")
+
 
