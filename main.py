@@ -16,16 +16,29 @@ COLOR_BOLD = "\033[1m"
 COLOR_RESET = "\033[0m"
 
 def log_success(msg: str):
-    print(f"{COLOR_GREEN}{COLOR_BOLD}✔ SUCCESS:{COLOR_RESET} {msg}")
+    try:
+        print(f"{COLOR_GREEN}{COLOR_BOLD}✔ SUCCESS:{COLOR_RESET} {msg}")
+    except UnicodeEncodeError:
+        print(f"{COLOR_GREEN}{COLOR_BOLD}[SUCCESS]{COLOR_RESET} {msg}")
 
 def log_info(msg: str):
-    print(f"{COLOR_CYAN}{COLOR_BOLD}ℹ INFO:{COLOR_RESET} {msg}")
+    try:
+        print(f"{COLOR_CYAN}{COLOR_BOLD}ℹ INFO:{COLOR_RESET} {msg}")
+    except UnicodeEncodeError:
+        print(f"{COLOR_CYAN}{COLOR_BOLD}[INFO]{COLOR_RESET} {msg}")
 
 def log_warn(msg: str):
-    print(f"{COLOR_YELLOW}{COLOR_BOLD}⚠ WARNING:{COLOR_RESET} {msg}")
+    try:
+        print(f"{COLOR_YELLOW}{COLOR_BOLD}⚠ WARNING:{COLOR_RESET} {msg}")
+    except UnicodeEncodeError:
+        print(f"{COLOR_YELLOW}{COLOR_BOLD}[WARNING]{COLOR_RESET} {msg}")
 
 def log_error(msg: str):
-    print(f"{COLOR_RED}{COLOR_BOLD}✘ ERROR:{COLOR_RESET} {msg}", file=sys.stderr)
+    try:
+        print(f"{COLOR_RED}{COLOR_BOLD}✘ ERROR:{COLOR_RESET} {msg}", file=sys.stderr)
+    except UnicodeEncodeError:
+        print(f"{COLOR_RED}{COLOR_BOLD}[ERROR]{COLOR_RESET} {msg}", file=sys.stderr)
+
 
 def get_workspace_path(path_arg: str | None) -> Path:
     if path_arg:
@@ -149,14 +162,28 @@ def cmd_show(args):
         if p.votes:
             print(f"\n{COLOR_BOLD}{COLOR_CYAN}--- PHASE 2: CAST VOTES ---{COLOR_RESET}")
             for v in p.votes:
-                print(f"{COLOR_BOLD}[Voter {v['voter_id']} / Team {v['team_id']}]{COLOR_RESET} voted {COLOR_GREEN}'{v['vote']}'{COLOR_RESET}")
-                print(f"  Rationale: {v['rationale']}")
+                vote_val = v.get("vote", "")
+                team_id = v.get("team_id", "")
+                voter_id = v.get("voter_id", "")
+                
+                # Fetch rationale directly or fallback to Phase 1 list
+                rationale = v.get("rationale", "")
+                if not rationale and p.rationales:
+                    for rat in p.rationales:
+                        if rat.get("team_id") == team_id:
+                            rationale = rat.get("rationale", "")
+                            break
+                            
+                print(f"{COLOR_BOLD}[Voter {voter_id} / Team {team_id}]{COLOR_RESET} voted {COLOR_GREEN}'{vote_val}'{COLOR_RESET}")
+                if rationale:
+                    print(f"  Rationale: {rationale}")
         print()
     except Exception as e:
         log_error(f"Query failed: {e}")
     finally:
         session.close()
         db_manager.close_all()
+
 
 def main():
     parser = argparse.ArgumentParser(
