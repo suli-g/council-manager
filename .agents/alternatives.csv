@@ -42,6 +42,9 @@ ALT-040;DEC-073;Stateless Upfront Validation;Simple string and list length limit
 ALT-041;DEC-074;Migrate Roadmap to SQLite;Standard ORM mapping allows relational filtering and API endpoints.;Adds schema complexity and risk of database-to-file drift if edited directly.
 ALT-042;DEC-074;Keep Roadmap in CSV;Zero database schema overhead, absolute single source of truth for humans.;Hard to filter, query, or join inside database queries or FastAPI endpoints.
 ALT-043;DEC-074;Dynamic CSV-backed Parser;No database schema changes; reads and returns CSV on the fly for API requests.;Requires constant disk reads and text parsing, adding latency to API calls.
+ALT-044;DEC-075;AI-Powered Proposal Inception;Quick pre-pass call to Gemini generates high-fidelity topic names and structured options.;Adds minor API latency and token cost to proposal creation step.
+ALT-045;DEC-075;Stateless Parser Heuristics;First line of description becomes topic; binary default options. Very fast.;Crude and inflexible options/topics that don't capture complex choices.
+ALT-046;DEC-075;Separate Inception Subcommand;Introduces proposal-draft subcommand to run extraction interactively.;Forces extra command invocation and doesn't automate the creation command.
 
 
 
