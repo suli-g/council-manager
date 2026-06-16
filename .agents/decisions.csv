@@ -65,6 +65,8 @@ DEC-067;2026-06-15;Architecture Design;High-Level Component Diagram;Adopted a hi
 DEC-068;2026-06-16;Data Architecture;SQLAlchemy & Workspace File Isolation;Ratified SQLAlchemy ORM mapped models using SQLite JSON columns for flexible governance records. Implemented physical tenant isolation by routing connections to a project-specific database file located at .agents/governance.db.
 DEC-069;2026-06-16;Project Management;Auditing Procedure and Granular Roadmap;Ratified formal auditing rules: audit logs are immutable, corrections require new re-audit entries, and generalized roadmap items must be split into granular, easily auditable sub-tasks.
 DEC-070;2026-06-16;AI Strategy;Separate Registry/Prompter with google-genai;Adopted the official google-genai SDK for AI queries. Built separate registry.py (to query active teams from SQLite) and prompter.py (to format paradigm-based system instructions and handle queries) modules, using mocks for offline unit testing.
+DEC-071;2026-06-16;AI Strategy;Asynchronous Deliberation Engine (Asyncio);Implemented the deliberation engine (Phase 1) using python's asyncio and the SDK's client.aio async client. This queries all active team agents concurrently, reducing API wait time from ~15-20s to ~2-3s.
+
 
 
 

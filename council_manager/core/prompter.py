@@ -104,3 +104,82 @@ class AgentPrompter:
         # Fallback to parsing raw text if parsed is empty
         data = json.loads(response.text)
         return VoteResponse(**data)
+
+    async def generate_deliberation_async(
+        self,
+        team_name: str,
+        paradigm_specialty: str,
+        title: str,
+        description: str,
+        options: List[str]
+    ) -> str:
+        """Query Gemini model asynchronously for a paradigm-based deliberation rationale."""
+        system_instruction = (
+            f"You are an AI agent representing the '{team_name}' engineering team, "
+            f"specializing in '{paradigm_specialty}'. Your goal is to deliberate on technical/architectural "
+            f"proposals from your paradigm's viewpoint. Provide clear, rigorous justifications."
+        )
+
+        prompt = (
+            f"Please deliberate on the following proposal:\n"
+            f"Title: {title}\n"
+            f"Description: {description}\n"
+            f"Options: {'; '.join(options)}\n\n"
+            f"Provide a concise, professional justification of your team's stance. "
+            f"Focus strictly on how the proposal affects your team's paradigm and domain of expertise."
+        )
+
+        response = await self.client.aio.models.generate_content(
+            model=settings.gemini_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.7,
+            )
+        )
+        return response.text.strip()
+
+    async def generate_vote_async(
+        self,
+        team_name: str,
+        paradigm_specialty: str,
+        title: str,
+        description: str,
+        options: List[str],
+        rationales_context: str
+    ) -> VoteResponse:
+        """Query Gemini model asynchronously to cast a blind vote, using structured Pydantic response schemas."""
+        system_instruction = (
+            f"You are an AI agent representing the '{team_name}' engineering team, "
+            f"specializing in '{paradigm_specialty}'. Your goal is to vote on technical/architectural "
+            f"proposals from your paradigm's viewpoint. Cast a blind vote without seeing how other teams voted."
+        )
+
+        prompt = (
+            f"Please cast your blind vote on the following proposal:\n"
+            f"Title: {title}\n"
+            f"Description: {description}\n"
+            f"Options: {'; '.join(options)}\n\n"
+            f"Here are the deliberation rationales written by all teams (including yours):\n"
+            f"{rationales_context}\n\n"
+            f"Cast your final blind vote. You must select exactly one of the options. "
+            f"Return your selection and voting rationale."
+        )
+
+        response = await self.client.aio.models.generate_content(
+            model=settings.gemini_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.2,
+                response_mime_type="application/json",
+                response_schema=VoteResponse,
+            )
+        )
+        
+        if hasattr(response, "parsed") and response.parsed:
+            return response.parsed
+            
+        data = json.loads(response.text)
+        return VoteResponse(**data)
+

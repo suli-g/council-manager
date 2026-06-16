@@ -1,0 +1,9 @@
+voter_id;team_id;vote;rationale
+V-001;A;Proposal;Async coroutines are highly expressive and support pure concurrent mapping.
+V-002;B;Proposal;The async SDK client wrapper fits nicely into our OOP class design.
+V-003;C;Proposal;Asyncio prevents event-loop blockages and provides maximum network throughput.
+V-004;D;Proposal;Declarative task configurations and async triggers work well.
+V-005;E;Proposal;Allows dynamic injection of async mocks in tests.
+V-006;F;Proposal;Parallel calls reduce validation latency, improving continuous integration QA speed.
+V-007;G;Proposal;The ~7x speedup makes async worth the minor test mocking overhead.
+V-008;User;Proposal;Selected asynchronous deliberation engine using asyncio and client.aio.
