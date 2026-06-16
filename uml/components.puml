@@ -1,0 +1,67 @@
+@startuml
+skinparam componentStyle uml2
+skinparam shadowing false
+skinparam ranksep 50
+skinparam linetype ortho
+
+component "User Interface" {
+  [CLI Console] as CLI
+  portin "Command Input" as ui_in
+  portout "Engine Requests" as ui_out
+  
+  ui_in --> CLI
+  CLI --> ui_out
+}
+
+component "Configuration" {
+  [Settings Manager] as Settings
+  portin "Set Config" as config_set
+  portout "Get Config" as config_get
+  
+  config_set --> Settings
+  Settings --> config_get
+}
+
+component "Core Engine" {
+  [Council Orchestrator] as Orchestrator
+  [Voting Engine] as Voting
+  portin "Proposals & Votes" as engine_in
+  portout "DB Requests" as engine_db_out
+  portout "AI Requests" as engine_ai_out
+  
+  engine_in --> Orchestrator
+  Orchestrator ..> Voting : "runs sessions"
+  Orchestrator --> engine_db_out
+  Voting --> engine_db_out
+  Orchestrator --> engine_ai_out
+  Voting --> engine_ai_out
+}
+
+component "Data Access" {
+  [Database Layer (SQLAlchemy)] as DBLayer
+  portin "DB Queries" as db_in
+  portout "File I/O" as db_out
+  
+  db_in --> DBLayer
+  DBLayer --> db_out
+}
+
+database "SQLite Database" {
+  [governance.db] as DBFile
+}
+
+node "AI Context" {
+  [AI Agent Teams (A-G)] as AIAgents
+  portin "Prompt Input" as ai_in
+  
+  ai_in --> AIAgents
+}
+
+' Connecting the Ports and Adapters
+CLI ..> config_get : "reads settings"
+ui_out --> engine_in : "delegates tasks"
+engine_db_out --> db_in : "persists state"
+engine_ai_out --> ai_in : "queries teams"
+db_out --> DBFile : "writes to file"
+
+@endum

@@ -1,0 +1,68 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam ranksep 50
+skinparam linetype ortho
+
+actor "Human Overseer" as User
+actor "AI Agent" as AIAgent
+actor "Auditor" as Auditor
+actor "External API Client" as Client
+
+rectangle "Council Manager" {
+
+  package "Project Isolation Subsystem" <<subsystem>> {
+    usecase "Create Project" as UC_CreateProj
+    usecase "Isolate Tenant Data" as UC_IsolateTenant
+  }
+
+  package "Governance Data Subsystem" <<subsystem>> {
+    usecase "Import CSV Governance Data" as UC_ImportCSV
+    usecase "Export CSV Governance Data" as UC_ExportCSV
+  }
+
+  package "Council Orchestration Subsystem" <<subsystem>> {
+    usecase "Submit Proposal" as UC_SubmitProposal
+    usecase "Ratify & Log Decision" as UC_RatifyDecision
+  }
+
+  package "Voting Subsystem" <<subsystem>> {
+    usecase "Create Voting Session" as UC_CreateSession
+    usecase "Publish Deliberation Rationale" as UC_PublishDelib
+    usecase "Submit Blind Vote" as UC_SubmitBlindVote
+    usecase "Verify Consensus Threshold" as UC_VerifyConsensus
+  }
+
+  package "Auditing & Quality Subsystem" <<subsystem>> {
+    usecase "Perform Project Audit" as UC_PerformAudit
+    usecase "Map Audit to Resolution Decision" as UC_MapAudit
+  }
+
+  package "External Integration Subsystem" <<subsystem>> {
+    usecase "Query Ratified Decisions" as UC_QueryDecisions
+    usecase "View Interactive Dashboard" as UC_ViewDashboard
+  }
+}
+
+User --> UC_CreateProj
+User --> UC_SubmitProposal
+User --> UC_CreateSession
+User --> UC_SubmitBlindVote
+User --> UC_ViewDashboard
+
+AIAgent --> UC_PublishDelib
+AIAgent --> UC_SubmitBlindVote
+
+Auditor --> UC_PerformAudit
+Auditor --> UC_MapAudit
+
+Client --> UC_QueryDecisions
+
+UC_SubmitProposal ..> UC_CreateSession : <<include>>
+UC_CreateSession ..> UC_PublishDelib : <<include>>
+UC_SubmitBlindVote ..> UC_VerifyConsensus : <<include>>
+UC_VerifyConsensus ..> UC_RatifyDecision : <<include>>
+UC_ImportCSV ..> UC_IsolateTenant : <<include>>
+
+@endum

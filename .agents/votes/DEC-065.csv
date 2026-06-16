@@ -1,0 +1,9 @@
+voter_id;team_id;vote;rationale
+V-001;A;Alt 3;Functional pipeline can model the two distinct phases explicitly as state transitions.
+V-002;B;Proposal;Encapsulated session classes are standard, but accepts two-phase sequence design.
+V-003;C;Proposal;Supports transactional phases (deliberation -> voting) stored in database.
+V-004;D;Alt 3;Rules for transitions and consensus logic can be declaratively defined.
+V-005;E;Proposal;Dynamic handlers for round transitions fit well.
+V-006;F;Alt 3;Ensures high audit trail fidelity and transparency before voting.
+V-007;G;Alt 3;Original proponent of two-phase deliberation model.
+V-008;User;Alt 3;Selected two-phase session to avoid groupthink/bandwagoning.

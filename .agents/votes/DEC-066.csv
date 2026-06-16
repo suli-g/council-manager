@@ -1,0 +1,9 @@
+voter_id;team_id;vote;rationale
+V-001;A;Proposal;ACID compliance in a local SQLite file is extremely clean and functional.
+V-002;B;Proposal;Encapsulating JSON parsing inside SQLAlchemy models provides clean OOP mapping.
+V-003;C;Proposal;SQLite transactions guarantee write safety and prevent concurrency bugs natively.
+V-004;D;Proposal;Declarative schemas mapped to SQLite tables align with declarative models.
+V-005;E;Proposal;Dynamic loading of JSON sub-elements is fully supported by Python/SQLite.
+V-006;F;Proposal;Zero external dependencies makes auditing and deployment extremely simple.
+V-007;G;Proposal;Eliminating MongoDB/TinyDB complexity is exactly what we advocated for.
+V-008;User;Proposal;Selected Unified SQLite for native ACID and maximum simplicity.

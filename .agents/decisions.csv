@@ -59,3 +59,9 @@ DEC-045;2026-06-04;AI Strategy;Smart PDF Instruction Selection;Implemented heuri
 DEC-062;2026-06-04;Settings Architecture;Modular Mixins with Unpack;Refactored Settings into logical mixins (GitHub, AI, System) using multiple inheritance and implemented `Unpack` for `get_settings` overrides.
 DEC-063;2026-06-04;Performance Optimization;Persistent Deduplication and AI Caching;Aligned hashing strategy between RepoStructure and RawSubmission to enable pre-fetch deduplication. Migrated AI checklist caching from memory to SQLAlchemy to prevent redundant analysis across sessions.
 DEC-064;2026-06-14;Data Architecture;SQL/Mongo Hybrid;Adopted Python backend with SQL (SQLite3/MySQL) for structured relational data and Mongo for flexible document-based governance data to support multi-project isolation.
+DEC-065;2026-06-15;Voting Subsystem;Two-Phase Session with Deliberation;Adopted Team G's two-phase session: Phase 1 publishes agent rationales for public deliberation, Phase 2 gathers simultaneous blind votes. A secondary debate round is triggered if consensus threshold is not met.
+DEC-066;2026-06-15;Data Architecture;Unified SQLite;Abandoned the SQL/Mongo hybrid model (DEC-064) in favor of a single local SQLite database per project. Used SQLite's native JSON support (JSON1) to store flexible governance documents (rationales, votes) alongside structured relational tables to ensure ACID compliance and zero external dependencies.
+DEC-067;2026-06-15;Architecture Design;High-Level Component Diagram;Adopted a high-level, paradigm-agnostic component diagram to outline module boundaries (CLI, Orchestrator, Voting Engine, Database Layer, Settings Config) and dependencies before starting the implementation.
+
+
+
