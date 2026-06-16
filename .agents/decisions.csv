@@ -68,6 +68,7 @@ DEC-070;2026-06-16;AI Strategy;Separate Registry/Prompter with google-genai;Adop
 DEC-071;2026-06-16;AI Strategy;Asynchronous Deliberation Engine (Asyncio);Implemented the deliberation engine (Phase 1) using python's asyncio and the SDK's client.aio async client. This queries all active team agents concurrently, reducing API wait time from ~15-20s to ~2-3s.
 DEC-072;2026-06-16;Voting Subsystem;5-Cycle Autonomous AI Voting with User Ratification;Ratified up to 5 rounds (cycles) of consensus voting where previous cycle rationales and tallies are fed back as context. Adopted Option 3: Only AI agents vote in the loop, and the final consensus is presented to the user for Approve/Reject ratification.
 DEC-073;2026-06-16;AI Strategy;GenAI Token Safeguards & Layered Caching;Ratified Option 1 (Layered Caching & Config-Driven Budgets) to prevent rapid API expense drainage. Deliberations and intermediate voting rounds are persistently cached. Config settings enforce max token caps and budget limits.
+DEC-074;2026-06-16;Data Architecture;Roadmap Table Implementation;Ratified Option 1 (Migrate Roadmap to SQLite) to introduce a RoadmapTask table in the SQLite database, synchronized bidirectionally with .agents/roadmap.csv in migration.py.
 
 
 

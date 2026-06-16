@@ -1,0 +1,9 @@
+voter_id;team_id;vote;rationale
+V-001;A;Alt 3;Functional parsing of CSV on-the-fly prevents state synchronization bugs.
+V-002;B;Alt 1;SQLAlchemy mapping represents the domain model cleanly.
+V-003;C;Alt 1;Relational querying is significantly faster than constant file read/parse overhead.
+V-004;D;Alt 1;Allows declarative query filters for task status and phases.
+V-005;E;Alt 1;Mocking database queries is standard and well-supported.
+V-006;F;Alt 1;Querying project roadmap status from SQLite makes API audit checks highly reliable.
+V-007;G;Alt 2;Sticking to the flat CSV avoids data drift when developers edit files directly.
+V-008;User;Alt 1;User ratified Option 1 to store the roadmap tasks as a database table.

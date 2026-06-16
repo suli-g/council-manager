@@ -39,6 +39,9 @@ ALT-037;DEC-072;Interactive Round-by-Round;Provides high-fidelity human steerage
 ALT-038;DEC-073;Layered Caching & Config Budgets;Persistent caching of deliberations and votes. Easy setup, no duplicate runs.;Caching can hide prompt updates if hashes are not versioned.
 ALT-039;DEC-073;Prompter Rate Limiter;Rate limiting and throttling at Prompter level. Protects API limits.;Does not prevent high total daily volume, only high spikes.
 ALT-040;DEC-073;Stateless Upfront Validation;Simple string and list length limits. Fail-fast validation.;Crude validation that may reject valid but large description/options inputs.
+ALT-041;DEC-074;Migrate Roadmap to SQLite;Standard ORM mapping allows relational filtering and API endpoints.;Adds schema complexity and risk of database-to-file drift if edited directly.
+ALT-042;DEC-074;Keep Roadmap in CSV;Zero database schema overhead, absolute single source of truth for humans.;Hard to filter, query, or join inside database queries or FastAPI endpoints.
+ALT-043;DEC-074;Dynamic CSV-backed Parser;No database schema changes; reads and returns CSV on the fly for API requests.;Requires constant disk reads and text parsing, adding latency to API calls.
 
 
 
