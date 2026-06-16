@@ -2,7 +2,7 @@ phase;id;task;status;notes
 1;P1-01;Database Layer Initialization (SQLAlchemy - Unified SQLite);DONE;Setup core SQLAlchemy models with JSON column mapping for Projects, Teams, and Governance records.
 1;P1-02;Project Isolation Logic;DONE;Implement tenant-style isolation for multiple projects within the same engine.
 1;P1-03;Governance CSV Import/Export;DONE;Migration tools to bridge current .agents/*.csv logic into the new database engine.
-2;P2-01a;AI Team Agent Prompter & Agent Registry;TODO;Implement configuration to load team profiles and prompt them for rationales from teams.csv in isolation.
+2;P2-01a;AI Team Agent Prompter & Agent Registry;DONE;Implement configuration to load team profiles and prompt them for rationales from teams.csv in isolation.
 2;P2-01b;Deliberation Engine;TODO;Implement Phase 1 logic to collect rationales and write them to the proposals JSON schema.
 2;P2-01c;Blind Voting Engine;TODO;Implement Phase 2 logic to collect secret votes and write them to the proposals JSON schema.
 2;P2-01d;Weighted Tally & Consensus Verifier;TODO;Implement calculation logic from weights, check >70% threshold, and handle secondary debate round triggers.

@@ -1,0 +1,9 @@
+voter_id;team_id;vote;rationale
+V-001;A;Alt 1;Raw httpx client feels more functional and lightweight, but accepts genai SDK.
+V-002;B;Proposal;Separate OOP classes for registry and prompter map cleanly to components.
+V-003;C;Proposal;GenAI SDK handles streaming and api key injection natively.
+V-004;D;Proposal;Declarative config settings for models and keys align with our Pydantic settings.
+V-005;E;Proposal;Allows dynamic mocking of GenAI client in tests.
+V-006;F;Proposal;Mocking external SDK calls is required for consistent, offline QA verification.
+V-007;G;Proposal;The google-genai library is standard and prevents us writing custom post serializers.
+V-008;User;Proposal;Selected separate modules with google-genai SDK and mocked client unit tests.

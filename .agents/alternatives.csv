@@ -30,6 +30,9 @@ ALT-028;DEC-068;Logical Multi-Tenancy;Single central SQLite database file is eas
 ALT-029;DEC-068;Raw SQLite3 Queries;Avoids ORM dependencies and keeps code footprint minimal.;Harder to maintain, test, and type-check; prone to SQL injection.
 ALT-030;DEC-069;Document Auditing Procedure only;Ensures audit log immutability.;Keeps the roadmap tasks generalized and difficult to track objectively.
 ALT-031;DEC-069;Text-Based Roadmap Breakdown only;Makes tasks granular.;Fails to resolve the underlying audit score editing process problem.
+ALT-032;DEC-070;Flat Agent Module with raw httpx;Lightweight footprint without google-genai dependency.;Requires custom API response serializers and token checkers.
+ALT-033;DEC-070;Unified Orchestrator Client;Simplifies file count.;Pollutes the database package with prompt rendering and external network boundaries.
+
 
 
 

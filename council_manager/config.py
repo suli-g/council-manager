@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     workspace_dir: Path = Path(".").resolve()
     db_file: str = "governance.db"
 
+    # AI Config
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
+
+
     @property
     def db_path(self) -> Path:
         agents_dir = self.workspace_dir / ".agents"
