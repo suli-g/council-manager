@@ -1,0 +1,9 @@
+voter_id;team_id;vote;rationale
+V-001;A;Proposal;Granular roadmap tasks allow modeling state transitions per task cleanly.
+V-002;B;Proposal;Auditing procedure ensures clear interfaces and QA separation.
+V-003;C;Proposal;Granular steps prevent batch commits and make code review manageable.
+V-004;D;Proposal;Declarative task schemas in roadmap.csv should be highly specific.
+V-005;E;Proposal;Allows dynamic adjustment of specific task details.
+V-006;F;Proposal;Immutable audit ledgers with corrective re-audits are standard QA best practice.
+V-007;G;Proposal;Avoids generalized hand-waving in task descriptions and audits.
+V-008;User;Proposal;Selected immutable auditing rules and granular Phase 2/3 task definitions.

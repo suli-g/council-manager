@@ -28,6 +28,9 @@ ALT-026;DEC-067;Text-Based Specification Only;Faster to write and doesn't requir
 ALT-027;DEC-067;Detailed Class/Interface Diagram;Models exact Python typing protocols and classes early.;Enforces rigid OOP patterns prematurely and is less Pythonic.
 ALT-028;DEC-068;Logical Multi-Tenancy;Single central SQLite database file is easier to manage externally.;High risk of accidental data leakage and cross-project database locks.
 ALT-029;DEC-068;Raw SQLite3 Queries;Avoids ORM dependencies and keeps code footprint minimal.;Harder to maintain, test, and type-check; prone to SQL injection.
+ALT-030;DEC-069;Document Auditing Procedure only;Ensures audit log immutability.;Keeps the roadmap tasks generalized and difficult to track objectively.
+ALT-031;DEC-069;Text-Based Roadmap Breakdown only;Makes tasks granular.;Fails to resolve the underlying audit score editing process problem.
+
 
 
 

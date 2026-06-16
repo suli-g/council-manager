@@ -2,7 +2,13 @@ phase;id;task;status;notes
 1;P1-01;Database Layer Initialization (SQLAlchemy - Unified SQLite);DONE;Setup core SQLAlchemy models with JSON column mapping for Projects, Teams, and Governance records.
 1;P1-02;Project Isolation Logic;DONE;Implement tenant-style isolation for multiple projects within the same engine.
 1;P1-03;Governance CSV Import/Export;DONE;Migration tools to bridge current .agents/*.csv logic into the new database engine.
-2;P2-01;Council Orchestration Engine;TODO;Core logic for multi-team perspective gathering and voting.
-2;P2-02;Asynchronous Task Queue;TODO;Handle long-running AI deliberations without blocking.
-3;P3-01;External Integration API;TODO;REST/gRPC interfaces for other projects to consume council services.
-3;P3-02;Interactive Web Dashboard;TODO;Visualization of decisions, votes, and roadmap.
+2;P2-01a;AI Team Agent Prompter & Agent Registry;TODO;Implement configuration to load team profiles and prompt them for rationales from teams.csv in isolation.
+2;P2-01b;Deliberation Engine;TODO;Implement Phase 1 logic to collect rationales and write them to the proposals JSON schema.
+2;P2-01c;Blind Voting Engine;TODO;Implement Phase 2 logic to collect secret votes and write them to the proposals JSON schema.
+2;P2-01d;Weighted Tally & Consensus Verifier;TODO;Implement calculation logic from weights, check >70% threshold, and handle secondary debate round triggers.
+2;P2-02a;Asynchronous Task Orchestrator;TODO;Implement background queue using asyncio to run deliberations and votes asynchronously.
+2;P2-02b;Task Status Query & CLI logging;TODO;CLI commands to check the status of running AI deliberations.
+3;P3-01a;FastAPI Server Setup;TODO;Setup FastAPI server and endpoints to submit proposals, trigger votes, and query decisions.
+3;P3-01b;Auth & Dynamic Database Routing Middleware;TODO;Secure API endpoints and route connections dynamically based on workspace header path.
+3;P3-02a;Interactive Web Dashboard UI;TODO;Stunning dark mode / glassmorphism UI using vanilla CSS and JavaScript to visualize decisions, votes, and roadmap.
+3;P3-02b;Dashboard API Integration;TODO;Connect frontend components to FastAPI endpoints via fetch calls.
