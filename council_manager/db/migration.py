@@ -145,10 +145,12 @@ def import_csv_to_db(workspace_dir: str | Path, project_id: str):
                 with open(votes_csv, mode="r", encoding="utf-8", newline="") as f:
                     reader = csv.DictReader(f, delimiter=";")
                     for row in reader:
-                        voter_id = row["voter_id"].strip()
-                        team_id = row["team_id"].strip()
-                        vote = row["vote"].strip()
-                        rationale = row["rationale"].strip()
+                        team_id = row.get("team_id", "").strip()
+                        voter_id = row.get("voter_id", "").strip()
+                        if not voter_id:
+                            voter_id = f"V-{team_id}"
+                        vote = row.get("vote", "").strip()
+                        rationale = row.get("rationale", "").strip()
 
                         options_set.add(vote)
                         votes.append({
@@ -163,6 +165,7 @@ def import_csv_to_db(workspace_dir: str | Path, project_id: str):
                                 "rationale": rationale,
                                 "timestamp": datetime.now().isoformat()
                             })
+
 
                 proposal = session.query(Proposal).filter_by(id=dec_id).first()
                 if not proposal:
