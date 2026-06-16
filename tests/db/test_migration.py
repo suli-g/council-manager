@@ -104,3 +104,62 @@ def test_migration_bidirectional():
             
         # Clean up database handles explicitly before exiting
         db_manager.close_all()
+
+def test_migration_missing_files():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        # 1. Verify that FileNotFoundError is raised if no .agents directory exists
+        with pytest.raises(FileNotFoundError, match="No .agents/ directory found"):
+            import_csv_to_db(workspace, "test_proj")
+            
+        # 2. Create an empty .agents directory and verify it imports 0 items gracefully
+        agents = workspace / ".agents"
+        agents.mkdir()
+        import_csv_to_db(workspace, "test_proj")
+        
+        session = db_manager.get_session(workspace)
+        teams = session.query(Team).all()
+        assert len(teams) == 0
+        session.close()
+        db_manager.close_all()
+
+
+def test_migration_legacy_votes_dynamic_voter():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        
+        # Setup source folder structure with a legacy vote file lacking voter_id column
+        agents = workspace / ".agents"
+        agents.mkdir()
+        votes_dir = agents / "votes"
+        votes_dir.mkdir()
+        
+        with open(agents / "teams.csv", "w", encoding="utf-8", newline="") as f:
+            f.write("team_id;team_name;count;paradigm_specialty\n")
+            f.write("G;Contrarians;10;Devil's advocacy\n")
+            
+        with open(agents / "decisions.csv", "w", encoding="utf-8", newline="") as f:
+            f.write("id;date;topic;decision;rationale\n")
+            f.write("DEC-002;2026-06-01;Topic;Decision;Rationale\n")
+            
+        # Legacy votes file: no voter_id column, only team_id, vote, rationale
+        with open(votes_dir / "DEC-002.csv", "w", encoding="utf-8", newline="") as f:
+            f.write("team_id;vote;rationale\n")
+            f.write("G;Option X;Contrarian view rationale\n")
+            
+        # Run import
+        import_csv_to_db(workspace, "legacy_project")
+        
+        # Verify proposal and votes table was successfully populated and voter_id was resolved to V-G
+        session = db_manager.get_session(workspace)
+        try:
+            prop = session.query(Proposal).filter_by(id="DEC-002").first()
+            assert prop is not None
+            assert len(prop.votes) == 1
+            assert prop.votes[0]["voter_id"] == "V-G"
+            assert prop.votes[0]["team_id"] == "G"
+            assert prop.votes[0]["vote"] == "Option X"
+        finally:
+            session.close()
+            db_manager.close_all()
+

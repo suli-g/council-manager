@@ -29,3 +29,20 @@ def test_registry_get_teams():
         assert team_a.paradigm_specialty == "Functional"
 
         db_manager.close_all()
+
+def test_registry_empty_database():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        # Verify get_teams returns empty list without error
+        teams = agent_registry.get_teams(workspace)
+        assert teams == []
+        db_manager.close_all()
+
+def test_registry_missing_team():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        # Verify get_team returns None for non-existent team
+        team = agent_registry.get_team(workspace, "NON_EXISTENT")
+        assert team is None
+        db_manager.close_all()
+

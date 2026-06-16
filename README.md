@@ -80,3 +80,73 @@ import_csv_to_db(workspace_path, "council_manager")
 # Export database tables back into semi-colon CSVs (.agents/*.csv)
 export_db_to_csv(workspace_path, "council_manager")
 ```
+
+### 3. Orchestration & 5-Cycle Voting
+
+The `CouncilOrchestrator` manages the lifecycle of proposals through deliberation and consensus voting.
+
+#### A. Initializing a Proposal
+Initialize a proposal and persist it within the isolated SQLite database:
+
+```python
+from pathlib import Path
+from council_manager.core.orchestrator import council_orchestrator
+
+workspace = Path("B:/projects/council_manager")
+
+proposal = council_orchestrator.create_proposal(
+    workspace_dir=workspace,
+    project_id="council_manager",
+    proposal_id="DEC-072",
+    topic="Voting Subsystem Strategy",
+    description="Adopt 5-cycle autonomous AI voting with final human ratification.",
+    options=[
+        "Alt 1: Pre-Voted and Fallback Override",
+        "Alt 2: Interactive Round-by-Round",
+        "Alt 3: Autonomous AI with User Ratification"
+    ]
+)
+print(f"Proposal '{proposal.id}' created. Status: {proposal.status}")
+```
+
+#### B. Asynchronous Deliberation (Phase 1)
+Run Phase 1 to collect engineering paradigm rationales from all active teams concurrently:
+
+```python
+import asyncio
+from pathlib import Path
+from council_manager.core.orchestrator import council_orchestrator
+
+workspace = Path("B:/projects/council_manager")
+
+async def run_phase1():
+    proposal = await council_orchestrator.run_deliberation(workspace, "DEC-072")
+    print(f"Deliberation complete. Status: {proposal.status}")
+    print(f"Collected rationales: {proposal.rationales}")
+
+asyncio.run(run_phase1())
+```
+
+#### C. Asynchronous 5-Cycle Voting Engine (Phase 2)
+Conduct up to 5 cycles of consensus voting. In each cycle:
+1.  **Blind Voting**: Teams cast secret, weighted votes concurrently using the official `google-genai` SDK.
+2.  **Consensus Verification**: The engine tallies votes. If any option achieves **$\ge 70\%$** of the active weight, consensus is met and the loop terminates early.
+3.  **Debate Feedback**: If no consensus is met, the engine feeds previous cycle vote distributions and justifications back to the team agents as context for the next cycle.
+4.  **Fallback**: If no consensus is reached after 5 cycles, the engine falls back to selecting the option with the highest weighted majority.
+5.  **User Ratification**: The final proposal is set to `RATIFICATION_PENDING` and awaits Approve/Reject signature from the user.
+
+```python
+import asyncio
+from pathlib import Path
+from council_manager.core.orchestrator import council_orchestrator
+
+workspace = Path("B:/projects/council_manager")
+
+async def run_phase2():
+    proposal = await council_orchestrator.run_voting(workspace, "DEC-072", max_cycles=5)
+    print(f"Voting complete. Final Status: {proposal.status}")
+    print(f"Consensus Votes: {proposal.votes}")
+
+asyncio.run(run_phase2())
+```
+

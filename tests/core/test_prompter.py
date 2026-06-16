@@ -1,4 +1,6 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, AsyncMock
+import json
+import pytest
 from council_manager.core.prompter import AgentPrompter, VoteResponse
 
 def test_generate_deliberation_mocked():
@@ -52,3 +54,70 @@ def test_generate_vote_mocked():
     args, kwargs = mock_client.models.generate_content.call_args
     assert kwargs["config"].response_mime_type == "application/json"
     assert kwargs["config"].response_schema == VoteResponse
+
+@pytest.mark.anyio
+async def test_generate_deliberation_async_mocked():
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.text = "Async deliberation response"
+    
+    # Setup async mock on client.aio.models.generate_content
+    mock_client.aio.models.generate_content = AsyncMock(return_value=mock_response)
+    
+    prompter = AgentPrompter(client=mock_client)
+    res = await prompter.generate_deliberation_async(
+        team_name="Team B",
+        paradigm_specialty="OOP",
+        title="Title Z",
+        description="Desc W",
+        options=["Opt A", "Opt B"]
+    )
+    
+    assert res == "Async deliberation response"
+    mock_client.aio.models.generate_content.assert_called_once()
+
+@pytest.mark.anyio
+async def test_generate_vote_async_mocked():
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_parsed_vote = VoteResponse(vote="Opt B", rationale="Better coupling")
+    mock_response.parsed = mock_parsed_vote
+    
+    mock_client.aio.models.generate_content = AsyncMock(return_value=mock_response)
+    
+    prompter = AgentPrompter(client=mock_client)
+    res = await prompter.generate_vote_async(
+        team_name="Team B",
+        paradigm_specialty="OOP",
+        title="Title Z",
+        description="Desc W",
+        options=["Opt A", "Opt B"],
+        rationales_context="context"
+    )
+    
+    assert res.vote == "Opt B"
+    assert res.rationale == "Better coupling"
+    mock_client.aio.models.generate_content.assert_called_once()
+
+def test_generate_vote_fallback_json():
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    
+    # No parsed attribute to force JSON fallback parsing
+    del mock_response.parsed
+    mock_response.text = json.dumps({"vote": "Alt 2", "rationale": "Fallback parsing works"})
+    mock_client.models.generate_content.return_value = mock_response
+
+    prompter = AgentPrompter(client=mock_client)
+    res = prompter.generate_vote(
+        team_name="Team C",
+        paradigm_specialty="Imperative",
+        title="T",
+        description="D",
+        options=["Alt 1", "Alt 2"],
+        rationales_context="..."
+    )
+
+    assert res.vote == "Alt 2"
+    assert res.rationale == "Fallback parsing works"
+

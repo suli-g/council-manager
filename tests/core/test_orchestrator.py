@@ -189,3 +189,143 @@ async def test_run_voting_fallback():
 
         # Release file locks before leaving temp directory context
         db_manager.close_all()
+
+@pytest.mark.anyio
+async def test_run_voting_midway_consensus():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        session = db_manager.get_session(workspace)
+        
+        proj = Project(id="test_proj", name="Test Project")
+        session.add(proj)
+        session.commit()
+
+        # Total weight = 20. Team A weight = 15 (>70%). Team B weight = 5.
+        t1 = Team(id="A", name="Team A", vote_weight=15, paradigm_specialty="Functional")
+        t2 = Team(id="B", name="Team B", vote_weight=5, paradigm_specialty="OOP")
+        session.add_all([t1, t2])
+        
+        prop = Proposal(
+            id="DEC-404",
+            project_id="test_proj",
+            topic="Consensus Topic",
+            description="...",
+            options=["Alt 1", "Alt 2"],
+            status="VOTING_PENDING",
+            rationales=[{"team_id": "A", "rationale": "..."}, {"team_id": "B", "rationale": "..."}]
+        )
+        session.add(prop)
+        session.commit()
+        session.close()
+
+        mock_prompter = MagicMock(spec=AgentPrompter)
+        mock_prompter.generate_vote_async = AsyncMock()
+
+        # In Cycle 1: Team A votes "Alt 1", Team B votes "Alt 2" -> No consensus (15/20 = 75%? Wait, 15 is 75% so consensus is reached in Cycle 1!).
+        # Let's make it so Team A votes "Alt 1" (10 weight) and Team B votes "Alt 2" (10 weight) -> No consensus.
+        # Wait, let's change weights: Team A (10 weight), Team B (10 weight). Total 20. Consensus requires 14 (70%).
+        # Cycle 1: Team A votes "Alt 1", Team B votes "Alt 2" -> 10 vs 10 (no consensus).
+        # Cycle 2: Both vote "Alt 1" -> 20 vs 0 (consensus reached!).
+        
+        # Adjust weights to 10 each in DB
+        session = db_manager.get_session(workspace)
+        ta = session.query(Team).filter_by(id="A").first()
+        tb = session.query(Team).filter_by(id="B").first()
+        ta.vote_weight = 10
+        tb.vote_weight = 10
+        session.commit()
+        session.close()
+
+        cycle_count = 0
+        async def mock_vote(team_name, paradigm_specialty, title, description, options, rationales_context):
+            nonlocal cycle_count
+            # Every 2 calls represents 1 cycle (2 teams)
+            current_cycle = (cycle_count // 2) + 1
+            cycle_count += 1
+            if current_cycle == 1:
+                if "Team A" in team_name:
+                    return VoteResponse(vote="Alt 1", rationale="Cycle 1 Functional")
+                return VoteResponse(vote="Alt 2", rationale="Cycle 1 OOP")
+            else:
+                return VoteResponse(vote="Alt 1", rationale="Compromised on Alt 1")
+
+        mock_prompter.generate_vote_async.side_effect = mock_vote
+
+        orchestrator = CouncilOrchestrator(prompter=mock_prompter)
+        
+        # Run voting with max_cycles = 5
+        updated_proposal = await orchestrator.run_voting(workspace, "DEC-404", max_cycles=5)
+        
+        assert updated_proposal.status == "RATIFICATION_PENDING"
+        # Consensus reached in Cycle 2, so call_count should be exactly 4 (2 cycles * 2 teams)
+        assert mock_prompter.generate_vote_async.call_count == 4
+        
+        db_manager.close_all()
+
+@pytest.mark.anyio
+async def test_run_deliberation_missing_proposal():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        orchestrator = CouncilOrchestrator()
+        with pytest.raises(ValueError, match="Proposal 'INVALID' not found"):
+            await orchestrator.run_deliberation(workspace, "INVALID")
+        db_manager.close_all()
+
+@pytest.mark.anyio
+async def test_run_voting_missing_proposal():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        orchestrator = CouncilOrchestrator()
+        with pytest.raises(ValueError, match="Proposal 'INVALID' not found"):
+            await orchestrator.run_voting(workspace, "INVALID")
+        db_manager.close_all()
+
+@pytest.mark.anyio
+async def test_run_deliberation_no_teams():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        session = db_manager.get_session(workspace)
+        proj = Project(id="test_proj", name="Test Project")
+        session.add(proj)
+        prop = Proposal(
+            id="DEC-505",
+            project_id="test_proj",
+            topic="No Teams",
+            description="...",
+            options=["Alt 1"],
+            status="DELIBERATION_PENDING"
+        )
+        session.add(prop)
+        session.commit()
+        session.close()
+
+        orchestrator = CouncilOrchestrator()
+        with pytest.raises(ValueError, match="No active teams registered"):
+            await orchestrator.run_deliberation(workspace, "DEC-505")
+        db_manager.close_all()
+
+@pytest.mark.anyio
+async def test_run_voting_no_teams():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        session = db_manager.get_session(workspace)
+        proj = Project(id="test_proj", name="Test Project")
+        session.add(proj)
+        prop = Proposal(
+            id="DEC-606",
+            project_id="test_proj",
+            topic="No Teams",
+            description="...",
+            options=["Alt 1"],
+            status="VOTING_PENDING",
+            rationales=[]
+        )
+        session.add(prop)
+        session.commit()
+        session.close()
+
+        orchestrator = CouncilOrchestrator()
+        with pytest.raises(ValueError, match="No active teams registered"):
+            await orchestrator.run_voting(workspace, "DEC-606")
+        db_manager.close_all()
+
