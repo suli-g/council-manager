@@ -36,6 +36,9 @@ ALT-034;DEC-071;Synchronous Deliberation Engine;Simple sequential code flow, eas
 ALT-035;DEC-071;ThreadPoolExecutor Deliberation;Allows parallel requests while keeping code synchronous.;Introduces thread management overhead and potential resource locks.
 ALT-036;DEC-072;Pre-Voted and Fallback Override;User votes once, AI loops, fallback prompts on failure.;User cannot change vote or comment dynamically during AI debate cycles.
 ALT-037;DEC-072;Interactive Round-by-Round;Provides high-fidelity human steerage during debate rounds.;Blocks task queues and asynchronous background execution.
+ALT-038;DEC-073;Layered Caching & Config Budgets;Persistent caching of deliberations and votes. Easy setup, no duplicate runs.;Caching can hide prompt updates if hashes are not versioned.
+ALT-039;DEC-073;Prompter Rate Limiter;Rate limiting and throttling at Prompter level. Protects API limits.;Does not prevent high total daily volume, only high spikes.
+ALT-040;DEC-073;Stateless Upfront Validation;Simple string and list length limits. Fail-fast validation.;Crude validation that may reject valid but large description/options inputs.
 
 
 
