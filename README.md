@@ -150,3 +150,44 @@ async def run_phase2():
 asyncio.run(run_phase2())
 ```
 
+---
+
+## Command Line Interface (CLI) Usage
+
+The system exposes a comprehensive CLI for managing projects, importing/exporting database states, and running deliberations/votes externally.
+
+You can run the CLI tool using `uv run council-manager`:
+
+```bash
+uv run council-manager --help
+```
+
+### Key CLI Commands
+
+1.  **Project Initialization**:
+    ```bash
+    uv run council-manager init-project --path <dir-path> --project-id <proj-id>
+    ```
+2.  **CSV Import/Export Migrations**:
+    ```bash
+    uv run council-manager import -w <workspace-dir> -p <project-id>
+    uv run council-manager export -w <workspace-dir> -p <project-id>
+    ```
+3.  **Proposal Creation** (with optional auto-inception):
+    ```bash
+    uv run council-manager proposal-create "Detailed description here" -w <workspace-dir>
+    ```
+4.  **Orchestrate Deliberations & Votes**:
+    ```bash
+    uv run council-manager deliberate -w <workspace-dir> --proposal-id <id>
+    uv run council-manager vote -w <workspace-dir> --proposal-id <id> --max-cycles 5
+    ```
+5.  **Status & Log Inspection**:
+    ```bash
+    uv run council-manager list -w <workspace-dir>
+    uv run council-manager show -w <workspace-dir> --proposal-id <id>
+    uv run council-manager show-decisions -w <workspace-dir>
+    uv run council-manager show-roadmap -w <workspace-dir>
+    uv run council-manager show-audits -w <workspace-dir>
+    ```
+
