@@ -3,7 +3,7 @@ import asyncio
 import os
 import sys
 from pathlib import Path
-from council_manager.db import db_manager, Proposal, Project, Team, Decision, Alternative, AuditLog, RoadmapTask, initialize_new_project, import_csv_to_db, export_db_to_csv
+from council_manager.db import db_manager, Proposal, Team, Decision, AuditLog, RoadmapTask, initialize_new_project, import_csv_to_db, export_db_to_csv
 from council_manager.core.orchestrator import council_orchestrator
 
 # ANSI escape codes for terminal aesthetics
@@ -50,7 +50,7 @@ def cmd_init_project(args):
     log_info(f"Initializing new project '{args.project_id}' in directory: {target_path}")
     try:
         initialize_new_project(target_path, args.project_id)
-        log_success(f"Project initialized and template CSV files imported successfully.")
+        log_success("Project initialized and template CSV files imported successfully.")
     except Exception as e:
         log_error(f"Failed to initialize project: {e}")
         sys.exit(1)
@@ -70,32 +70,32 @@ def cmd_export(args):
     log_info(f"Exporting database tables from SQLite back to CSVs in {workspace / '.agents'}...")
     try:
         export_db_to_csv(workspace, args.project_id)
-        log_success(f"Database tables exported back to CSV format successfully.")
+        log_success("Database tables exported back to CSV format successfully.")
     except Exception as e:
         log_error(f"Export failed: {e}")
         sys.exit(1)
 
 def cmd_proposal_create(args):
     workspace = get_workspace_path(args.workspace)
-    options = [opt.strip() for opt in args.options.split(";") if opt.strip()]
-    if not options:
-        log_error("Options list cannot be empty. Delimit options using semicolons ';'.")
-        sys.exit(1)
+    options = None
+    if args.options:
+        options = [opt.strip() for opt in args.options.split(";") if opt.strip()]
         
-    log_info(f"Creating proposal '{args.proposal_id}' in project '{args.project_id}'...")
+    log_info(f"Creating proposal in project '{args.project_id}'...")
     try:
         prop = council_orchestrator.create_proposal(
             workspace_dir=workspace,
             project_id=args.project_id,
+            description=args.description,
             proposal_id=args.proposal_id,
             topic=args.topic,
-            description=args.description,
             options=options
         )
         log_success(f"Proposal '{prop.id}' created. Status: {prop.status}")
     except Exception as e:
         log_error(f"Proposal creation failed: {e}")
         sys.exit(1)
+
 
 async def run_deliberation_async(args):
     workspace = get_workspace_path(args.workspace)
@@ -194,7 +194,7 @@ def cmd_show(args):
 
 def cmd_show_teams(args):
     workspace = get_workspace_path(args.workspace)
-    log_info(f"Querying teams from registry database...")
+    log_info("Querying teams from registry database...")
     session = db_manager.get_session(workspace)
     try:
         teams = session.query(Team).all()
@@ -214,7 +214,7 @@ def cmd_show_teams(args):
 
 def cmd_show_decisions(args):
     workspace = get_workspace_path(args.workspace)
-    log_info(f"Querying ratified decisions...")
+    log_info("Querying ratified decisions...")
     session = db_manager.get_session(workspace)
     try:
         decisions = session.query(Decision).all()
@@ -234,7 +234,7 @@ def cmd_show_decisions(args):
 
 def cmd_show_roadmap(args):
     workspace = get_workspace_path(args.workspace)
-    log_info(f"Querying project roadmap tasks...")
+    log_info("Querying project roadmap tasks...")
     session = db_manager.get_session(workspace)
     try:
         tasks = session.query(RoadmapTask).order_by(RoadmapTask.phase, RoadmapTask.id).all()
@@ -254,7 +254,7 @@ def cmd_show_roadmap(args):
 
 def cmd_show_audits(args):
     workspace = get_workspace_path(args.workspace)
-    log_info(f"Querying quality audits log...")
+    log_info("Querying quality audits log...")
     session = db_manager.get_session(workspace)
     try:
         audits = session.query(AuditLog).order_by(AuditLog.timestamp.desc()).all()
@@ -389,12 +389,13 @@ def main():
 
     # Command: proposal-create
     p_create = subparsers.add_parser("proposal-create", help="Create a new proposal in the database.")
+    p_create.add_argument("description", help="Detailed description of the proposal.")
     p_create.add_argument("-w", "--workspace", help="Path to the workspace folder.")
     p_create.add_argument("-p", "--project-id", default="council_manager", help="ID of the project.")
-    p_create.add_argument("--proposal-id", required=True, help="Unique identifier for the proposal.")
-    p_create.add_argument("--topic", required=True, help="Title or topic of the proposal.")
-    p_create.add_argument("--description", required=True, help="Detailed description of the proposal.")
-    p_create.add_argument("--options", required=True, help="Semicolon-delimited list of options (e.g. 'Alt 1; Alt 2').")
+    p_create.add_argument("--proposal-id", help="Unique identifier for the proposal.")
+    p_create.add_argument("--topic", help="Title or topic of the proposal.")
+    p_create.add_argument("--options", help="Semicolon-delimited list of options (e.g. 'Alt 1; Alt 2').")
+
 
     # Command: deliberate
     p_deliberate = subparsers.add_parser("deliberate", help="Run Phase 1 (Deliberation) to gather engineering justifications.")

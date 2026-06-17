@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 import json
 from google import genai
 from google.genai import types
@@ -8,6 +8,11 @@ from council_manager.config import settings
 class VoteResponse(BaseModel):
     vote: str = Field(description="The exact option selected from the proposal's options")
     rationale: str = Field(description="A concise rationale from your paradigm's perspective")
+
+class InceptionResponse(BaseModel):
+    topic: str = Field(description="A concise title/topic for this proposal (maximum 4 words)")
+    options: List[str] = Field(description="A list of 2 to 4 structured engineering alternatives/options extracted or derived from the description")
+
 
 class AgentPrompter:
     def __init__(self, client: Optional[genai.Client] = None):
@@ -182,4 +187,67 @@ class AgentPrompter:
             
         data = json.loads(response.text)
         return VoteResponse(**data)
+
+    def generate_proposal_inception(self, description: str) -> InceptionResponse:
+        """Query Gemini model to extract topic and options from description."""
+        system_instruction = (
+            "You are an AI assistant designed to bootstrap project decisions. "
+            "Given a proposal description, you must generate a concise topic title (maximum 4 words) "
+            "and extract/extrapolate a list of 2 to 4 structured, mutually exclusive engineering options/alternatives."
+        )
+
+        prompt = (
+            f"Please bootstrap the following proposal description:\n"
+            f"Description: {description}\n\n"
+            f"Return a structured JSON containing the topic title and options."
+        )
+
+        response = self.client.models.generate_content(
+            model=settings.gemini_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.2,
+                response_mime_type="application/json",
+                response_schema=InceptionResponse,
+            )
+        )
+
+        if hasattr(response, "parsed") and response.parsed:
+            return response.parsed
+
+        data = json.loads(response.text)
+        return InceptionResponse(**data)
+
+    async def generate_proposal_inception_async(self, description: str) -> InceptionResponse:
+        """Query Gemini model asynchronously to extract topic and options."""
+        system_instruction = (
+            "You are an AI assistant designed to bootstrap project decisions. "
+            "Given a proposal description, you must generate a concise topic title (maximum 4 words) "
+            "and extract/extrapolate a list of 2 to 4 structured, mutually exclusive engineering options/alternatives."
+        )
+
+        prompt = (
+            f"Please bootstrap the following proposal description:\n"
+            f"Description: {description}\n\n"
+            f"Return a structured JSON containing the topic title and options."
+        )
+
+        response = await self.client.aio.models.generate_content(
+            model=settings.gemini_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.2,
+                response_mime_type="application/json",
+                response_schema=InceptionResponse,
+            )
+        )
+
+        if hasattr(response, "parsed") and response.parsed:
+            return response.parsed
+
+        data = json.loads(response.text)
+        return InceptionResponse(**data)
+
 

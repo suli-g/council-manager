@@ -1,9 +1,6 @@
 import csv
-import os
 from datetime import datetime, date
 from pathlib import Path
-from typing import Dict, List, Any
-from sqlalchemy.orm import Session
 from council_manager.db import db_manager
 from council_manager.db.models import Project, Team, Proposal, Decision, Alternative, AuditLog, RoadmapTask
 

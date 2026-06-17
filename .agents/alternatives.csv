@@ -45,6 +45,9 @@ ALT-043;DEC-074;Dynamic CSV-backed Parser;No database schema changes; reads and 
 ALT-044;DEC-075;AI-Powered Proposal Inception;Quick pre-pass call to Gemini generates high-fidelity topic names and structured options.;Adds minor API latency and token cost to proposal creation step.
 ALT-045;DEC-075;Stateless Parser Heuristics;First line of description becomes topic; binary default options. Very fast.;Crude and inflexible options/topics that don't capture complex choices.
 ALT-046;DEC-075;Separate Inception Subcommand;Introduces proposal-draft subcommand to run extraction interactively.;Forces extra command invocation and doesn't automate the creation command.
+ALT-047;DEC-076;Feature-Task Branching;Isolates work, provides excellent audit tracking and history;Adds minor branching and merging overhead.
+ALT-048;DEC-076;Trunk-Based Development;Ensures fast integration and minimal branch management;Risk of unstable code on main and harder task-specific auditing.
+ALT-049;DEC-076;Single Development Branch;Zero Git branch switching or merging overhead;No isolation of features, highly cluttered branch history, poor tracking.
 
 
 

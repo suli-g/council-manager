@@ -121,3 +121,37 @@ def test_generate_vote_fallback_json():
     assert res.vote == "Alt 2"
     assert res.rationale == "Fallback parsing works"
 
+
+def test_generate_proposal_inception_mocked():
+    from council_manager.core.prompter import InceptionResponse
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_parsed_inception = InceptionResponse(topic="Cool Topic", options=["Opt 1", "Opt 2"])
+    mock_response.parsed = mock_parsed_inception
+    mock_client.models.generate_content.return_value = mock_response
+
+    prompter = AgentPrompter(client=mock_client)
+    res = prompter.generate_proposal_inception("Some description")
+
+    assert res.topic == "Cool Topic"
+    assert res.options == ["Opt 1", "Opt 2"]
+    mock_client.models.generate_content.assert_called_once()
+    args, kwargs = mock_client.models.generate_content.call_args
+    assert kwargs["config"].response_schema == InceptionResponse
+
+@pytest.mark.anyio
+async def test_generate_proposal_inception_async_mocked():
+    from council_manager.core.prompter import InceptionResponse
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_parsed_inception = InceptionResponse(topic="Async Topic", options=["A", "B"])
+    mock_response.parsed = mock_parsed_inception
+    mock_client.aio.models.generate_content = AsyncMock(return_value=mock_response)
+
+    prompter = AgentPrompter(client=mock_client)
+    res = await prompter.generate_proposal_inception_async("Some description")
+
+    assert res.topic == "Async Topic"
+    assert res.options == ["A", "B"]
+    mock_client.aio.models.generate_content.assert_called_once()
+

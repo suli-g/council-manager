@@ -18,13 +18,42 @@ class CouncilOrchestrator:
         self,
         workspace_dir: str | Path,
         project_id: str,
-        proposal_id: str,
-        topic: str,
         description: str,
-        options: List[str]
+        proposal_id: Optional[str] = None,
+        topic: Optional[str] = None,
+        options: Optional[List[str]] = None
     ) -> Proposal:
         """Create and persist a new proposal in the project's SQLite database."""
-        session = db_manager.get_session(workspace_dir)
+        workspace_path = Path(workspace_dir).resolve()
+        
+        # 1. Generate proposal_id if not provided
+        if not proposal_id:
+            session = db_manager.get_session(workspace_path)
+            try:
+                count = session.query(Proposal).count()
+                proposal_id = f"DEC-{count + 1:03d}"
+                while session.query(Proposal).filter_by(id=proposal_id).first():
+                    count += 1
+                    proposal_id = f"DEC-{count + 1:03d}"
+            finally:
+                session.close()
+
+        # 2. Extract topic and options via Gemini if either is omitted
+        if not topic or not options:
+            try:
+                inception = self.prompter.generate_proposal_inception(description)
+                if not topic:
+                    topic = inception.topic
+                if not options:
+                    options = inception.options
+            except Exception:
+                # Safe fallback if GenAI fails (e.g. offline during tests)
+                if not topic:
+                    topic = description[:30].strip() + "..."
+                if not options:
+                    options = ["Adopt Proposal", "Keep Status Quo"]
+
+        session = db_manager.get_session(workspace_path)
         try:
             # Ensure Project context exists
             project = session.query(Project).filter_by(id=project_id).first()
@@ -57,6 +86,7 @@ class CouncilOrchestrator:
             return proposal
         finally:
             session.close()
+
 
     async def run_deliberation(
         self,
@@ -223,7 +253,7 @@ class CouncilOrchestrator:
                 tally[v["vote"]] = tally.get(v["vote"], 0) + w
             
             # Select majority winner
-            majority_choice = max(tally, key=tally.get)
+            _majority_choice = max(tally, key=tally.get)
             final_votes = prev_votes
 
         # 4. Commit final votes and update proposal status

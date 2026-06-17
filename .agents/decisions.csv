@@ -70,6 +70,7 @@ DEC-072;2026-06-16;Voting Subsystem;5-Cycle Autonomous AI Voting with User Ratif
 DEC-073;2026-06-16;AI Strategy;GenAI Token Safeguards & Layered Caching;Ratified Option 1 (Layered Caching & Config-Driven Budgets) to prevent rapid API expense drainage. Deliberations and intermediate voting rounds are persistently cached. Config settings enforce max token caps and budget limits.
 DEC-074;2026-06-16;Data Architecture;Roadmap Table Implementation;Ratified Option 1 (Migrate Roadmap to SQLite) to introduce a RoadmapTask table in the SQLite database, synchronized bidirectionally with .agents/roadmap.csv in migration.py.
 DEC-075;2026-06-16;AI Strategy;AI-Powered Proposal Inception;Ratified Option 1 (AI-Powered Proposal Inception) to automatically generate sequential IDs from the database, and use Gemini to generate the topic name and extract structured options from the description if omitted.
+DEC-076;2026-06-17;Branching Strategy;Feature-Task Branching;Ratified Option 1 (Feature-Task Branching) to adopt dedicated task-oriented feature branches (e.g. feature/P2-01g-inception) off a stable main branch to isolate roadmap implementations and maintain auditability.
 
 
 

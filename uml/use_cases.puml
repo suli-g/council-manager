@@ -51,8 +51,8 @@ User --> UC_CreateSession
 User --> UC_SubmitBlindVote
 User --> UC_ViewDashboard
 
-AIAgent --> UC_PublishDelib
-AIAgent --> UC_SubmitBlindVote
+AIAgent -up-> UC_PublishDelib
+AIAgent -up-> UC_SubmitBlindVote
 
 Auditor --> UC_PerformAudit
 Auditor --> UC_MapAudit
@@ -63,6 +63,6 @@ UC_SubmitProposal ..> UC_CreateSession : <<include>>
 UC_CreateSession ..> UC_PublishDelib : <<include>>
 UC_SubmitBlindVote ..> UC_VerifyConsensus : <<include>>
 UC_VerifyConsensus ..> UC_RatifyDecision : <<include>>
-UC_ImportCSV ..> UC_IsolateTenant : <<include>>
+UC_ImportCSV .up.> UC_IsolateTenant : <<include>>
 
 @endum

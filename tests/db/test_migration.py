@@ -1,4 +1,3 @@
-import os
 import csv
 import tempfile
 import pytest
@@ -14,7 +13,7 @@ def cleanup_connections():
 def test_migration_bidirectional():
     with tempfile.TemporaryDirectory() as src_dir, tempfile.TemporaryDirectory() as dest_dir:
         src_path = Path(src_dir)
-        dest_path = Path(dest_dir)
+        _dest_path = Path(dest_dir)
 
         # 1. Setup mock .agents/ folder structure in source directory
         src_agents = src_path / ".agents"
