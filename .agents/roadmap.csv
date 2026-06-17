@@ -8,7 +8,7 @@ phase;id;task;status;notes
 2;P2-01d;Weighted Tally & Consensus Verifier;DONE;Implement calculation logic from weights, check >70% threshold, and handle secondary debate round triggers.
 2;P2-01e;Token Safeguards & Caching Implementation;TODO;Implement caching for deliberations/votes and settings-based budget limit overrides.
 2;P2-01f;Database Roadmap Table & Sync Implementation;TODO;Implement RoadmapTask DB schema in models.py and add sync migration logic.
-2;P2-01g;AI-Powered Proposal Inception Implementation;TODO;Implement AI topic generation and option extraction in CouncilOrchestrator and CLI.
+2;P2-01g;AI-Powered Proposal Inception Implementation;DONE;Implement AI topic generation and option extraction in CouncilOrchestrator and CLI.
 2;P2-02a;Asynchronous Task Orchestrator;TODO;Implement background queue using asyncio to run deliberations and votes asynchronously.
 2;P2-02b;Task Status Query & CLI logging;TODO;CLI commands to check the status of running AI deliberations.
 3;P3-01a;FastAPI Server Setup;TODO;Setup FastAPI server and endpoints to submit proposals, trigger votes, and query decisions.
