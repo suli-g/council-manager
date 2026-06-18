@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;YES (Option 1);Supports a clear pipeline approach to segment resolution.
-B;OOP Specialists;YES (Option 1);Enables better encapsulation of state during traversal.
-C;Imperative Specialists;YES (Option 1);Provides granular control over error handling at each path level.
-D;Declarative Specialists;NO (Option 2);Preferred simpler pattern-matching rules.
-E;Dynamic Specialists;YES (Option 1);Provides flexibility for resolving deeply nested tasks.
-F;Auditors/Project Managers;YES (Option 1);Ensures that path hierarchy matches academic task structures.
-G;Contrarians;YES (Option 1);Proposed the critical 'Literal-First' refinement to avoid accidental false positives.
+voter_id;team_id;vote
+V-A;A;YES (Option 1)
+V-B;B;YES (Option 1)
+V-C;C;YES (Option 1)
+V-D;D;NO (Option 2)
+V-E;E;YES (Option 1)
+V-F;F;YES (Option 1)
+V-G;G;YES (Option 1)

@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;YES;New organizational setup directly addresses the root cause of API rate limits.
-B;OOP Specialists;YES;Simplifies configuration management by centralizing API key control.
-C;Imperative Specialists;YES;Eliminates a significant development blocker, improving efficiency.
-D;Declarative Specialists;YES;Aligns with principle of externalizing complex environment management.
-E;Dynamic Specialists;YES;Provides a stable environment for rapid iteration and testing.
-F;Auditors/Project Managers;YES;Permanently resolves AUDIT-007, ensuring project progress.
-G;Contrarians;YES;A pragmatic and effective solution that removes a key pain point.
+voter_id;team_id;vote
+V-A;A;YES
+V-B;B;YES
+V-C;C;YES
+V-D;D;YES
+V-E;E;YES
+V-F;F;YES
+V-G;G;YES

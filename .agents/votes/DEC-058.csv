@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;YES;Supports clean mapping of tree data to target paths.
-B;OOP Specialists;YES;Encapsulates semantic navigation within the strategy layer.
-C;Imperative Specialists;YES;Explicitly uses the 'type' and 'path' metadata for efficient discovery.
-D;Declarative Specialists;YES;Aligns with the 'data-first' principle of using GitHub's provided tree structure.
-E;Dynamic Specialists;YES;Provides flexibility for various task naming conventions.
-F;Auditors/Project Managers;YES;Ensures the 'Never download full level' guardrail is strictly enforced by targeting only dir nodes.
-G;Contrarians;YES;Pragmatic use of available API metadata avoids unnecessary complex parsing (regex).
+voter_id;team_id;vote
+V-A;A;YES
+V-B;B;YES
+V-C;C;YES
+V-D;D;YES
+V-E;E;YES
+V-F;F;YES
+V-G;G;YES

@@ -1,9 +1,9 @@
-voter_id;team_id;vote;rationale
-V-001;A;Alt 1;Separate feature branches preserve history immutability and isolate functional pipelines.
-V-002;B;Alt 1;Structured feature branching encapsulates changes cleanly aligned with design modules.
-V-003;C;Alt 2;Trunk-based development reduces merge conflicts and keeps direct procedural execution fast.
-V-004;D;Alt 1;Feature branching is compatible with declarative CI/CD and roadmap tracking configs.
-V-005;E;Alt 1;Easy metadata/reflection inspection on isolated branches during rapid prototyping.
-V-006;F;Alt 1;Feature branches mapped to tasks enforce rigorous quality controls and audit tracking.
-V-007;G;Alt 3;Branching adds unnecessary management overhead for a small project; single branch is simpler.
-V-008;User;Alt 1;User ratified Feature-Task Branching off stable main branch for enhanced auditability.
+voter_id;team_id;vote
+V-001;A;Alt 1
+V-002;B;Alt 1
+V-003;C;Alt 2
+V-004;D;Alt 1
+V-005;E;Alt 1
+V-006;F;Alt 1
+V-007;G;Alt 3
+V-008;User;Alt 1

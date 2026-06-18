@@ -1,8 +1,8 @@
-voter_id;team_id;vote;rationale
-V-001;A;Alt A;Configuration as data input to the constructor aligns with functional principles, making the strategy's behavior predictable.
-V-002;B;Alt A;Clearly defines the strategy's behavior at object instantiation, promoting better encapsulation.
-V-003;C;Alt A;Simplifies method calls by moving a constant configuration parameter out of the execution path.
-V-004;D;Alt A;Allows declarative definition of strategy behavior in configuration.
-V-005;E;Alt A;Setting the resolution behavior once during initialization reduces dynamic state changes during runtime.
-V-006;F;Alt A;Configuration-based decisions are easier to audit and understand the strategy's intent.
-V-007;G;Alt A;Cautious support: while it makes the strategy's behavior fixed post-instantiation, it might limit flexibility in highly dynamic scenarios where the resolution need changes per-call.
+voter_id;team_id;vote
+V-001;A;Alt A
+V-002;B;Alt A
+V-003;C;Alt A
+V-004;D;Alt A
+V-005;E;Alt A
+V-006;F;Alt A
+V-007;G;Alt A

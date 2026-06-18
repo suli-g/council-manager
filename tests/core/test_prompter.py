@@ -24,7 +24,7 @@ def test_generate_deliberation_mocked():
     # Assert generate_content called with expected arguments
     mock_client.models.generate_content.assert_called_once()
     args, kwargs = mock_client.models.generate_content.call_args
-    assert kwargs["model"] == "gemini-2.5-flash"
+    assert kwargs["model"] == "gemini-3.5-flash"
     assert kwargs["contents"].startswith("Please deliberate on the following proposal:")
     assert kwargs["config"].system_instruction.startswith("You are an AI agent representing the 'Team A'")
 
@@ -154,4 +154,124 @@ async def test_generate_proposal_inception_async_mocked():
     assert res.topic == "Async Topic"
     assert res.options == ["A", "B"]
     mock_client.aio.models.generate_content.assert_called_once()
+
+from unittest.mock import patch
+from council_manager.config import settings
+
+def test_custom_provider_deliberation(monkeypatch):
+    # Backup original settings
+    orig_provider = settings.llm_provider
+    orig_base = settings.llm_api_base
+    orig_model = settings.gemini_model
+    
+    try:
+        monkeypatch.setattr(settings, "llm_provider", "openai")
+        monkeypatch.setattr(settings, "llm_api_base", "https://api.custom.com/v1")
+        monkeypatch.setattr(settings, "gemini_model", "custom-model")
+        
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "choices": [{
+                "message": {
+                    "content": "Custom deliberation result"
+                }
+            }]
+        }
+        
+        with patch("httpx.post", return_value=mock_response) as mock_post:
+            prompter = AgentPrompter()
+            res = prompter.generate_deliberation(
+                team_name="Team A",
+                paradigm_specialty="Functional",
+                title="Title X",
+                description="Desc Y",
+                options=["Alt 1", "Alt 2"]
+            )
+            
+            assert res == "Custom deliberation result"
+            mock_post.assert_called_once()
+            args, kwargs = mock_post.call_args
+            assert args[0] == "https://api.custom.com/v1/chat/completions"
+            assert kwargs["json"]["model"] == "custom-model"
+    finally:
+        settings.llm_provider = orig_provider
+        settings.llm_api_base = orig_base
+        settings.gemini_model = orig_model
+
+@pytest.mark.anyio
+async def test_custom_provider_deliberation_async(monkeypatch):
+    orig_provider = settings.llm_provider
+    orig_base = settings.llm_api_base
+    orig_model = settings.gemini_model
+    
+    try:
+        monkeypatch.setattr(settings, "llm_provider", "ollama")
+        monkeypatch.setattr(settings, "llm_api_base", None)
+        
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "choices": [{
+                "message": {
+                    "content": "Custom async deliberation"
+                }
+            }]
+        }
+        
+        mock_client = MagicMock()
+        mock_client.post = AsyncMock(return_value=mock_response)
+        
+        # Mock __aenter__ and __aexit__ for context manager
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=None)
+        
+        with patch("httpx.AsyncClient", return_value=mock_client):
+            prompter = AgentPrompter()
+            res = await prompter.generate_deliberation_async(
+                team_name="Team B",
+                paradigm_specialty="OOP",
+                title="Title Z",
+                description="Desc W",
+                options=["Opt A", "Opt B"]
+            )
+            
+            assert res == "Custom async deliberation"
+            mock_client.post.assert_called_once()
+            args, kwargs = mock_client.post.call_args
+            assert args[0] == "http://localhost:11434/v1/chat/completions"
+    finally:
+        settings.llm_provider = orig_provider
+        settings.llm_api_base = orig_base
+        settings.gemini_model = orig_model
+
+def test_clean_and_parse_json_fallback():
+    from council_manager.core.prompter import clean_and_parse_json
+    
+    # 1. Test standard JSON
+    standard_json = '{"vote": "Alt 1", "rationale": "Simple option is best"}'
+    assert clean_and_parse_json(standard_json) == {"vote": "Alt 1", "rationale": "Simple option is best"}
+    
+    # 2. Test JSON wrapped in markdown blocks
+    markdown_json = '```json\n{"vote": "Alt A", "rationale": "Pipeline composition"}\n```'
+    assert clean_and_parse_json(markdown_json) == {"vote": "Alt A", "rationale": "Pipeline composition"}
+    
+    # 3. Test malformed JSON with unescaped double quotes inside value
+    malformed_json = '{\n  "vote": "Alt 1",\n  "rationale": "This contains an unescaped "double quote" inside the string value."\n}'
+    result = clean_and_parse_json(malformed_json)
+    assert result["vote"] == "Alt 1"
+    assert "unescaped" in result["rationale"]
+    assert "double quote" in result["rationale"]
+    
+    # 4. Test InceptionResponse regex parsing fallback
+    inception_json = '{\n  "topic": "Clean Code Project",\n  "options": ["Option 1", "Option 2", "Option 3"]\n}'
+    inception_result = clean_and_parse_json(inception_json)
+    assert inception_result["topic"] == "Clean Code Project"
+    assert inception_result["options"] == ["Option 1", "Option 2", "Option 3"]
+
+    # 5. Test truncated JSON without closing quotes/braces
+    truncated_json = '{\n  "vote": "Option A",\n  "rationale": "We should adopt this because it is clean'
+    truncated_result = clean_and_parse_json(truncated_json)
+    assert truncated_result["vote"] == "Option A"
+    assert truncated_result["rationale"] == "We should adopt this because it is clean"
+
+
 

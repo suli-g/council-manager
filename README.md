@@ -2,6 +2,8 @@
 
 A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, and structured project audits across multiple isolated workspaces.
 
+See the [CHANGELOG.md](file:///B:/projects/council_manager/CHANGELOG.md) for version release details.
+
 ---
 
 ## Architecture Overview
@@ -25,6 +27,26 @@ Ensure you have [uv](https://github.com/astral-sh/uv) installed in your environm
 2.  **Install dependencies** and create the virtual environment:
     ```bash
     uv sync
+    ```
+3.  **Configure Environment Variables**:
+    Create a `.env` file in the project root (you can copy the template from `.env.example`):
+    ```bash
+    cp .env.example .env
+    ```
+    Open `.env` and set your `GEMINI_API_KEY`:
+    ```env
+    GEMINI_API_KEY=your-actual-api-key
+    ```
+    *(Optional)* You can also change the target model by setting `LLM_MODEL`, `OLLAMA_MODEL`, or `GEMINI_MODEL`. If you experience high demand (503) or rate limits on the default model, you can try setting it to a different supported model (e.g. `gemini-3.5-pro` or `gemini-3.5-flash`).
+
+    *(Optional)* **Swappable LLM Providers (Local Ollama / OpenAI)**:
+    To bypass rate limits or run offline, configure a custom provider:
+    ```env
+    LLM_PROVIDER=ollama
+    # Default URL is http://localhost:11434/v1
+    LLM_API_BASE=http://localhost:11434/v1
+    # Swapped model name matching your local library (LLM_MODEL or OLLAMA_MODEL)
+    LLM_MODEL=llama3
     ```
 
 ---
@@ -173,21 +195,42 @@ uv run council-manager --help
     uv run council-manager import -w <workspace-dir> -p <project-id>
     uv run council-manager export -w <workspace-dir> -p <project-id>
     ```
-3.  **Proposal Creation** (with optional auto-inception):
+3.  **Proposal Creation** (with optional auto-inception, auto-deliberation, or auto-voting):
     ```bash
+    # Create proposal (returns dynamic DEC-xxx ID)
     uv run council-manager proposal-create "Detailed description here" -w <workspace-dir>
+
+    # Create and automatically trigger Phase 1 Deliberation immediately
+    uv run council-manager proposal-create "Detailed description here" -w <workspace-dir> --deliberate
+
+    # Create and automatically trigger both Deliberation and Phase 2 Consensus Voting
+    uv run council-manager proposal-create "Detailed description here" -w <workspace-dir> --vote --max-cycles 5
     ```
-4.  **Orchestrate Deliberations & Votes**:
+4.  **Orchestrate Deliberations & Votes** (omitting `--proposal-id` automatically targets the latest created proposal):
     ```bash
+    # Run Phase 1 Deliberation
     uv run council-manager deliberate -w <workspace-dir> --proposal-id <id>
+    uv run council-manager deliberate -w <workspace-dir>  # Targets the latest proposal
+
+    # Run Phase 2 Consensus Voting
     uv run council-manager vote -w <workspace-dir> --proposal-id <id> --max-cycles 5
+    uv run council-manager vote -w <workspace-dir> --max-cycles 5  # Targets the latest proposal
     ```
-5.  **Status & Log Inspection**:
+5.  **Status & Log Inspection** (omitting `--proposal-id` targets the latest proposal):
     ```bash
     uv run council-manager list -w <workspace-dir>
     uv run council-manager show -w <workspace-dir> --proposal-id <id>
+    uv run council-manager show -w <workspace-dir>  # Shows details of the latest proposal
+    uv run council-manager show-teams -w <workspace-dir>
     uv run council-manager show-decisions -w <workspace-dir>
     uv run council-manager show-roadmap -w <workspace-dir>
     uv run council-manager show-audits -w <workspace-dir>
+    ```
+6.  **Individual Team Deliberation & Voting** (omitting `--proposal-id` targets the latest proposal):
+    ```bash
+    uv run council-manager team-deliberate -w <workspace-dir> --team-id <team-id> --proposal-id <id>
+    uv run council-manager team-deliberate -w <workspace-dir> --team-id <team-id>  # Targets latest proposal
+    uv run council-manager team-vote -w <workspace-dir> --team-id <team-id> --proposal-id <id>
+    uv run council-manager team-vote -w <workspace-dir> --team-id <team-id>  # Targets latest proposal
     ```
 

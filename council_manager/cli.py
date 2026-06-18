@@ -3,6 +3,7 @@ import asyncio
 import os
 import sys
 from pathlib import Path
+from council_manager.config import settings
 from council_manager.db import db_manager, Proposal, Team, Decision, AuditLog, RoadmapTask, initialize_new_project, import_csv_to_db, export_db_to_csv
 from council_manager.core.orchestrator import council_orchestrator
 
@@ -44,6 +45,26 @@ def get_workspace_path(path_arg: str | None) -> Path:
     else:
         p = Path(os.getcwd()).resolve()
     return p
+
+def get_proposal_id(args, workspace: Path) -> str:
+    if getattr(args, "proposal_id", None):
+        return args.proposal_id
+    
+    # Otherwise, query the latest proposal ID
+    session = db_manager.get_session(workspace)
+    try:
+        latest = session.query(Proposal).order_by(Proposal.created_at.desc()).first()
+        if not latest:
+            log_error("No proposals found in database. Please specify --proposal-id or create one first.")
+            sys.exit(1)
+        log_info(f"No --proposal-id specified. Defaulting to the latest proposal: '{latest.id}'")
+        return latest.id
+    except Exception as e:
+        log_error(f"Failed to query latest proposal: {e}")
+        sys.exit(1)
+    finally:
+        session.close()
+        db_manager.close_all()
 
 def cmd_init_project(args):
     target_path = Path(args.path).resolve()
@@ -92,16 +113,32 @@ def cmd_proposal_create(args):
             options=options
         )
         log_success(f"Proposal '{prop.id}' created. Status: {prop.status}")
+        
+        # Check auto-run flags
+        if getattr(args, "vote", False):
+            log_info(f"Auto-running Phase 1 Deliberation for proposal '{prop.id}'...")
+            prop = asyncio.run(council_orchestrator.run_deliberation(workspace, prop.id))
+            log_success(f"Deliberation complete. Status: {prop.status}")
+            
+            log_info(f"Auto-running Phase 2 Voting Loop for proposal '{prop.id}' (max {args.max_cycles} cycles)...")
+            prop = asyncio.run(council_orchestrator.run_voting(workspace, prop.id, max_cycles=args.max_cycles))
+            log_success(f"Voting complete. Final Status: {prop.status}")
+        elif getattr(args, "deliberate", False):
+            log_info(f"Auto-running Phase 1 Deliberation for proposal '{prop.id}'...")
+            prop = asyncio.run(council_orchestrator.run_deliberation(workspace, prop.id))
+            log_success(f"Deliberation complete. Status: {prop.status}")
+            
     except Exception as e:
-        log_error(f"Proposal creation failed: {e}")
+        log_error(f"Proposal creation or auto-run failed: {e}")
         sys.exit(1)
 
 
 async def run_deliberation_async(args):
     workspace = get_workspace_path(args.workspace)
-    log_info(f"Running Phase 1 Deliberation for proposal '{args.proposal_id}'...")
+    proposal_id = get_proposal_id(args, workspace)
+    log_info(f"Running Phase 1 Deliberation for proposal '{proposal_id}'...")
     try:
-        prop = await council_orchestrator.run_deliberation(workspace, args.proposal_id)
+        prop = await council_orchestrator.run_deliberation(workspace, proposal_id)
         log_success(f"Deliberation complete. Status updated to: {prop.status}")
         log_info(f"Collected rationales from {len(prop.rationales)} teams.")
     except Exception as e:
@@ -113,9 +150,10 @@ def cmd_deliberate(args):
 
 async def run_voting_async(args):
     workspace = get_workspace_path(args.workspace)
-    log_info(f"Running Phase 2 Voting Loop for proposal '{args.proposal_id}' (max {args.max_cycles} cycles)...")
+    proposal_id = get_proposal_id(args, workspace)
+    log_info(f"Running Phase 2 Voting Loop for proposal '{proposal_id}' (max {args.max_cycles} cycles)...")
     try:
-        prop = await council_orchestrator.run_voting(workspace, args.proposal_id, max_cycles=args.max_cycles)
+        prop = await council_orchestrator.run_voting(workspace, proposal_id, max_cycles=args.max_cycles)
         log_success(f"Voting complete. Final Status: {prop.status}")
         log_info(f"Recorded {len(prop.votes)} votes in database.")
     except Exception as e:
@@ -148,11 +186,12 @@ def cmd_list(args):
 
 def cmd_show(args):
     workspace = get_workspace_path(args.workspace)
+    proposal_id = get_proposal_id(args, workspace)
     session = db_manager.get_session(workspace)
     try:
-        p = session.query(Proposal).filter_by(id=args.proposal_id).first()
+        p = session.query(Proposal).filter_by(id=proposal_id).first()
         if not p:
-            log_error(f"Proposal '{args.proposal_id}' not found.")
+            log_error(f"Proposal '{proposal_id}' not found.")
             sys.exit(1)
             
         print(f"\n{COLOR_BOLD}{COLOR_CYAN}=== PROPOSAL DETAILS: {p.id} ==={COLOR_RESET}")
@@ -275,8 +314,8 @@ def cmd_show_audits(args):
 
 async def run_team_deliberate_async(args):
     workspace = get_workspace_path(args.workspace)
+    proposal_id = get_proposal_id(args, workspace)
     team_id = args.team_id
-    proposal_id = args.proposal_id
     
     log_info(f"Triggering individual deliberation for Team '{team_id}' on proposal '{proposal_id}'...")
     from council_manager.core.registry import agent_registry
@@ -317,8 +356,8 @@ def cmd_team_deliberate(args):
 
 async def run_team_vote_async(args):
     workspace = get_workspace_path(args.workspace)
+    proposal_id = get_proposal_id(args, workspace)
     team_id = args.team_id
-    proposal_id = args.proposal_id
     
     log_info(f"Triggering individual vote for Team '{team_id}' on proposal '{proposal_id}'...")
     from council_manager.core.registry import agent_registry
@@ -342,8 +381,9 @@ async def run_team_vote_async(args):
         
     # Seed deliberations context
     rationales_context = "Deliberation Justifications:\n" + "\n".join(
-        f"- {r['team_id']}: {r['rationale']}" for r in delib_rationales
+        f"- {r['team_id']}: {r['rationale'][:400]}" for r in delib_rationales
     )
+
     
     try:
         res = await council_orchestrator.prompter.generate_vote_async(
@@ -362,6 +402,130 @@ async def run_team_vote_async(args):
         log_error(f"Failed to vote: {e}")
         sys.exit(1)
 
+async def run_proposal_ratify_async(args):
+    workspace = get_workspace_path(args.workspace)
+    proposal_id = get_proposal_id(args, workspace)
+    
+    session = db_manager.get_session(workspace)
+    try:
+        p = session.query(Proposal).filter_by(id=proposal_id).first()
+        if not p:
+            log_error(f"Proposal '{proposal_id}' not found.")
+            sys.exit(1)
+            
+        print(f"\n{COLOR_BOLD}{COLOR_CYAN}=== INTERACTIVE RATIFICATION WIZARD: {p.id} ==={COLOR_RESET}")
+        print(f"{COLOR_BOLD}Topic:{COLOR_RESET}       {p.topic}")
+        print(f"{COLOR_BOLD}Description:{COLOR_RESET} {p.description}")
+        print(f"{COLOR_BOLD}Status:{COLOR_RESET}      {p.status}")
+        print(f"{COLOR_BOLD}Options:{COLOR_RESET}")
+        for i, opt in enumerate(p.options, 1):
+            print(f"  {i}. {opt}")
+            
+        # Display full rationales for the votes
+        print(f"\n{COLOR_BOLD}{COLOR_CYAN}--- VOTES CAST & DETAILED RATIONALES ---{COLOR_RESET}")
+        rat_dict = {r["team_id"]: r["rationale"] for r in (p.rationales or [])}
+        
+        votes = p.votes or []
+        if not votes:
+            print("No votes recorded for this proposal yet.")
+        else:
+            for v in votes:
+                team_id = v.get("team_id", "")
+                vote_val = v.get("vote", "")
+                rationale_val = v.get("rationale", "") or rat_dict.get(team_id, "")
+                
+                print(f"\n{COLOR_BOLD}[Team {team_id}] voted '{vote_val}'{COLOR_RESET}")
+                print(f"Rationale: {rationale_val}")
+                print("-" * 50)
+                
+        # Ask user for decision
+        print(f"\n{COLOR_BOLD}Select an action:{COLOR_RESET}")
+        for i, opt in enumerate(p.options, 1):
+            print(f"  [{i}] Ratify Option: '{opt}'")
+        print(f"  [A] State a new custom alternative (starts a new proposal & voting cycle)")
+        print(f"  [Q] Cancel / Quit")
+        
+        choice = input("\nEnter choice: ").strip()
+        if choice.lower() == 'q':
+            print("Ratification cancelled.")
+            return
+            
+        if choice.lower() == 'a':
+            new_desc = input("\nEnter description for the new proposal/alternative: ").strip()
+            if not new_desc:
+                log_error("Description cannot be empty.")
+                return
+            
+            log_info("Starting a new proposal & voting cycle immediately...")
+            
+            # Create, Deliberate, and Vote
+            new_prop = council_orchestrator.create_proposal(
+                workspace_dir=workspace,
+                project_id=p.project_id,
+                description=new_desc
+            )
+            log_success(f"Created new proposal '{new_prop.id}' with topic: '{new_prop.topic}'")
+            
+            log_info(f"Running Phase 1 Deliberation for '{new_prop.id}'...")
+            new_prop = await council_orchestrator.run_deliberation(workspace, new_prop.id)
+            log_success("Deliberation complete.")
+            
+            log_info(f"Running Phase 2 Voting Loop for '{new_prop.id}'...")
+            new_prop = await council_orchestrator.run_voting(workspace, new_prop.id)
+            log_success("Voting complete.")
+            
+            # Rerun the ratification command on the new proposal
+            args.proposal_id = new_prop.id
+            session.close()
+            db_manager.close_all()
+            await run_proposal_ratify_async(args)
+            return
+            
+        try:
+            idx = int(choice) - 1
+            if idx < 0 or idx >= len(p.options):
+                raise ValueError()
+            selected_option = p.options[idx]
+        except ValueError:
+            log_error("Invalid selection.")
+            return
+            
+        # 1. Ask for Roadmap Task ID
+        print(f"\n{COLOR_BOLD}Roadmap Sync:{COLOR_RESET}")
+        roadmap_tasks = session.query(RoadmapTask).filter_by(project_id=p.project_id).all()
+        todo_tasks = [t for t in roadmap_tasks if t.status != 'DONE']
+        if todo_tasks:
+            print("Open roadmap tasks:")
+            for t in todo_tasks:
+                print(f"  - {t.id}: {t.task}")
+        else:
+            print("No open roadmap tasks found.")
+            
+        task_id = input("\nEnter roadmap task ID to mark as DONE (leave empty to skip): ").strip()
+        
+        session.close()
+        
+        # 2. Ratify the proposal using orchestrator logic
+        council_orchestrator.ratify_proposal(
+            workspace_dir=workspace,
+            proposal_id=p.id,
+            decision_option=selected_option,
+            roadmap_task_id=task_id if task_id else None
+        )
+        
+        log_success(f"Proposal '{p.id}' successfully ratified!")
+        log_info(f"Decision registered: '{selected_option}'")
+        if task_id:
+            log_info(f"Roadmap task '{task_id}' updated to DONE.")
+            
+    except Exception as e:
+        log_error(f"Ratification failed: {e}")
+    finally:
+        db_manager.close_all()
+
+def cmd_proposal_ratify(args):
+    asyncio.run(run_proposal_ratify_async(args))
+
 def cmd_team_vote(args):
     asyncio.run(run_team_vote_async(args))
 
@@ -370,6 +534,7 @@ def main():
         description="Council Manager CLI: Interact with isolated multi-team governance databases.",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
+    parser.add_argument("--debug", action="store_true", help="Enable verbose debug logging of transition events and API communications.")
     subparsers = parser.add_subparsers(dest="command", help="Subcommand to execute")
 
     # Command: init-project
@@ -395,17 +560,19 @@ def main():
     p_create.add_argument("--proposal-id", help="Unique identifier for the proposal.")
     p_create.add_argument("--topic", help="Title or topic of the proposal.")
     p_create.add_argument("--options", help="Semicolon-delimited list of options (e.g. 'Alt 1; Alt 2').")
-
+    p_create.add_argument("--deliberate", action="store_true", help="Automatically run Phase 1 Deliberation after creation.")
+    p_create.add_argument("--vote", action="store_true", help="Automatically run Phase 1 Deliberation and Phase 2 Voting Loop after creation.")
+    p_create.add_argument("--max-cycles", type=int, default=5, help="Maximum voting cycles to run (used with --vote).")
 
     # Command: deliberate
     p_deliberate = subparsers.add_parser("deliberate", help="Run Phase 1 (Deliberation) to gather engineering justifications.")
     p_deliberate.add_argument("-w", "--workspace", help="Path to the workspace folder.")
-    p_deliberate.add_argument("--proposal-id", required=True, help="ID of the target proposal.")
+    p_deliberate.add_argument("--proposal-id", help="ID of the target proposal (defaults to latest).")
 
     # Command: vote
     p_vote = subparsers.add_parser("vote", help="Run Phase 2 (Voting Loop) to cast consensus votes.")
     p_vote.add_argument("-w", "--workspace", help="Path to the workspace folder.")
-    p_vote.add_argument("--proposal-id", required=True, help="ID of the target proposal.")
+    p_vote.add_argument("--proposal-id", help="ID of the target proposal (defaults to latest).")
     p_vote.add_argument("--max-cycles", type=int, default=5, help="Maximum number of debate/voting cycles.")
 
     # Command: list
@@ -415,7 +582,7 @@ def main():
     # Command: show
     p_show = subparsers.add_parser("show", help="Show full detail log of a specific proposal.")
     p_show.add_argument("-w", "--workspace", help="Path to the workspace folder.")
-    p_show.add_argument("--proposal-id", required=True, help="ID of the proposal to show.")
+    p_show.add_argument("--proposal-id", help="ID of the proposal to show (defaults to latest).")
 
     # Command: show-teams
     p_teams = subparsers.add_parser("show-teams", help="Show all registered teams in the registry.")
@@ -437,15 +604,22 @@ def main():
     p_td = subparsers.add_parser("team-deliberate", help="Instruct a single team to deliberate on a proposal individually.")
     p_td.add_argument("-w", "--workspace", help="Path to the workspace folder.")
     p_td.add_argument("--team-id", required=True, help="ID of the team to call.")
-    p_td.add_argument("--proposal-id", required=True, help="ID of the target proposal.")
+    p_td.add_argument("--proposal-id", help="ID of the target proposal (defaults to latest).")
 
     # Command: team-vote
     p_tv = subparsers.add_parser("team-vote", help="Instruct a single team to vote on a proposal individually.")
     p_tv.add_argument("-w", "--workspace", help="Path to the workspace folder.")
     p_tv.add_argument("--team-id", required=True, help="ID of the team to call.")
-    p_tv.add_argument("--proposal-id", required=True, help="ID of the target proposal.")
+    p_tv.add_argument("--proposal-id", help="ID of the target proposal (defaults to latest).")
+    
+    # Command: proposal-ratify
+    p_pr = subparsers.add_parser("proposal-ratify", help="Interactively review rationales, choose decision, and update roadmap.")
+    p_pr.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+    p_pr.add_argument("--proposal-id", help="ID of the target proposal (defaults to latest).")
 
     args = parser.parse_args()
+    if args.debug:
+        settings.debug = True
 
     if not args.command:
         parser.print_help()
@@ -480,6 +654,8 @@ def main():
         cmd_team_deliberate(args)
     elif args.command == "team-vote":
         cmd_team_vote(args)
+    elif args.command == "proposal-ratify":
+        cmd_proposal_ratify(args)
 
 if __name__ == "__main__":
     main()

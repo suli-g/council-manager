@@ -1,9 +1,9 @@
-voter_id;team_id;vote;rationale
-V-001;A;Alt 1;Caching rationales and votes prevents duplicate queries; fits functional immutability.
-V-002;B;Alt 2;Preferred rate-limiting interface, but accepts Alt 1 since caching serves as an effective throttle.
-V-003;C;Alt 1;Fast dictionary or database lookup avoids unnecessary external API overhead.
-V-004;D;Alt 1;Settings-based token budgets are declarative and highly configurable.
-V-005;E;Alt 1;Dynamic config updates can reload budgets without restart.
-V-006;F;Alt 1;Prevents running duplicate deliberations, ensuring high cost predictability.
-V-007;G;Alt 3;Caching hides changes in prompts and might lead to stale data.
-V-008;User;Alt 1;User ratified Layered Caching & Config-Driven Budgets to protect the API wallet.
+voter_id;team_id;vote
+V-001;A;Alt 1
+V-002;B;Alt 2
+V-003;C;Alt 1
+V-004;D;Alt 1
+V-005;E;Alt 1
+V-006;F;Alt 1
+V-007;G;Alt 3
+V-008;User;Alt 1

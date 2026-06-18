@@ -1,9 +1,50 @@
 from typing import List, Optional
 import json
+import re
 from google import genai
 from google.genai import types
 from pydantic import BaseModel, Field
 from council_manager.config import settings
+
+def clean_and_parse_json(text: str) -> dict:
+    """Clean common JSON formatting issues from LLM outputs and parse it."""
+    text = text.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+    
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as orig_err:
+        # Fallback regex parsing for VoteResponse (allowing truncated rationale quote)
+        vote_match = re.search(r'"vote"\s*:\s*"(.*?)"', text, re.DOTALL)
+        rationale_match = re.search(r'"rationale"\s*:\s*"(.*)', text, re.DOTALL)
+        if vote_match and rationale_match:
+            vote_val = vote_match.group(1).strip()
+            rationale_val = rationale_match.group(1).strip()
+            # Clean trailing quotes/braces/newlines
+            while rationale_val.endswith('}') or rationale_val.endswith('"') or rationale_val.endswith('\n') or rationale_val.endswith('\r'):
+                if rationale_val.endswith('}'):
+                    rationale_val = rationale_val[:-1].strip()
+                elif rationale_val.endswith('"'):
+                    rationale_val = rationale_val[:-1]
+                else:
+                    rationale_val = rationale_val.strip()
+            return {"vote": vote_val, "rationale": rationale_val}
+            
+        # Fallback regex parsing for InceptionResponse
+        topic_match = re.search(r'"topic"\s*:\s*"(.*?)"', text, re.DOTALL)
+        options_match = re.search(r'"options"\s*:\s*\[(.*?)\]', text, re.DOTALL)
+        if topic_match and options_match:
+            topic_val = topic_match.group(1).strip()
+            options_val = [opt.strip().strip('"\'') for opt in re.findall(r'"(.*?)"', options_match.group(1))]
+            return {"topic": topic_val, "options": options_val}
+            
+        raise orig_err
 
 class VoteResponse(BaseModel):
     vote: str = Field(description="The exact option selected from the proposal's options")
@@ -30,6 +71,279 @@ class AgentPrompter:
                 self._client = genai.Client()
         return self._client
 
+    def probe_connectivity(self) -> None:
+        """Probe the connectivity of the LLM endpoint (checks base URL) and raises descriptive errors."""
+        import httpx
+        from urllib.parse import urlparse
+        provider = settings.llm_provider.lower()
+        if provider == "google":
+            if settings.debug:
+                print("[DEBUG] Probing connectivity for Google GenAI provider...")
+            try:
+                _ = self.client
+                if settings.debug:
+                    print("[DEBUG] Google GenAI client instantiated successfully.")
+            except Exception as e:
+                raise RuntimeError(f"Google GenAI initialization failed: {e}")
+        else:
+            api_base = settings.llm_api_base
+            if not api_base:
+                if provider == "ollama":
+                    api_base = "http://localhost:11434/v1"
+                elif provider == "openai":
+                    api_base = "https://api.openai.com/v1"
+                else:
+                    raise ValueError(f"No API base URL configured for provider '{provider}'")
+            
+            parsed = urlparse(api_base)
+            root_url = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else api_base.rstrip("/")
+            
+            if settings.debug:
+                print(f"[DEBUG] Probing endpoint root connectivity: {root_url}")
+            
+            try:
+                response = httpx.get(root_url, timeout=3.0)
+                if settings.debug:
+                    print(f"[DEBUG] Probe response from {root_url}: Status {response.status_code}")
+            except httpx.RequestError as e:
+                raise RuntimeError(
+                    f"LLM provider '{provider}' is unreachable. Could not connect to base service at '{root_url}'. "
+                    f"Please verify that the service is running and accessible. Error: {e}"
+                )
+            
+            if provider == "ollama":
+                tags_url = f"{root_url}/api/tags"
+                if settings.debug:
+                    print(f"[DEBUG] Checking Ollama available models: {tags_url}")
+                try:
+                    tags_response = httpx.get(tags_url, timeout=3.0)
+                    if tags_response.status_code == 200:
+                        data = tags_response.json()
+                        available_models = [m.get("name", "") for m in data.get("models", [])]
+                        configured_model = settings.gemini_model
+                        norm_configured = configured_model.lower()
+                        
+                        match_found = False
+                        for model in available_models:
+                            norm_model = model.lower()
+                            if norm_model == norm_configured:
+                                match_found = True
+                                break
+                            if ":" in norm_model and norm_model.split(":")[0] == norm_configured:
+                                match_found = True
+                                break
+                            if ":" in norm_configured and norm_configured.split(":")[0] == norm_model.split(":")[0]:
+                                match_found = True
+                                break
+                        
+                        if not match_found:
+                            raise RuntimeError(
+                                f"Ollama is running at '{root_url}', but the configured model '{configured_model}' "
+                                f"is not pulled or available. Available models: {available_models}. "
+                                f"Please run 'ollama pull {configured_model}' to pull it, or change the model in your .env configuration."
+                            )
+                except httpx.RequestError as e:
+                    if settings.debug:
+                        print(f"[DEBUG] Could not query Ollama tags endpoint at '{tags_url}': {e}")
+
+    async def probe_connectivity_async(self) -> None:
+        """Probe the connectivity of the LLM endpoint asynchronously."""
+        import httpx
+        from urllib.parse import urlparse
+        provider = settings.llm_provider.lower()
+        if provider == "google":
+            if settings.debug:
+                print("[DEBUG] Probing connectivity for Google GenAI provider (async)...")
+            try:
+                _ = self.client
+                if settings.debug:
+                    print("[DEBUG] Google GenAI client instantiated successfully.")
+            except Exception as e:
+                raise RuntimeError(f"Google GenAI initialization failed: {e}")
+        else:
+            api_base = settings.llm_api_base
+            if not api_base:
+                if provider == "ollama":
+                    api_base = "http://localhost:11434/v1"
+                elif provider == "openai":
+                    api_base = "https://api.openai.com/v1"
+                else:
+                    raise ValueError(f"No API base URL configured for provider '{provider}'")
+            
+            parsed = urlparse(api_base)
+            root_url = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else api_base.rstrip("/")
+            
+            if settings.debug:
+                print(f"[DEBUG] Probing endpoint root connectivity (async): {root_url}")
+            
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(root_url, timeout=3.0)
+                if settings.debug:
+                    print(f"[DEBUG] Probe response from {root_url}: Status {response.status_code}")
+            except httpx.RequestError as e:
+                raise RuntimeError(
+                    f"LLM provider '{provider}' is unreachable. Could not connect to base service at '{root_url}'. "
+                    f"Please verify that the service is running and accessible. Error: {e}"
+                )
+            
+            if provider == "ollama":
+                tags_url = f"{root_url}/api/tags"
+                if settings.debug:
+                    print(f"[DEBUG] Checking Ollama available models (async): {tags_url}")
+                try:
+                    async with httpx.AsyncClient() as client:
+                        tags_response = await client.get(tags_url, timeout=3.0)
+                    if tags_response.status_code == 200:
+                        data = tags_response.json()
+                        available_models = [m.get("name", "") for m in data.get("models", [])]
+                        configured_model = settings.gemini_model
+                        norm_configured = configured_model.lower()
+                        
+                        match_found = False
+                        for model in available_models:
+                            norm_model = model.lower()
+                            if norm_model == norm_configured:
+                                match_found = True
+                                break
+                            if ":" in norm_model and norm_model.split(":")[0] == norm_configured:
+                                match_found = True
+                                break
+                            if ":" in norm_configured and norm_configured.split(":")[0] == norm_model.split(":")[0]:
+                                match_found = True
+                                break
+                        
+                        if not match_found:
+                            raise RuntimeError(
+                                f"Ollama is running at '{root_url}', but the configured model '{configured_model}' "
+                                f"is not pulled or available. Available models: {available_models}. "
+                                f"Please run 'ollama pull {configured_model}' to pull it, or change the model in your .env configuration."
+                            )
+                except httpx.RequestError as e:
+                    if settings.debug:
+                        print(f"[DEBUG] Could not query Ollama tags endpoint at '{tags_url}': {e}")
+
+    def _generate_content_custom(
+        self,
+        system_instruction: str,
+        prompt: str,
+        schema: Optional[BaseModel] = None,
+        temperature: float = 0.7
+    ) -> str:
+        import httpx
+        provider = settings.llm_provider.lower()
+        api_base = settings.llm_api_base
+        if not api_base:
+            if provider == "ollama":
+                api_base = "http://localhost:11434/v1"
+            elif provider == "openai":
+                api_base = "https://api.openai.com/v1"
+            else:
+                raise ValueError(f"No API base URL configured for provider '{provider}'")
+
+        url = f"{api_base.rstrip('/')}/chat/completions"
+        headers = {"Content-Type": "application/json"}
+        api_key = settings.llm_api_key or settings.gemini_api_key
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+
+        payload = {
+            "model": settings.gemini_model,
+            "messages": [
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": temperature
+        }
+
+        if schema:
+            payload["response_format"] = {"type": "json_object"}
+            schema_json = json.dumps(schema.model_json_schema())
+            payload["messages"].append({
+                "role": "user",
+                "content": f"You must return your JSON response conforming to this JSON Schema:\n{schema_json}"
+            })
+
+        if settings.debug:
+            print(f"[DEBUG] Custom Provider HTTP Request:")
+            print(f"  URL: {url}")
+            print(f"  Headers: {headers}")
+            print(f"  Payload: {json.dumps(payload, indent=2)}")
+
+        try:
+            response = httpx.post(url, json=payload, headers=headers, timeout=60.0)
+            if settings.debug:
+                print(f"[DEBUG] Custom Provider HTTP Response Status: {response.status_code}")
+                print(f"[DEBUG] Custom Provider HTTP Response Content: {response.text}")
+            response.raise_for_status()
+            res_data = response.json()
+            return res_data["choices"][0]["message"]["content"].strip()
+        except httpx.RequestError as e:
+            if settings.debug:
+                print(f"[DEBUG] Custom Provider Request Failed: {e}")
+            raise
+
+    async def _generate_content_custom_async(
+        self,
+        system_instruction: str,
+        prompt: str,
+        schema: Optional[BaseModel] = None,
+        temperature: float = 0.7
+    ) -> str:
+        import httpx
+        provider = settings.llm_provider.lower()
+        api_base = settings.llm_api_base
+        if not api_base:
+            if provider == "ollama":
+                api_base = "http://localhost:11434/v1"
+            elif provider == "openai":
+                api_base = "https://api.openai.com/v1"
+            else:
+                raise ValueError(f"No API base URL configured for provider '{provider}'")
+
+        url = f"{api_base.rstrip('/')}/chat/completions"
+        headers = {"Content-Type": "application/json"}
+        api_key = settings.llm_api_key or settings.gemini_api_key
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+
+        payload = {
+            "model": settings.gemini_model,
+            "messages": [
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": temperature
+        }
+
+        if schema:
+            payload["response_format"] = {"type": "json_object"}
+            schema_json = json.dumps(schema.model_json_schema())
+            payload["messages"].append({
+                "role": "user",
+                "content": f"You must return your JSON response conforming to this JSON Schema:\n{schema_json}"
+            })
+
+        if settings.debug:
+            print(f"[DEBUG] Custom Provider HTTP Request (async):")
+            print(f"  URL: {url}")
+            print(f"  Headers: {headers}")
+            print(f"  Payload: {json.dumps(payload, indent=2)}")
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=payload, headers=headers, timeout=60.0)
+            if settings.debug:
+                print(f"[DEBUG] Custom Provider HTTP Response Status: {response.status_code}")
+                print(f"[DEBUG] Custom Provider HTTP Response Content: {response.text}")
+            response.raise_for_status()
+            res_data = response.json()
+            return res_data["choices"][0]["message"]["content"].strip()
+        except httpx.RequestError as e:
+            if settings.debug:
+                print(f"[DEBUG] Custom Provider Async Request Failed: {e}")
+            raise
+
     def generate_deliberation(
         self,
         team_name: str,
@@ -38,7 +352,7 @@ class AgentPrompter:
         description: str,
         options: List[str]
     ) -> str:
-        """Query Gemini model for a paradigm-based deliberation rationale."""
+        """Query target LLM model for a paradigm-based deliberation rationale."""
         system_instruction = (
             f"You are an AI agent representing the '{team_name}' engineering team, "
             f"specializing in '{paradigm_specialty}'. Your goal is to deliberate on technical/architectural "
@@ -53,6 +367,9 @@ class AgentPrompter:
             f"Provide a concise, professional justification of your team's stance. "
             f"Focus strictly on how the proposal affects your team's paradigm and domain of expertise."
         )
+
+        if settings.llm_provider.lower() != "google":
+            return self._generate_content_custom(system_instruction, prompt, temperature=0.7)
 
         response = self.client.models.generate_content(
             model=settings.gemini_model,
@@ -73,7 +390,7 @@ class AgentPrompter:
         options: List[str],
         rationales_context: str
     ) -> VoteResponse:
-        """Query Gemini model to cast a blind vote, using structured Pydantic response schemas."""
+        """Query target LLM model to cast a blind vote, using structured Pydantic response schemas."""
         system_instruction = (
             f"You are an AI agent representing the '{team_name}' engineering team, "
             f"specializing in '{paradigm_specialty}'. Your goal is to vote on technical/architectural "
@@ -91,6 +408,10 @@ class AgentPrompter:
             f"Return your selection and voting rationale."
         )
 
+        if settings.llm_provider.lower() != "google":
+            text = self._generate_content_custom(system_instruction, prompt, schema=VoteResponse, temperature=0.2)
+            return VoteResponse(**clean_and_parse_json(text))
+
         response = self.client.models.generate_content(
             model=settings.gemini_model,
             contents=prompt,
@@ -107,7 +428,7 @@ class AgentPrompter:
             return response.parsed
             
         # Fallback to parsing raw text if parsed is empty
-        data = json.loads(response.text)
+        data = clean_and_parse_json(response.text)
         return VoteResponse(**data)
 
     async def generate_deliberation_async(
@@ -118,7 +439,7 @@ class AgentPrompter:
         description: str,
         options: List[str]
     ) -> str:
-        """Query Gemini model asynchronously for a paradigm-based deliberation rationale."""
+        """Query target LLM model asynchronously for a paradigm-based deliberation rationale."""
         system_instruction = (
             f"You are an AI agent representing the '{team_name}' engineering team, "
             f"specializing in '{paradigm_specialty}'. Your goal is to deliberate on technical/architectural "
@@ -133,6 +454,9 @@ class AgentPrompter:
             f"Provide a concise, professional justification of your team's stance. "
             f"Focus strictly on how the proposal affects your team's paradigm and domain of expertise."
         )
+
+        if settings.llm_provider.lower() != "google":
+            return await self._generate_content_custom_async(system_instruction, prompt, temperature=0.7)
 
         response = await self.client.aio.models.generate_content(
             model=settings.gemini_model,
@@ -153,7 +477,7 @@ class AgentPrompter:
         options: List[str],
         rationales_context: str
     ) -> VoteResponse:
-        """Query Gemini model asynchronously to cast a blind vote, using structured Pydantic response schemas."""
+        """Query target LLM model asynchronously to cast a blind vote, using structured Pydantic response schemas."""
         system_instruction = (
             f"You are an AI agent representing the '{team_name}' engineering team, "
             f"specializing in '{paradigm_specialty}'. Your goal is to vote on technical/architectural "
@@ -171,6 +495,10 @@ class AgentPrompter:
             f"Return your selection and voting rationale."
         )
 
+        if settings.llm_provider.lower() != "google":
+            text = await self._generate_content_custom_async(system_instruction, prompt, schema=VoteResponse, temperature=0.2)
+            return VoteResponse(**clean_and_parse_json(text))
+
         response = await self.client.aio.models.generate_content(
             model=settings.gemini_model,
             contents=prompt,
@@ -185,11 +513,11 @@ class AgentPrompter:
         if hasattr(response, "parsed") and response.parsed:
             return response.parsed
             
-        data = json.loads(response.text)
+        data = clean_and_parse_json(response.text)
         return VoteResponse(**data)
 
     def generate_proposal_inception(self, description: str) -> InceptionResponse:
-        """Query Gemini model to extract topic and options from description."""
+        """Query target LLM model to extract topic and options from description."""
         system_instruction = (
             "You are an AI assistant designed to bootstrap project decisions. "
             "Given a proposal description, you must generate a concise topic title (maximum 4 words) "
@@ -201,6 +529,10 @@ class AgentPrompter:
             f"Description: {description}\n\n"
             f"Return a structured JSON containing the topic title and options."
         )
+
+        if settings.llm_provider.lower() != "google":
+            text = self._generate_content_custom(system_instruction, prompt, schema=InceptionResponse, temperature=0.2)
+            return InceptionResponse(**clean_and_parse_json(text))
 
         response = self.client.models.generate_content(
             model=settings.gemini_model,
@@ -216,11 +548,11 @@ class AgentPrompter:
         if hasattr(response, "parsed") and response.parsed:
             return response.parsed
 
-        data = json.loads(response.text)
+        data = clean_and_parse_json(response.text)
         return InceptionResponse(**data)
 
     async def generate_proposal_inception_async(self, description: str) -> InceptionResponse:
-        """Query Gemini model asynchronously to extract topic and options."""
+        """Query target LLM model asynchronously to extract topic and options."""
         system_instruction = (
             "You are an AI assistant designed to bootstrap project decisions. "
             "Given a proposal description, you must generate a concise topic title (maximum 4 words) "
@@ -232,6 +564,10 @@ class AgentPrompter:
             f"Description: {description}\n\n"
             f"Return a structured JSON containing the topic title and options."
         )
+
+        if settings.llm_provider.lower() != "google":
+            text = await self._generate_content_custom_async(system_instruction, prompt, schema=InceptionResponse, temperature=0.2)
+            return InceptionResponse(**clean_and_parse_json(text))
 
         response = await self.client.aio.models.generate_content(
             model=settings.gemini_model,
@@ -247,7 +583,7 @@ class AgentPrompter:
         if hasattr(response, "parsed") and response.parsed:
             return response.parsed
 
-        data = json.loads(response.text)
+        data = clean_and_parse_json(response.text)
         return InceptionResponse(**data)
 
 

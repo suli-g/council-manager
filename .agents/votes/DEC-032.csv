@@ -1,8 +1,8 @@
-voter_id;team_id;vote;rationale
-V-001;A;Alt A;pytest handles async naturally; respx is declarative.
-V-002;B;Alt A;respx provides clean isolation for our API handler objects.
-V-003;C;Alt A;Fastest execution and setup time.
-V-004;D;Alt A;Declarative mocking matches our architecture.
-V-005;E;Alt A;Rapid prototyping of tests.
-V-006;F;Alt A;Industry standard for Pydantic/httpx stacks.
-V-007;G;Alt B;Wait—standard lib is safer for long-term maintenance. (Dissent recorded)
+voter_id;team_id;vote
+V-001;A;Alt A
+V-002;B;Alt A
+V-003;C;Alt A
+V-004;D;Alt A
+V-005;E;Alt A
+V-006;F;Alt A
+V-007;G;Alt B

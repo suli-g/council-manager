@@ -1,33 +1,33 @@
 id;decision_id;option;pros;cons
 ALT-001;DEC-001;Django;Built-in admin and ORM;High overhead for simple automation/CLI needs.
 ALT-002;DEC-002;Re-download/Parse everything;Simple implementation;Slow performance and wasted API/bandwidth.
-ALT-003;DEC-003;Single monolithic AI prompt;Lower token usage;Less precise feedback; harder to debug specific failures.
+ALT-003;DEC-003;Single monolithic AI prompt;Lower token usage;Less precise feedback
 ALT-004;DEC-018;Composable Fetching Pipeline (Functional);Pure functions / Easy testing;Can be abstract / Harder to manage stateful caching.
 ALT-005;DEC-018;Centralized Procedural Controller (Imperative);Performance / Simple flow;Tight coupling / Hard to extend.
 ALT-006;DEC-018;Source Configuration Engine (Declarative);Very extensible / No code for new sources;Complex to build engine / Harder to debug.
-ALT-007;DEC-018;Registry-based Plugin System (Dynamic);Runtime discovery;"Magic" behavior / Type safety risks.
+ALT-007;DEC-018;Registry-based Plugin System (Dynamic);Runtime discovery;Magic behavior / Type safety risks.
 ALT-008;DEC-021;Domain-Driven Modular;High separation / Scalability;Higher friction for prototyping / Nested complexity.
-ALT-009;DEC-021;Service-Oriented Flat;Simpler than Modular;Still carries some "service" boilerplate.
+ALT-009;DEC-021;Service-Oriented Flat;Simpler than Modular;"Still carries some ""service"" boilerplate."
 ALT-010;DEC-021;Data-Centric Pipeline;Predictable data flow;Rigid for exploration phase.
 ALT-011;DEC-021;Subsystem Packages;Organized;More overhead than flat modules for early playing around.
 ALT-012;DEC-028;Protocols/TypedDicts;Structural typing / No Pydantic req;Lacks runtime validation and consistency with model stack.
-ALT-013;DEC-029;Future: prefix;Custom intent label;Deprecated in favor of standard TODO/FIXME for tool compatibility.
 ALT-014;DEC-028;Inheritance DAOs;Less boilerplate;Tighter coupling between models and interfaces.
+ALT-013;DEC-029;Future: prefix;Custom intent label;Deprecated in favor of standard TODO/FIXME for tool compatibility.
 ALT-015;DEC-030;Pyright;Native @computed_field support / Speed;Violates DEC-030 / Requires dev reconfig.
 ALT-016;DEC-047;Flexible .env Loading with CLI;Allows dynamic environment switching and isolated testing.;No longer necessary due to new organizational API key management.
 ALT-017;DEC-048;Dedicated docs branch;Focused documentation review, separates code from prose.;Merge overhead, potential for doc drift.
 ALT-018;DEC-048;Inline README updates;Docs always in working context, no extra branching.;Cluttered README, UML remains inaccurate during Phase 1.
 ALT-019;DEC-048;Minimalist Documentation;Zero overhead, prevents drift.;High orientation cost for new agents, violates standards.
 ALT-020;DEC-064;Git-Ops CSV/Text;Zero infrastructure, human-readable audit trail.;Incapable of scaling to multi-project isolation/queries.
-ALT-021;DEC-064;SQLite Event Sourcing;Strict immutability and audit logs.;High architectural complexity; overkill for initial prototyping.
+ALT-021;DEC-064;SQLite Event Sourcing;Strict immutability and audit logs.;High architectural complexity
 ALT-022;DEC-065;Stateful Encapsulated Ballot;Encapsulation prevents premature vote inspection.;Does not support public deliberation before voting.
-ALT-023;DEC-065;Stateless Pipeline;Simple, side-effect-free tallying.;Forces batch processing; lacks interaction and session persistence.
+ALT-023;DEC-065;Stateless Pipeline;Simple, side-effect-free tallying.;Forces batch processing
 ALT-024;DEC-066;SQL/Mongo Hybrid;Separates structured data from flexible document data.;Adds external server dependency and increases risk of multi-project data leakage.
 ALT-025;DEC-066;TinyDB JSON Files;Keeps document data local and file-isolated.;Lacks robust ACID transaction guarantees and fails under concurrent agent write operations.
 ALT-026;DEC-067;Text-Based Specification Only;Faster to write and doesn't require compiling UML.;Does not provide a clear visual blueprint of module dependencies.
 ALT-027;DEC-067;Detailed Class/Interface Diagram;Models exact Python typing protocols and classes early.;Enforces rigid OOP patterns prematurely and is less Pythonic.
 ALT-028;DEC-068;Logical Multi-Tenancy;Single central SQLite database file is easier to manage externally.;High risk of accidental data leakage and cross-project database locks.
-ALT-029;DEC-068;Raw SQLite3 Queries;Avoids ORM dependencies and keeps code footprint minimal.;Harder to maintain, test, and type-check; prone to SQL injection.
+ALT-029;DEC-068;Raw SQLite3 Queries;Avoids ORM dependencies and keeps code footprint minimal.;Harder to maintain, test, and type-check
 ALT-030;DEC-069;Document Auditing Procedure only;Ensures audit log immutability.;Keeps the roadmap tasks generalized and difficult to track objectively.
 ALT-031;DEC-069;Text-Based Roadmap Breakdown only;Makes tasks granular.;Fails to resolve the underlying audit score editing process problem.
 ALT-032;DEC-070;Flat Agent Module with raw httpx;Lightweight footprint without google-genai dependency.;Requires custom API response serializers and token checkers.
@@ -41,18 +41,27 @@ ALT-039;DEC-073;Prompter Rate Limiter;Rate limiting and throttling at Prompter l
 ALT-040;DEC-073;Stateless Upfront Validation;Simple string and list length limits. Fail-fast validation.;Crude validation that may reject valid but large description/options inputs.
 ALT-041;DEC-074;Migrate Roadmap to SQLite;Standard ORM mapping allows relational filtering and API endpoints.;Adds schema complexity and risk of database-to-file drift if edited directly.
 ALT-042;DEC-074;Keep Roadmap in CSV;Zero database schema overhead, absolute single source of truth for humans.;Hard to filter, query, or join inside database queries or FastAPI endpoints.
-ALT-043;DEC-074;Dynamic CSV-backed Parser;No database schema changes; reads and returns CSV on the fly for API requests.;Requires constant disk reads and text parsing, adding latency to API calls.
+ALT-043;DEC-074;Dynamic CSV-backed Parser;No database schema changes;reads and returns CSV on the fly for API requests.
 ALT-044;DEC-075;AI-Powered Proposal Inception;Quick pre-pass call to Gemini generates high-fidelity topic names and structured options.;Adds minor API latency and token cost to proposal creation step.
-ALT-045;DEC-075;Stateless Parser Heuristics;First line of description becomes topic; binary default options. Very fast.;Crude and inflexible options/topics that don't capture complex choices.
+ALT-045;DEC-075;Stateless Parser Heuristics;First line of description becomes topic;binary default options. Very fast.
 ALT-046;DEC-075;Separate Inception Subcommand;Introduces proposal-draft subcommand to run extraction interactively.;Forces extra command invocation and doesn't automate the creation command.
 ALT-047;DEC-076;Feature-Task Branching;Isolates work, provides excellent audit tracking and history;Adds minor branching and merging overhead.
 ALT-048;DEC-076;Trunk-Based Development;Ensures fast integration and minimal branch management;Risk of unstable code on main and harder task-specific auditing.
 ALT-049;DEC-076;Single Development Branch;Zero Git branch switching or merging overhead;No isolation of features, highly cluttered branch history, poor tracking.
-
-
-
-
-
-
-
-
+ALT-050;DEC-077;Swappable LLM Adapter;Implement a polymorphic prompter adapter to support local Ollama or other APIs.;Requires provider configuration and class abstraction.
+ALT-051;DEC-077;JSON File Pipeline;Read pre-generated deliberations and votes from a JSON file.;Couples orchestration to workspace execution.
+ALT-052;DEC-077;Interactive Manual Mode;Add a CLI flag to enter rationales and votes manually offline.;Tedious for multi-cycle voting.
+ALT-053;DEC-078;Create Local Agent Skill;Define the skill locally under .agents/skills/council-manager/.;Couples the code to a specific agent framework.
+ALT-054;DEC-078;Create Global Agent Skill;Define the skill globally under ~/.gemini/config/skills/council-manager/.;Fails if run outside of a configured project workspace.
+ALT-055;DEC-078;Defer Skill Creation;Keep the project as a clean CLI tool and Python package.;Agents must read README.md instructions.
+ALT-056;DEC-079;Keep GEMINI_MODEL only;Simple and keeps settings schema unchanged.;Confusing and unintuitive when configuring non-Gemini/Ollama models.
+ALT-057;DEC-079;Rename field to llm_model;More descriptive and generic.;Breaks backwards compatibility with existing config files/installations using GEMINI_MODEL.
+ALT-058;DEC-080;Health Check Probe and --debug flag;Quick HTTP validation before query;adds debug output.
+ALT-059;DEC-080;Endpoint check at startup;Catches misconfigured endpoint early.;Forces check even for non-AI local commands (e.g. list, show).
+ALT-060;DEC-080;Always log to file;Verbose logs kept locally for review.;Pollutes local storage
+ALT-061;DEC-081;Detailed multi-stage probe;Verify server is running with root '/' probe, then check model availability in Ollama;Adds a few HTTP requests to the startup probe
+ALT-062;DEC-081;Minimalist endpoint catch;Do not add extra pre-flight requests;just catch 404 on completions and print details
+ALT-063;DEC-082;Retain CSV file generation;"CSV files serve as a Git-trackable, human-readable ""single source of truth"".";Adds double-write and sync logic code footprint.
+ALT-064;DEC-082;Discontinue CSV file generation;Completely retire the CSV files and use the local SQLite3 database as the sole source of truth.;Removes Git-trackable text indices of decisions and votes, making human and external agent verification harder.
+ALT-065;DEC-083;Interactive CLI ratification wizard;Implement interactive prompt to display full rationales, select the winner, mark others as alternatives, update the roadmap, and run immediate new cycles for new alternatives.;Adds interactive terminal UI complexity to the CLI.
+ALT-066;DEC-083;Blind auto-ratification;Automatically ratify whatever option reaches consensus or majority, without human review/ratification wizard.;Fails to allow human overseers to override, choose custom alternatives, or review full rationales dynamically.

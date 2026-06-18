@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;YES (Option 1);Clear separation of concerns between code and documentation metadata.
-B;OOP Specialists;YES (Option 1);Encapsulates documentation updates as a discrete task; prevents README clutter in dev history.
-C;Imperative Specialists;NO (Option 2);Prefers execution speed; extra branching adds procedural friction for simple docs.
-D;Declarative Specialists;YES (Option 1);Synchronizing UML is essential for maintaining the project's declarative specifications.
-E;Dynamic Specialists;NO (Option 2);Docs should be updated dynamically alongside the features they describe.
-F;Auditors/Project Managers;YES (Option 1);Ensures documentation is 'up to scratch' and contains current instructions as requested.
-G;Contrarians;NO (Option 3);Question the ROI of high-maintenance UML diagrams during early Phase 1.
+voter_id;team_id;vote
+V-A;A;YES (Option 1)
+V-B;B;YES (Option 1)
+V-C;C;NO (Option 2)
+V-D;D;YES (Option 1)
+V-E;E;NO (Option 2)
+V-F;F;YES (Option 1)
+V-G;G;NO (Option 3)
