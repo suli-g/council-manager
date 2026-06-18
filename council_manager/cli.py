@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 from council_manager.config import settings
-from council_manager.db import db_manager, Proposal, Team, Decision, AuditLog, RoadmapTask, initialize_new_project, import_csv_to_db, export_db_to_csv
+from council_manager.db import db_manager, Proposal, Team, Decision, AuditLog, RoadmapTask, BackgroundTask, initialize_new_project, import_csv_to_db, export_db_to_csv
 from council_manager.core.orchestrator import council_orchestrator
 
 # ANSI escape codes for terminal aesthetics
@@ -65,6 +65,48 @@ def get_proposal_id(args, workspace: Path) -> str:
     finally:
         session.close()
         db_manager.close_all()
+
+def generate_task_id(session, project_id: str) -> str:
+    count = session.query(BackgroundTask).filter_by(project_id=project_id).count()
+    while True:
+        task_id = f"TASK-{count + 1:03d}"
+        if not session.query(BackgroundTask).filter_by(id=task_id).first():
+            return task_id
+        count += 1
+
+def spawn_background_task(workspace_path: Path, task_id: str, max_cycles: int | None = None):
+    import subprocess
+    import sys
+    log_dir = workspace_path / ".agents" / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / f"{task_id}.log"
+    
+    cmd = [
+        sys.executable,
+        "-m", "council_manager.cli",
+        "run-task-worker",
+        task_id,
+        "--workspace", str(workspace_path)
+    ]
+    if max_cycles is not None:
+        cmd.extend(["--max-cycles", str(max_cycles)])
+        
+    log_out = open(log_file, "w", encoding="utf-8")
+    
+    kwargs = {}
+    if sys.platform == "win32":
+        kwargs["creationflags"] = 0x00000008 | 0x08000000
+    else:
+        kwargs["start_new_session"] = True
+        
+    subprocess.Popen(
+        cmd,
+        stdout=log_out,
+        stderr=log_out,
+        close_fds=True,
+        **kwargs
+    )
+    log_out.close()
 
 def cmd_init_project(args):
     target_path = Path(args.path).resolve()
@@ -146,7 +188,36 @@ async def run_deliberation_async(args):
         sys.exit(1)
 
 def cmd_deliberate(args):
-    asyncio.run(run_deliberation_async(args))
+    if getattr(args, "async_mode", False):
+        workspace = get_workspace_path(args.workspace)
+        proposal_id = get_proposal_id(args, workspace)
+        session = db_manager.get_session(workspace)
+        try:
+            p = session.query(Proposal).filter_by(id=proposal_id).first()
+            if not p:
+                log_error(f"Proposal '{proposal_id}' not found.")
+                sys.exit(1)
+                
+            task_id = generate_task_id(session, p.project_id)
+            task = BackgroundTask(
+                id=task_id,
+                project_id=p.project_id,
+                task_type="DELIBERATION",
+                proposal_id=proposal_id,
+                status="PENDING"
+            )
+            session.add(task)
+            session.commit()
+            
+            spawn_background_task(workspace, task_id)
+            log_success(f"Deliberation task '{task_id}' queued in background for proposal '{proposal_id}'.")
+            log_info(f"Check status with: council-manager task-status {task_id}")
+            log_info(f"View logs with:   council-manager task-logs {task_id} --tail")
+        finally:
+            session.close()
+            db_manager.close_all()
+    else:
+        asyncio.run(run_deliberation_async(args))
 
 async def run_voting_async(args):
     workspace = get_workspace_path(args.workspace)
@@ -161,7 +232,36 @@ async def run_voting_async(args):
         sys.exit(1)
 
 def cmd_vote(args):
-    asyncio.run(run_voting_async(args))
+    if getattr(args, "async_mode", False):
+        workspace = get_workspace_path(args.workspace)
+        proposal_id = get_proposal_id(args, workspace)
+        session = db_manager.get_session(workspace)
+        try:
+            p = session.query(Proposal).filter_by(id=proposal_id).first()
+            if not p:
+                log_error(f"Proposal '{proposal_id}' not found.")
+                sys.exit(1)
+                
+            task_id = generate_task_id(session, p.project_id)
+            task = BackgroundTask(
+                id=task_id,
+                project_id=p.project_id,
+                task_type="VOTING",
+                proposal_id=proposal_id,
+                status="PENDING"
+            )
+            session.add(task)
+            session.commit()
+            
+            spawn_background_task(workspace, task_id, max_cycles=args.max_cycles)
+            log_success(f"Voting task '{task_id}' queued in background for proposal '{proposal_id}'.")
+            log_info(f"Check status with: council-manager task-status {task_id}")
+            log_info(f"View logs with:   council-manager task-logs {task_id} --tail")
+        finally:
+            session.close()
+            db_manager.close_all()
+    else:
+        asyncio.run(run_voting_async(args))
 
 def cmd_list(args):
     workspace = get_workspace_path(args.workspace)
@@ -230,6 +330,135 @@ def cmd_show(args):
     finally:
         session.close()
         db_manager.close_all()
+
+def cmd_run_task_worker(args):
+    workspace = get_workspace_path(args.workspace)
+    task_id = args.task_id
+    session = db_manager.get_session(workspace)
+    try:
+        task = session.query(BackgroundTask).filter_by(id=task_id).first()
+        if not task:
+            print(f"Task '{task_id}' not found.", file=sys.stderr)
+            sys.exit(1)
+            
+        task.status = "RUNNING"
+        session.commit()
+        
+        proposal_id = task.proposal_id
+        task_type = task.task_type
+        project_id = task.project_id
+        
+        # Close connection handles before spawning the async run
+        session.close()
+        db_manager.close_all()
+        
+        if task_type == "DELIBERATION":
+            asyncio.run(council_orchestrator.run_deliberation(workspace, proposal_id))
+        elif task_type == "VOTING":
+            asyncio.run(council_orchestrator.run_voting(workspace, proposal_id, max_cycles=args.max_cycles))
+            
+        # Re-open session to complete task
+        session = db_manager.get_session(workspace)
+        task = session.query(BackgroundTask).filter_by(id=task_id).first()
+        task.status = "COMPLETED"
+        session.commit()
+        
+        # Export database state back to CSV files
+        export_db_to_csv(workspace, project_id)
+        
+    except Exception as e:
+        try:
+            session = db_manager.get_session(workspace)
+            task = session.query(BackgroundTask).filter_by(id=task_id).first()
+            if task:
+                task.status = "FAILED"
+                task.error_message = str(e)
+                session.commit()
+        except Exception:
+            pass
+        print(f"Task execution failed: {e}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        try:
+            session.close()
+        except Exception:
+            pass
+        db_manager.close_all()
+
+def cmd_task_status(args):
+    workspace = get_workspace_path(args.workspace)
+    task_id = args.task_id
+    session = db_manager.get_session(workspace)
+    try:
+        task = session.query(BackgroundTask).filter_by(id=task_id).first()
+        if not task:
+            log_error(f"Task '{task_id}' not found.")
+            sys.exit(1)
+            
+        print(f"\n{COLOR_BOLD}=== Task Status: {task.id} ==={COLOR_RESET}")
+        print(f"{COLOR_BOLD}Type:{COLOR_RESET}        {task.task_type}")
+        print(f"{COLOR_BOLD}Proposal ID:{COLOR_RESET} {task.proposal_id}")
+        
+        status_color = COLOR_RESET
+        if task.status == "RUNNING":
+            status_color = COLOR_CYAN
+        elif task.status == "COMPLETED":
+            status_color = COLOR_GREEN
+        elif task.status == "FAILED":
+            status_color = COLOR_RED
+            
+        print(f"{COLOR_BOLD}Status:{COLOR_RESET}      {status_color}{task.status}{COLOR_RESET}")
+        if task.error_message:
+            print(f"{COLOR_BOLD}Error:{COLOR_RESET}       {COLOR_RED}{task.error_message}{COLOR_RESET}")
+        print(f"{COLOR_BOLD}Created At:{COLOR_RESET}  {task.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"{COLOR_BOLD}Updated At:{COLOR_RESET}  {task.updated_at.strftime('%Y-%m-%d %H:%M:%S')}")
+        print()
+    finally:
+        session.close()
+        db_manager.close_all()
+
+def cmd_task_logs(args):
+    workspace = get_workspace_path(args.workspace)
+    task_id = args.task_id
+    log_file = workspace / ".agents" / "logs" / f"{task_id}.log"
+    
+    if not log_file.exists():
+        log_error(f"No log file found for task '{task_id}'. (It may not have started running yet)")
+        sys.exit(1)
+        
+    print(f"\n{COLOR_BOLD}=== Logs for Task: {task_id} ==={COLOR_RESET}")
+    
+    if not getattr(args, "tail", False):
+        with open(log_file, "r", encoding="utf-8") as f:
+            print(f.read())
+        return
+        
+    import time
+    try:
+        with open(log_file, "r", encoding="utf-8") as f:
+            print(f.read(), end="")
+            while True:
+                line = f.readline()
+                if not line:
+                    session = db_manager.get_session(workspace)
+                    task = session.query(BackgroundTask).filter_by(id=task_id).first()
+                    status = task.status if task else "COMPLETED"
+                    session.close()
+                    db_manager.close_all()
+                    
+                    if status in ("COMPLETED", "FAILED"):
+                        line = f.readline()
+                        while line:
+                            print(line, end="")
+                            line = f.readline()
+                        break
+                        
+                    time.sleep(0.5)
+                    continue
+                print(line, end="")
+        print(f"\n{COLOR_GREEN}Task finished execution.{COLOR_RESET}\n")
+    except KeyboardInterrupt:
+        print(f"\n{COLOR_CYAN}Stopped tailing logs.{COLOR_RESET}\n")
 
 def cmd_show_teams(args):
     workspace = get_workspace_path(args.workspace)
@@ -568,12 +797,14 @@ def main():
     p_deliberate = subparsers.add_parser("deliberate", help="Run Phase 1 (Deliberation) to gather engineering justifications.")
     p_deliberate.add_argument("-w", "--workspace", help="Path to the workspace folder.")
     p_deliberate.add_argument("--proposal-id", help="ID of the target proposal (defaults to latest).")
+    p_deliberate.add_argument("--async", action="store_true", dest="async_mode", help="Run deliberation in the background.")
 
     # Command: vote
     p_vote = subparsers.add_parser("vote", help="Run Phase 2 (Voting Loop) to cast consensus votes.")
     p_vote.add_argument("-w", "--workspace", help="Path to the workspace folder.")
     p_vote.add_argument("--proposal-id", help="ID of the target proposal (defaults to latest).")
     p_vote.add_argument("--max-cycles", type=int, default=5, help="Maximum number of debate/voting cycles.")
+    p_vote.add_argument("--async", action="store_true", dest="async_mode", help="Run voting in the background.")
 
     # Command: list
     p_list = subparsers.add_parser("list", help="List all proposals in the workspace database.")
@@ -617,6 +848,23 @@ def main():
     p_pr.add_argument("-w", "--workspace", help="Path to the workspace folder.")
     p_pr.add_argument("--proposal-id", help="ID of the target proposal (defaults to latest).")
 
+    # Command: run-task-worker (internal hidden subprocess worker)
+    p_worker = subparsers.add_parser("run-task-worker", help=argparse.SUPPRESS)
+    p_worker.add_argument("task_id", help="ID of the background task.")
+    p_worker.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+    p_worker.add_argument("--max-cycles", type=int, default=5, help="Maximum debate cycles.")
+
+    # Command: task-status
+    p_tstatus = subparsers.add_parser("task-status", help="Check the current status of a background task.")
+    p_tstatus.add_argument("task_id", help="ID of the target background task.")
+    p_tstatus.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+
+    # Command: task-logs
+    p_tlogs = subparsers.add_parser("task-logs", help="View or tail the console logs for a background task.")
+    p_tlogs.add_argument("task_id", help="ID of the target background task.")
+    p_tlogs.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+    p_tlogs.add_argument("--tail", action="store_true", help="Tail the log output in real-time.")
+
     args = parser.parse_args()
     if args.debug:
         settings.debug = True
@@ -656,6 +904,12 @@ def main():
         cmd_team_vote(args)
     elif args.command == "proposal-ratify":
         cmd_proposal_ratify(args)
+    elif args.command == "run-task-worker":
+        cmd_run_task_worker(args)
+    elif args.command == "task-status":
+        cmd_task_status(args)
+    elif args.command == "task-logs":
+        cmd_task_logs(args)
 
 if __name__ == "__main__":
     main()
