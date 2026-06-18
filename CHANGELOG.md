@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-06-18
+
+### Added
+- **Configurable Database Location**: Relocated SQLite database files outside of the project workspace by default (stored slugified under the user's home directory `~/.council_manager/databases`) to eliminate workspace clutter, avoid file locking during parallel/cloned runs, and prevent the need for Git ignore rules. Supported custom path overrides using the `COUNCIL_DATABASE_DIR` environment variable.
+
 ## [0.4.3] - 2026-06-18
 
 ### Added
