@@ -175,7 +175,7 @@ def test_initialize_new_project():
         assert (workspace / ".agents" / "roadmap.csv").exists()
         
         # Verify DB was created and seeded
-        assert (workspace / ".agents" / "governance.db").exists()
+        assert db_manager.get_db_path(workspace).exists()
         
         session = db_manager.get_session(workspace)
         try:

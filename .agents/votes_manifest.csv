@@ -1,52 +1,53 @@
 decision_id;topic;file_path;timestamp
-DEC-025;Governance & Oversight;docs/.agents/votes/DEC-025.csv;2026-06-16T12:29:29
-DEC-026;Project Management;docs/.agents/votes/DEC-026.csv;2026-06-16T12:29:29
-DEC-031;Audit Workflow;docs/.agents/votes/DEC-031.csv;2026-06-16T12:29:29
-DEC-032;Testing Framework;docs/.agents/votes/DEC-032.csv;2026-06-16T12:29:29
-DEC-033;Test Coverage Scope;docs/.agents/votes/DEC-033.csv;2026-06-16T12:29:29
-DEC-034;Test Organization;docs/.agents/votes/DEC-034.csv;2026-06-16T12:29:29
-DEC-036;Content Processing;docs/.agents/votes/DEC-036.csv;2026-06-16T12:29:29
-DEC-037;System Architecture;docs/.agents/votes/DEC-037.csv;2026-06-16T12:29:29
-DEC-038;Documentation Standards;docs/.agents/votes/DEC-038.csv;2026-06-16T12:29:29
-DEC-039;GitHubStrategy Configuration;docs/.agents/votes/DEC-039.csv;2026-06-16T12:29:29
-DEC-040;Retrieval Architecture;docs/.agents/votes/DEC-040.csv;2026-06-16T12:29:29
-DEC-041;Content Matching;docs/.agents/votes/DEC-041.csv;2026-06-16T12:29:29
-DEC-042;Persistence Strategy;docs/.agents/votes/DEC-042.csv;2026-06-16T12:29:29
-DEC-043;AI Strategy;docs/.agents/votes/DEC-043.csv;2026-06-16T12:29:29
-DEC-044;Retrieval Optimization;docs/.agents/votes/DEC-044.csv;2026-06-16T12:29:29
-DEC-045;AI Strategy;docs/.agents/votes/DEC-045.csv;2026-06-16T12:29:29
-DEC-046;Configuration Management;docs/.agents/votes/DEC-046.csv;2026-06-16T12:29:29
-DEC-047;Configuration Management;docs/.agents/votes/DEC-047.csv;2026-06-16T12:29:29
-DEC-048;Documentation;docs/.agents/votes/DEC-048.csv;2026-06-16T12:29:29
-DEC-049;Documentation;docs/.agents/votes/DEC-049.csv;2026-06-16T12:29:29
-DEC-050;Persistence;docs/.agents/votes/DEC-050.csv;2026-06-16T12:29:29
-DEC-051;AI Strategy;docs/.agents/votes/DEC-051.csv;2026-06-16T12:29:29
-DEC-052;Persistence;docs/.agents/votes/DEC-052.csv;2026-06-16T12:29:29
-DEC-053;System Architecture;docs/.agents/votes/DEC-053.csv;2026-06-16T12:29:29
-DEC-054;Retrieval;docs/.agents/votes/DEC-054.csv;2026-06-16T12:29:29
-DEC-055;Retrieval;docs/.agents/votes/DEC-055.csv;2026-06-16T12:29:29
-DEC-056;Configuration Management;docs/.agents/votes/DEC-056.csv;2026-06-16T12:29:29
-DEC-058;Retrieval;docs/.agents/votes/DEC-058.csv;2026-06-16T12:29:29
-DEC-059;Configuration Management;docs/.agents/votes/DEC-059.csv;2026-06-16T12:29:29
-DEC-060;AI Strategy;docs/.agents/votes/DEC-060.csv;2026-06-16T12:29:29
-DEC-062;Settings Architecture;docs/.agents/votes/DEC-062.csv;2026-06-16T12:29:29
-DEC-063;Performance Optimization;docs/.agents/votes/DEC-063.csv;2026-06-16T12:29:29
-DEC-064;Data Architecture;docs/.agents/votes/DEC-064.csv;2026-06-16T12:29:29
-DEC-065;Voting Subsystem;docs/.agents/votes/DEC-065.csv;2026-06-16T12:29:29
-DEC-066;Data Architecture;docs/.agents/votes/DEC-066.csv;2026-06-16T12:29:29
-DEC-067;Architecture Design;docs/.agents/votes/DEC-067.csv;2026-06-16T12:29:29
-DEC-068;Data Architecture;docs/.agents/votes/DEC-068.csv;2026-06-16T12:29:29
-DEC-069;Project Management;docs/.agents/votes/DEC-069.csv;2026-06-16T20:00:37
-DEC-070;AI Strategy;docs/.agents/votes/DEC-070.csv;2026-06-16T20:00:37
-DEC-071;AI Strategy;docs/.agents/votes/DEC-071.csv;2026-06-16T20:00:37
-DEC-072;Voting Subsystem;docs/.agents/votes/DEC-072.csv;2026-06-16T20:00:37
-DEC-073;AI Strategy;docs/.agents/votes/DEC-073.csv;2026-06-16T20:00:37
-DEC-074;Data Architecture;docs/.agents/votes/DEC-074.csv;2026-06-16T20:00:37
-DEC-075;AI Strategy;docs/.agents/votes/DEC-075.csv;2026-06-17T10:20:24
-DEC-076;Branching Strategy;docs/.agents/votes/DEC-076.csv;2026-06-17T10:20:24
-DEC-077;AI Strategy;docs/.agents/votes/DEC-077.csv;2026-06-17T19:36:46
-DEC-078;AI Strategy;docs/.agents/votes/DEC-078.csv;2026-06-17T20:39:33
-DEC-080;Observability & Diagnostics;docs/.agents/votes/DEC-080.csv;2026-06-18T16:56:06
-DEC-081;Observability & Diagnostics;docs/.agents/votes/DEC-081.csv;2026-06-18T16:56:06
-DEC-082;Data Architecture;docs/.agents/votes/DEC-082.csv;2026-06-18T16:56:06
-DEC-083;Voting Subsystem;docs/.agents/votes/DEC-083.csv;2026-06-18T19:14:02
+DEC-025;Governance & Oversight;docs/.agents/votes/DEC-025.csv;2026-06-18T20:00:55
+DEC-026;Project Management;docs/.agents/votes/DEC-026.csv;2026-06-18T20:00:55
+DEC-031;Audit Workflow;docs/.agents/votes/DEC-031.csv;2026-06-18T20:00:55
+DEC-032;Testing Framework;docs/.agents/votes/DEC-032.csv;2026-06-18T20:00:55
+DEC-033;Test Coverage Scope;docs/.agents/votes/DEC-033.csv;2026-06-18T20:00:55
+DEC-034;Test Organization;docs/.agents/votes/DEC-034.csv;2026-06-18T20:00:55
+DEC-036;Content Processing;docs/.agents/votes/DEC-036.csv;2026-06-18T20:00:55
+DEC-037;System Architecture;docs/.agents/votes/DEC-037.csv;2026-06-18T20:00:55
+DEC-038;Documentation Standards;docs/.agents/votes/DEC-038.csv;2026-06-18T20:00:55
+DEC-039;GitHubStrategy Configuration;docs/.agents/votes/DEC-039.csv;2026-06-18T20:00:55
+DEC-040;Retrieval Architecture;docs/.agents/votes/DEC-040.csv;2026-06-18T20:00:55
+DEC-041;Content Matching;docs/.agents/votes/DEC-041.csv;2026-06-18T20:00:55
+DEC-042;Persistence Strategy;docs/.agents/votes/DEC-042.csv;2026-06-18T20:00:55
+DEC-043;AI Strategy;docs/.agents/votes/DEC-043.csv;2026-06-18T20:00:55
+DEC-044;Retrieval Optimization;docs/.agents/votes/DEC-044.csv;2026-06-18T20:00:55
+DEC-045;AI Strategy;docs/.agents/votes/DEC-045.csv;2026-06-18T20:00:55
+DEC-046;Configuration Management;docs/.agents/votes/DEC-046.csv;2026-06-18T20:00:55
+DEC-047;Configuration Management;docs/.agents/votes/DEC-047.csv;2026-06-18T20:00:55
+DEC-048;Documentation;docs/.agents/votes/DEC-048.csv;2026-06-18T20:00:55
+DEC-049;Documentation;docs/.agents/votes/DEC-049.csv;2026-06-18T20:00:55
+DEC-050;Persistence;docs/.agents/votes/DEC-050.csv;2026-06-18T20:00:55
+DEC-051;AI Strategy;docs/.agents/votes/DEC-051.csv;2026-06-18T20:00:55
+DEC-052;Persistence;docs/.agents/votes/DEC-052.csv;2026-06-18T20:00:55
+DEC-053;System Architecture;docs/.agents/votes/DEC-053.csv;2026-06-18T20:00:55
+DEC-054;Retrieval;docs/.agents/votes/DEC-054.csv;2026-06-18T20:00:55
+DEC-055;Retrieval;docs/.agents/votes/DEC-055.csv;2026-06-18T20:00:55
+DEC-056;Configuration Management;docs/.agents/votes/DEC-056.csv;2026-06-18T20:00:55
+DEC-058;Retrieval;docs/.agents/votes/DEC-058.csv;2026-06-18T20:00:55
+DEC-059;Configuration Management;docs/.agents/votes/DEC-059.csv;2026-06-18T20:00:55
+DEC-060;AI Strategy;docs/.agents/votes/DEC-060.csv;2026-06-18T20:00:55
+DEC-062;Settings Architecture;docs/.agents/votes/DEC-062.csv;2026-06-18T20:00:55
+DEC-063;Performance Optimization;docs/.agents/votes/DEC-063.csv;2026-06-18T20:00:55
+DEC-064;Data Architecture;docs/.agents/votes/DEC-064.csv;2026-06-18T20:00:55
+DEC-065;Voting Subsystem;docs/.agents/votes/DEC-065.csv;2026-06-18T20:00:55
+DEC-066;Data Architecture;docs/.agents/votes/DEC-066.csv;2026-06-18T20:00:55
+DEC-067;Architecture Design;docs/.agents/votes/DEC-067.csv;2026-06-18T20:00:55
+DEC-068;Data Architecture;docs/.agents/votes/DEC-068.csv;2026-06-18T20:00:55
+DEC-069;Project Management;docs/.agents/votes/DEC-069.csv;2026-06-18T20:00:55
+DEC-070;AI Strategy;docs/.agents/votes/DEC-070.csv;2026-06-18T20:00:55
+DEC-071;AI Strategy;docs/.agents/votes/DEC-071.csv;2026-06-18T20:00:55
+DEC-072;Voting Subsystem;docs/.agents/votes/DEC-072.csv;2026-06-18T20:00:55
+DEC-073;AI Strategy;docs/.agents/votes/DEC-073.csv;2026-06-18T20:00:55
+DEC-074;Data Architecture;docs/.agents/votes/DEC-074.csv;2026-06-18T20:00:55
+DEC-075;AI Strategy;docs/.agents/votes/DEC-075.csv;2026-06-18T20:00:55
+DEC-076;Branching Strategy;docs/.agents/votes/DEC-076.csv;2026-06-18T20:00:55
+DEC-077;AI Strategy;docs/.agents/votes/DEC-077.csv;2026-06-18T20:00:55
+DEC-078;AI Strategy;docs/.agents/votes/DEC-078.csv;2026-06-18T20:00:55
+DEC-080;Observability & Diagnostics;docs/.agents/votes/DEC-080.csv;2026-06-18T20:00:55
+DEC-081;Observability & Diagnostics;docs/.agents/votes/DEC-081.csv;2026-06-18T20:00:55
+DEC-082;Data Architecture;docs/.agents/votes/DEC-082.csv;2026-06-18T20:00:55
+DEC-083;Voting Subsystem;docs/.agents/votes/DEC-083.csv;2026-06-18T20:00:55
+DEC-084;Data Architecture;docs/.agents/votes/DEC-084.csv;2026-06-18T20:00:55
