@@ -79,3 +79,8 @@ ALT-077;DEC-089;Separate Frontend Web SPA;Modern, highly interactive web compone
 ALT-078;DEC-089;Static HTML pages served by FastAPI;Lightweight, no Node modules, served directly by backend process.;Harder to maintain complex UI states and component updates programmatically.
 ALT-079;DEC-090;Minor Configuration Overrides in teams.csv;Allows configuring optional model/provider columns per team with fallback defaults.;Creates reasoning disparity during consensus rounds.
 ALT-080;DEC-090;Structured JSON Agent Config Profiles;Decouples model clients completely into separate agent configurations.;Requires breaking changes and complex multi-client connection management.
+ALT-081;DEC-091;Option B: Monitor-Only Dashboard;Keep dashboard read-only and enforce command-query separation.;Impedes developer workflow by requiring constant switching between terminal command line and TUI panel.
+ALT-082;DEC-091;Option C: Hybrid Actions in TUI;Implement only proposal creation and ratification in the TUI, keeping imports/exports in the CLI.;Requires users to still use CLI for simple data sync tasks, breaking visual continuity of the dashboard experience.
+ALT-083;DEC-092;Option B: Patch Bump to 0.5.1;Bump the version to 0.5.1 instead of 0.6.0.;The addition of the TUI Dashboard introduces substantial new features and user-facing capabilities, which is more aligned with a minor version bump (0.6.0) than a patch bump (0.5.1) under SemVer.
+ALT-084;DEC-092;Option C: Defer Bump;Keep the version at 0.5.0 and postpone any bump until a later release cycle.;Delaying the version bump creates a mismatch between the codebase's current feature set (which includes the TUI Dashboard) and the published metadata, hindering release tracking.
+

@@ -208,15 +208,21 @@ uv run council-manager --help
     ```
 4.  **Orchestrate Deliberations & Votes** (omitting `--proposal-id` automatically targets the latest created proposal):
     ```bash
-    # Run Phase 1 Deliberation
-    uv run council-manager deliberate -w <workspace-dir> --proposal-id <id>
+    # Run Phase 1 Deliberation (add --async to run in the background as a task)
+    uv run council-manager deliberate -w <workspace-dir> --proposal-id <id> [--async]
     uv run council-manager deliberate -w <workspace-dir>  # Targets the latest proposal
 
-    # Run Phase 2 Consensus Voting
-    uv run council-manager vote -w <workspace-dir> --proposal-id <id> --max-cycles 5
+    # Run Phase 2 Consensus Voting Loop (add --async to run in the background as a task)
+    uv run council-manager vote -w <workspace-dir> --proposal-id <id> --max-cycles 5 [--async]
     uv run council-manager vote -w <workspace-dir> --max-cycles 5  # Targets the latest proposal
     ```
-5.  **Status & Log Inspection** (omitting `--proposal-id` targets the latest proposal):
+5.  **Interactive Proposal Ratification Wizard**:
+    Review voting rationales, select/ratify the final option, and complete the corresponding roadmap task in the database and CSV files:
+    ```bash
+    uv run council-manager proposal-ratify -w <workspace-dir> --proposal-id <id>
+    uv run council-manager proposal-ratify -w <workspace-dir>  # Targets the latest proposal
+    ```
+6.  **Status & Log Inspection** (omitting `--proposal-id` targets the latest proposal):
     ```bash
     uv run council-manager list -w <workspace-dir>
     uv run council-manager show -w <workspace-dir> --proposal-id <id>
@@ -225,19 +231,25 @@ uv run council-manager --help
     uv run council-manager show-decisions -w <workspace-dir>
     uv run council-manager show-roadmap -w <workspace-dir>
     uv run council-manager show-audits -w <workspace-dir>
+
+    # Check the execution status of a background task
+    uv run council-manager task-status <task-id> -w <workspace-dir>
+
+    # View or tail console logs of a background task
+    uv run council-manager task-logs <task-id> -w <workspace-dir> [--tail]
     ```
-6.  **Individual Team Deliberation & Voting** (omitting `--proposal-id` targets the latest proposal):
+7.  **Individual Team Deliberation & Voting** (omitting `--proposal-id` targets the latest proposal):
     ```bash
     uv run council-manager team-deliberate -w <workspace-dir> --team-id <team-id> --proposal-id <id>
     uv run council-manager team-deliberate -w <workspace-dir> --team-id <team-id>  # Targets latest proposal
     uv run council-manager team-vote -w <workspace-dir> --team-id <team-id> --proposal-id <id>
     uv run council-manager team-vote -w <workspace-dir> --team-id <team-id>  # Targets latest proposal
     ```
-7.  **Starting the API Server**:
+8.  **Starting the API Server**:
     ```bash
     uv run council-manager start-server --host 127.0.0.1 --port 8000 --reload
     ```
-8.  **Interactive Terminal UI Dashboard**:
+9.  **Interactive Terminal UI Dashboard**:
     ```bash
     uv run council-manager dashboard [-w <workspace-dir>]
     ```

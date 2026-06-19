@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-06-19
+
+### Added
+- **Interactive Terminal UI (TUI) Dashboard**: Built a stunning terminal-based dashboard UI (`P3-02a` and `P3-02b`) using Textual and Rich. It visualizes project decisions, voting records, and development roadmaps.
+- **Interactive Dashboard Actions**: Added interactive CLI actions (creating proposals, ratifying proposals, and importing/exporting CSVs) directly inside the Textual TUI dashboard using custom inputs and dialog modals.
+- **Unified Model Configuration**: Enforced a single unified LLM model across all voting agents, preventing reasoning unbalances, biases, and synchronization discrepancies in deliberations.
+
 ## [0.5.0] - 2026-06-19
 
 ### Added
