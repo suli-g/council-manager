@@ -1,9 +1,9 @@
-voter_id;team_id;vote;rationale
-V-001;A;Alt 2;Stateless parser heuristics avoid external API dependency for basic creation.
-V-002;B;Alt 1;Encapsulated generator pattern separates proposal inception from core orchestration.
-V-003;C;Alt 3;Interactive drafting CLI prevents slow blocking network calls during direct creation.
-V-004;D;Alt 1;Declarative AI-extracted topics and options provide high-fidelity proposal parameters.
-V-005;E;Alt 1;Budget settings can dynamically toggle this generator step.
-V-006;F;Alt 1;Highly automated inception decreases developer friction, encouraging frequent use.
-V-007;G;Alt 2;Warns that AI-generated options introduce variance, which makes replicate debate rounds fragile.
-V-008;User;Alt 1;User ratified AI-Powered Inception to automate topic generation and option extraction.
+voter_id;team_id;vote
+V-001;A;Alt 2
+V-002;B;Alt 1
+V-003;C;Alt 3
+V-004;D;Alt 1
+V-005;E;Alt 1
+V-006;F;Alt 1
+V-007;G;Alt 2
+V-008;User;Alt 1

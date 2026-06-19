@@ -1,13 +1,13 @@
 id;date;topic;decision;rationale
-DEC-001;2026-05-01;Framework Selection;Drop Django dependency;Problem doesn't require complex web framework; prefer lightweight/modular approach.
+DEC-001;2026-05-01;Framework Selection;Drop Django dependency;Problem doesn't require complex web framework
 DEC-002;2026-05-01;Performance Optimization;Implement Content Hashing and Caching;Minimize redundant downloads and parsing for shared content across cohorts.
 DEC-003;2026-05-01;Analysis Strategy;Granular AI Analysis Categories;Split analysis into Completeness, Efficiency, Style, and Documentation for focused feedback.
 DEC-004;2026-05-01;System Architecture;Externalize AI Analysis System;Separate AI capabilities into a dedicated system for advanced analysis (e.g., student leveling, historical analysis).
-DEC-005;2026-05-01;System Architecture;Subsystem Nesting & Review Generation;Re-integrated AI as a subsystem of Review Handler; added dedicated Review Generation system for criteria orchestration.
+DEC-005;2026-05-01;System Architecture;Subsystem Nesting & Review Generation;Re-integrated AI as a subsystem of Review Handler
 DEC-006;2026-05-01;Documentation Standards;Apply UML Stereotypes;Utilize <<subsystem>> stereotypes to explicitly mark architectural components in use-case diagrams.
 DEC-007;2026-05-01;Analysis Logic;Requirement Inference Strategy;Infer Style, Efficiency, and Documentation requirements from historical reviews, multi-task context, and industry standards rather than static input.
 DEC-008;2026-05-01;System Architecture;Review Interface Encapsulation;Introduce a Review Interface subsystem as the sole entry point for the Reviewer, decoupling user interaction from core logic.
-DEC-009;2026-05-01;Reporting Logic;Conditional Report Generation;Implement "Retrieve Report" as a base use case; Store and Generate extend it based on availability to avoid redundant AI processing.
+DEC-009;2026-05-01;Reporting Logic;Conditional Report Generation;"Implement ""Retrieve Report"" as a base use case"
 DEC-010;2026-05-01;Progression Strategy;Student Progression Subsystem;Dedicated subsystem for ranking progression and level assessment (Junior to Senior) based on historical review analysis.
 DEC-011;2026-05-01;Architecture Design;Component-Based Mapping;Mapped use-case subsystems to modular software components with clear external dependencies (Gemini, GitHub).
 DEC-012;2026-05-01;System Integration;Legacy Dashboard Scraper;Implement a dedicated scraper to extract historical review data from the HTML-only legacy dashboard to seed student history.
@@ -15,26 +15,26 @@ DEC-013;2026-05-01;Performance Optimization;Dashboard Data Caching;Apply caching
 DEC-014;2026-05-01;System Architecture;External Retrieval System;Decouple data acquisition (GitHub, Dashboard) into an externalized Retrieval System to simplify core logic and enable independent scaling.
 DEC-015;2026-05-01;Architecture Design;Subsystem Sequence Modeling;Created detailed sequence diagrams for Ingestion, Analysis, and Progression subsystems to validate temporal logic.
 DEC-016;2026-05-01;Performance Optimization;Requirements Caching;Cache inferred requirements (Style, Efficiency, Documentation) to reduce Gemini API costs and latency during re-analysis.
-DEC-017;2026-05-01;Project Management;Project Roadmap Definition;Defined 3-phase roadmap in README to focus on core engine before UX/Analytics; skill tree marked as future consideration to prevent scope creep.
+DEC-017;2026-05-01;Project Management;Project Roadmap Definition;Defined 3-phase roadmap in README to focus on core engine before UX/Analytics
 DEC-018;2026-05-01;Retrieval Architecture;Repository with Strategy Injection;Winning choice in multi-paradigm vote (31/50). Provides best balance of testability, separation of concerns, and extensibility.
-DEC-019;2026-05-01;Library Stack;Pydantic + SQLAlchemy + BeautifulSoup;Winning "Power Trio" for data validation, persistence, and scraping.
+DEC-019;2026-05-01;Library Stack;Pydantic + SQLAlchemy + BeautifulSoup;"Winning ""Power Trio"" for data validation, persistence, and scraping."
 DEC-021;2026-05-01;Project Structure;Flat Vertical Structure;Prioritize prototyping speed and ease of exploration by using top-level modules. Refactor to packages only when necessary.
-DEC-022;2026-05-01;Scraping Strategy;Selector-Based Prototyping;Use CSS selectors for initial Dashboard scraping to quickly explore data; transition to template-based approach later.
+DEC-022;2026-05-01;Scraping Strategy;Selector-Based Prototyping;Use CSS selectors for initial Dashboard scraping to quickly explore data
 DEC-023;2026-05-01;Data Modeling;Composite Submission Structure;Use a list of SourceFile objects, a directory manifest, and a root submission_hash to handle both single PDFs and complex multi-file code submissions with preserved hierarchy.
-DEC-024;2026-05-01;Authentication;Custom APIHandler with Auth Strategy;Manual implementation using httpx for flexibility and lightweight footprint; avoids PyGitHub dependency.
+DEC-024;2026-05-01;Authentication;Custom APIHandler with Auth Strategy;Manual implementation using httpx for flexibility and lightweight footprint
 DEC-025;2026-05-07;Governance & Oversight;Auditor Team and Audit Logs;Added Auditor/Project Manager team (Team F) and audits.csv to monitor project alignment and quality standards.
 DEC-026;2026-05-15;Project Management;Audit-Decision Mapping Structure;Implemented relational join table (audit_decisions.csv) to track resolution of audit findings via specific architectural decisions.
 DEC-027;2026-05-15;Retrieval Architecture;Unified Retrieval Client with Pydantic Models;Refactored retrieval system to use Repository pattern, httpx handlers, and Pydantic models with automated hashing for content integrity.
 DEC-028;2026-05-17;Strategy Architecture;Type-Safe Strategy DAOs;Adopted Pydantic-based StrategyInput/Output classes to eliminate typing.Any and enforce rigid schemas.
-DEC-029;2026-05-17;Documentation Standards;Standardized Intent Prefixes;Adopted TODO/FIXME/BUG prefixes for comments; deprecated 'Future:' and other non-standard labels.
+DEC-029;2026-05-17;Documentation Standards;Standardized Intent Prefixes;Adopted TODO/FIXME/BUG prefixes for comments
 DEC-030;2026-05-17;Tooling Stack;Strict Mypy and Modern Ruff;Configured strict type checking with Pydantic plugin and modern Ruff lint/format rules to enforce architectural integrity.
-DEC-031;2026-05-18;Audit Workflow;Dual-Entry with Failure-Triggered Issues;Auditors document all findings locally; GitHub issues created only for audits with <80% alignment (Alt 3).
+DEC-031;2026-05-18;Audit Workflow;Dual-Entry with Failure-Triggered Issues;Auditors document all findings locally
 DEC-032;2026-05-18;Testing Framework;pytest + respx (Cycle 1);Adopted pytest with respx for async-native API mocking and isolation.
 DEC-033;2026-05-18;Test Coverage Scope;Full Vertical Coverage (Cycle 2);Adopted full unit testing for APIHandlers, Strategies, and RetrievalClient to ensure multi-layer integrity.
 DEC-034;2026-05-18;Test Organization;Mirrored tests/ directory (Cycle 3);Standardized on a mirrored tests/ root directory for clean separation and scalability.
 DEC-036;2026-05-26;Content Processing;Hierarchical Instruction Extraction & Versioning;Adopt pypdf for heading-based text extraction and SHA-256 binary hashing for instruction versioning to enable comparison.
 DEC-037;2026-05-26;System Architecture;Improved Configuration Management;Replace manual input() and os.getenv with a structured Pydantic-based Settings model to enable non-interactive execution.
-DEC-038;2026-05-26;Documentation Standards;Semi-colon Delimiters for CSVs;Standardize on semi-colons (;) for all CSV files to prevent formatting errors caused by commas in text fields.
+DEC-038;2026-05-26;Documentation Standards;Semi-colon Delimiters for CSVs;Standardize on semi-colons (
 DEC-040;2026-05-26;Retrieval Architecture;Decoupled Structural Exploration and Downloading;Split retrieval into discovery (metadata only) and targeted downloading phases to prevent excessive bandwidth usage.
 DEC-041;2026-05-26;Content Matching;Deterministic Task Normalization;Adopt deterministic string normalization (casing, separators) for task folder matching to provide liberal matching without external fuzzy logic dependencies.
 DEC-042;2026-05-26;Persistence Strategy;Hybrid Submission Storage;Standardize on storing submission metadata/hashes in the SQLAlchemy database while keeping raw file contents on the local disk for performance and inspectability.
@@ -55,7 +55,7 @@ DEC-058;2026-06-02;Retrieval;Semantic Tree Navigation;Adopt semantic navigation 
 DEC-059;2026-06-02;Configuration Management;Standardized Settings Management and Priority;Adopt 'pydantic-settings' (BaseSettings) to ensure standard prioritization where execution flags and initialization arguments strictly override environment variables and .env files.
 DEC-060;2026-06-02;AI Strategy;Versioned Analysis Caching;Implement AI analysis caching using a composite key of the instruction PDF hash and the system prompt hash. This prevents redundant Gemini API calls while ensuring results are automatically refreshed if the AI logic is updated.
 DEC-039;2026-06-03;GitHubStrategy Configuration;Configure Task Resolution in Constructor;Moved task ID resolution from an `explore` method parameter to a `GitHubStrategy` constructor parameter (`resolve_task_id`).
-DEC-045;2026-06-04;AI Strategy;Smart PDF Instruction Selection;Implemented heuristic filtering to prioritize instructions matching task identity and exclude "AdditionalReading" documents to improve AI analysis quality.
+DEC-045;2026-06-04;AI Strategy;Smart PDF Instruction Selection;"Implemented heuristic filtering to prioritize instructions matching task identity and exclude ""AdditionalReading"" documents to improve AI analysis quality."
 DEC-062;2026-06-04;Settings Architecture;Modular Mixins with Unpack;Refactored Settings into logical mixins (GitHub, AI, System) using multiple inheritance and implemented `Unpack` for `get_settings` overrides.
 DEC-063;2026-06-04;Performance Optimization;Persistent Deduplication and AI Caching;Aligned hashing strategy between RepoStructure and RawSubmission to enable pre-fetch deduplication. Migrated AI checklist caching from memory to SQLAlchemy to prevent redundant analysis across sessions.
 DEC-064;2026-06-14;Data Architecture;SQL/Mongo Hybrid;Adopted Python backend with SQL (SQLite3/MySQL) for structured relational data and Mongo for flexible document-based governance data to support multi-project isolation.
@@ -70,11 +70,13 @@ DEC-072;2026-06-16;Voting Subsystem;5-Cycle Autonomous AI Voting with User Ratif
 DEC-073;2026-06-16;AI Strategy;GenAI Token Safeguards & Layered Caching;Ratified Option 1 (Layered Caching & Config-Driven Budgets) to prevent rapid API expense drainage. Deliberations and intermediate voting rounds are persistently cached. Config settings enforce max token caps and budget limits.
 DEC-074;2026-06-16;Data Architecture;Roadmap Table Implementation;Ratified Option 1 (Migrate Roadmap to SQLite) to introduce a RoadmapTask table in the SQLite database, synchronized bidirectionally with .agents/roadmap.csv in migration.py.
 DEC-075;2026-06-16;AI Strategy;AI-Powered Proposal Inception;Ratified Option 1 (AI-Powered Proposal Inception) to automatically generate sequential IDs from the database, and use Gemini to generate the topic name and extract structured options from the description if omitted.
-
-
-
-
-
-
-
-
+DEC-076;2026-06-17;Branching Strategy;Feature-Task Branching;Ratified Option 1 (Feature-Task Branching) to adopt dedicated task-oriented feature branches (e.g. feature/P2-01g-inception) off a stable main branch to isolate roadmap implementations and maintain auditability.
+DEC-077;2026-06-17;AI Strategy;Swappable Prompter Adapter;Ratified Swappable LLM Adapter to support local models/Ollama or alternative APIs to bypass API rate limit issues.
+DEC-078;2026-06-17;AI Strategy;Skill Packaging Strategy;Ratified to defer packaging the CLI and workflows as an agent skill to keep the project CLI-centric and avoid premature abstractions.
+DEC-079;2026-06-18;AI Strategy;Model Config Variable Aliases;Allow LLM_MODEL and OLLAMA_MODEL as environment variable aliases for gemini_model to prevent confusion when using local/custom providers.
+DEC-080;2026-06-18;Observability & Diagnostics;CLI Debug Logging and Endpoint Probe;Ratified Option 1 to add a --debug / --verbose flag for request/response logging, and implement an upfront base URL connectivity check in the prompter.
+DEC-081;2026-06-18;Observability & Diagnostics;Multi-Stage LLM Probe & Diagnostics;Implement multi-stage LLM endpoint connectivity checking (verifying server root, API path, and model availability) to produce clear, actionable configuration errors.
+DEC-082;2026-06-18;Data Architecture;Retain CSV Governance Files;Ratified Option 1 to retain CSV file generation and bidirectional database-to-file synchronization to maintain human-readable, Git-trackable text indices of decisions, votes, and roadmap tasks.
+DEC-083;2026-06-18;Voting Subsystem;Interactive Proposal Ratification Wizard;Ratified Option 1 to implement an interactive 'proposal-ratify' CLI subcommand. The wizard displays full agent rationales, lets the user select the final decision and alternative status, updates target roadmap tasks to 'DONE', and supports immediate creation of a new proposal cycle if the user chooses a custom alternative.
+DEC-084;2026-06-18;Data Architecture;Configurable Database Location Outside Workspace;Ratified Option 3 to move the SQLite database out of the project workspace to a user AppData/home directory by default (e.g. ~/.council_manager/databases). This resolves workspace clutter, database locking, and eliminates the need for Git ignore rules. Supported overrides via the COUNCIL_DATABASE_DIR environment variable.
+DEC-085;2026-06-18;Data Architecture;Retain Decentralized Workspace Path Hashing for DB Routing;Ratified Option 1 to retain the stateless, deterministic workspace path slug and hashing strategy to route database connections. Rejected a central database registry router or monolithic multi-tenancy database to prevent connection/state lock corruption, maintain strict workspace isolation, and simplify local dev directory portability.

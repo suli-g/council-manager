@@ -1,8 +1,8 @@
-team_id;team_name;count;paradigm_specialty;vote;rationale
-A;Functional Specialists;10;Functional Programming (Immutability, Pure Functions, Pipelines);Aye;Decouples audit history from resolution state.
-B;OOP Specialists;10;Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns);Aye;Correctly models many-to-many relationship.
-C;Imperative Specialists;10;Imperative Programming (Explicit State, Procedural logic, Performance);Aye;Enables direct lookup of resolution status.
-D;Declarative Specialists;10;Declarative Programming (Logic engines, Config-driven, DSLs);Aye;Supports relational schema design.
-E;Dynamic Specialists;10;Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping);Aye;Clear extension point for audit metadata.
-F;Auditors/Project Managers;10;Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment);Aye;Essential for alignment tracking mandate.
-G;Contrarians;10;Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives);Aye;Prevents God-file anti-pattern in audits.csv.
+voter_id;team_id;vote
+V-A;A;Aye
+V-B;B;Aye
+V-C;C;Aye
+V-D;D;Aye
+V-E;E;Aye
+V-F;F;Aye
+V-G;G;Aye

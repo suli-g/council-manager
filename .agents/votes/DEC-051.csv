@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;NO (Option 1);Supports batching pipeline.
-B;OOP Specialists;NO (Option 1);Supports batching encapsulation.
-C;Imperative Specialists;YES (Option 2);Favors reliability and simpler failure handling.
-D;Declarative Specialists;NO (Option 1);Supports batching.
-E;Dynamic Specialists;NO (Option 1);Supports flexible batching.
-F;Auditors/Project Managers;YES (Option 2);Requires discrete audit trails for each generation.
-G;Contrarians;YES (Option 2);Warns against context limit and hallucination risks in batching.
+voter_id;team_id;vote
+V-A;A;NO (Option 1)
+V-B;B;NO (Option 1)
+V-C;C;YES (Option 2)
+V-D;D;NO (Option 1)
+V-E;E;NO (Option 1)
+V-F;F;YES (Option 2)
+V-G;G;YES (Option 2)

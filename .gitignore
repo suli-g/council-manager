@@ -14,3 +14,7 @@ wheels/
 .agents/governance.db-wal
 .agents/governance.db-shm
 
+# Environment secrets
+.env
+
+

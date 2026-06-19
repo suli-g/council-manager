@@ -1,9 +1,9 @@
-voter_id;team_id;vote;rationale
-V-001;A;Alt 3;Preferred append-only event sourcing for immutability.
-V-002;B;Proposal;Supports clean OOP abstraction over hybrid storage.
-V-003;C;Proposal;SQL/Mongo provides best performance for complex queries.
-V-004;D;Alt 3;Preferred declarative schema enforcement of SQLite.
-V-005;E;Proposal;Mongo allows rapid iteration on governance data shapes.
-V-006;F;Proposal;Accepts SQL for relational integrity while acknowledging multi-project needs.
-V-007;G;Proposal;Conceded that Git-Ops is insufficient for multi-project isolation.
-V-008;User;Proposal;Selected SQL/Mongo Hybrid for the new platform.
+voter_id;team_id;vote
+V-001;A;Alt 3
+V-002;B;Proposal
+V-003;C;Proposal
+V-004;D;Alt 3
+V-005;E;Proposal
+V-006;F;Proposal
+V-007;G;Proposal
+V-008;User;Proposal

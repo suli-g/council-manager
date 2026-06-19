@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;YES;Semi-colons are more robust delimiters for text-heavy datasets.
-B;OOP Specialists;YES;Consistent with standard CSV alternatives for European locales/Excel.
-C;Imperative Specialists;YES;Easier to parse without complex quoting logic.
-D;Declarative Specialists;YES;Clean separation of concerns between structure and content.
-E;Dynamic Specialists;YES;Rapidly improves data integrity for free-form rationale text.
-F;Auditors/Project Managers;YES;Critical for maintaining readability of governance logs.
-G;Contrarians;YES;Sensible refinement to prevent common formatting breakage.
+voter_id;team_id;vote
+V-A;A;YES
+V-B;B;YES
+V-C;C;YES
+V-D;D;YES
+V-E;E;YES
+V-F;F;YES
+V-G;G;YES

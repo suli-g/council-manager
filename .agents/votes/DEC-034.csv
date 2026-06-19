@@ -1,8 +1,8 @@
-voter_id;team_id;vote;rationale
-V-001;A;Alt A;Mirrored structure is the most logical mapping for functional units.
-V-002;B;Alt A;Encapsulates tests away from production code.
-V-003;C;Alt A;Scalable for procedural expansion.
-V-004;D;Alt A;Clean declarative separation.
-V-005;E;Alt A;Standard layout is best for tool integration.
-V-006;F;Alt A;Eases audit of test coverage.
-V-007;G;Alt A;Consensus reached on industry standard.
+voter_id;team_id;vote
+V-001;A;Alt A
+V-002;B;Alt A
+V-003;C;Alt A
+V-004;D;Alt A
+V-005;E;Alt A
+V-006;F;Alt A
+V-007;G;Alt A

@@ -1,4 +1,3 @@
-import asyncio
 import pytest
 import tempfile
 from pathlib import Path
@@ -328,4 +327,73 @@ async def test_run_voting_no_teams():
         with pytest.raises(ValueError, match="No active teams registered"):
             await orchestrator.run_voting(workspace, "DEC-606")
         db_manager.close_all()
+
+
+def test_create_proposal_auto_inception():
+    from council_manager.core.prompter import InceptionResponse
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        try:
+            # Setup mock project in database
+            session = db_manager.get_session(workspace)
+            proj = Project(id="test_proj", name="Test Project")
+            session.add(proj)
+            session.commit()
+            session.close()
+
+            # Mock prompter generate_proposal_inception
+            mock_prompter = MagicMock(spec=AgentPrompter)
+            mock_prompter.generate_proposal_inception.return_value = InceptionResponse(
+                topic="Auto Topic",
+                options=["Alt A", "Alt B"]
+            )
+
+            orchestrator = CouncilOrchestrator(prompter=mock_prompter)
+
+            # Create proposal with omitted ID, topic, and options
+            proposal = orchestrator.create_proposal(
+                workspace_dir=workspace,
+                project_id="test_proj",
+                description="Testing auto inception logic."
+            )
+
+            # Verify proposal_id was generated as DEC-001 (since it's the first proposal)
+            assert proposal.id == "DEC-001"
+            assert proposal.topic == "Auto Topic"
+            assert proposal.options == ["Alt A", "Alt B"]
+        finally:
+            # Release database locks
+            db_manager.close_all()
+
+def test_create_proposal_auto_inception_fallback():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        try:
+            # Setup mock project in database
+            session = db_manager.get_session(workspace)
+            proj = Project(id="test_proj", name="Test Project")
+            session.add(proj)
+            session.commit()
+            session.close()
+
+            # Mock prompter to raise exception to trigger fallback
+            mock_prompter = MagicMock(spec=AgentPrompter)
+            mock_prompter.generate_proposal_inception.side_effect = Exception("API Error")
+
+            orchestrator = CouncilOrchestrator(prompter=mock_prompter)
+
+            # Create proposal with omitted ID, topic, and options
+            proposal = orchestrator.create_proposal(
+                workspace_dir=workspace,
+                project_id="test_proj",
+                description="Testing auto inception fallback logic."
+            )
+
+            # Verify fallback topic and options are set correctly
+            assert proposal.id == "DEC-001"
+            assert proposal.topic == "Testing auto inception fallbac..."
+            assert proposal.options == ["Adopt Proposal", "Keep Status Quo"]
+        finally:
+            # Release database locks
+            db_manager.close_all()
 

@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;YES;Deterministic normalization is a pure function; far easier to reason about than external fuzzy logic.
-B;OOP Specialists;YES;Encapsulating normalization in a utility module provides a clean, testable interface.
-C;Imperative Specialists;YES;Avoids the significant performance and dependency overhead of Levenshtein-based fuzzy matching.
-D;Declarative Specialists;YES;Standardized names allow for more predictable declarative filtering of repository paths.
-E;Dynamic Specialists;YES;Enables rapid prototyping of task matching without managing complex external library states.
-F;Auditors/Project Managers;YES;Reduces supply chain risk by avoiding unnecessary third-party dependencies like 'thefuzz'.
-G;Contrarians;YES;Sensible middle ground: provides 'liberal' matching without the magic/unpredictability of full fuzzy logic.
+voter_id;team_id;vote
+V-A;A;YES
+V-B;B;YES
+V-C;C;YES
+V-D;D;YES
+V-E;E;YES
+V-F;F;YES
+V-G;G;YES

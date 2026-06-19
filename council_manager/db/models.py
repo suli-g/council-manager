@@ -17,6 +17,7 @@ class Project(Base):
     decisions: Mapped[List["Decision"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     audit_logs: Mapped[List["AuditLog"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     roadmap_tasks: Mapped[List["RoadmapTask"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+    background_tasks: Mapped[List["BackgroundTask"]] = relationship(back_populates="project", cascade="all, delete-orphan")
 
 
 
@@ -96,5 +97,22 @@ class RoadmapTask(Base):
     notes: Mapped[str] = mapped_column(String, nullable=True)
 
     project: Mapped["Project"] = relationship(back_populates="roadmap_tasks")
+
+
+class BackgroundTask(Base):
+    __tablename__ = "background_tasks"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"), nullable=False)
+    task_type: Mapped[str] = mapped_column(String, nullable=False)  # 'DELIBERATION', 'VOTING'
+    proposal_id: Mapped[str] = mapped_column(String, ForeignKey("proposals.id"), nullable=False)
+    status: Mapped[str] = mapped_column(String, default="PENDING")  # 'PENDING', 'RUNNING', 'COMPLETED', 'FAILED'
+    error_message: Mapped[str] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None), onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+
+    project: Mapped["Project"] = relationship(back_populates="background_tasks")
+    proposal: Mapped["Proposal"] = relationship()
+
 
 

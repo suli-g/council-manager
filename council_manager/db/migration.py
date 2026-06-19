@@ -1,9 +1,6 @@
 import csv
-import os
 from datetime import datetime, date
 from pathlib import Path
-from typing import Dict, List, Any
-from sqlalchemy.orm import Session
 from council_manager.db import db_manager
 from council_manager.db.models import Project, Team, Proposal, Decision, Alternative, AuditLog, RoadmapTask
 
@@ -279,16 +276,13 @@ def export_db_to_csv(workspace_dir: str | Path, project_id: str):
             vote_file = votes_dir / f"{p.id}.csv"
             with open(vote_file, mode="w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f, delimiter=";")
-                writer.writerow(["voter_id", "team_id", "vote", "rationale"])
+                writer.writerow(["voter_id", "team_id", "vote"])
                 
-                # Combine votes and rationales
-                rat_dict = {r["team_id"]: r["rationale"] for r in p.rationales}
                 for v in p.votes:
                     voter_id = v.get("voter_id", f"V-{v.get('team_id')}")
                     team_id = v.get("team_id", "")
                     vote_val = v.get("vote", "")
-                    rationale_val = rat_dict.get(team_id, "")
-                    writer.writerow([voter_id, team_id, vote_val, rationale_val])
+                    writer.writerow([voter_id, team_id, vote_val])
             
             # Format timestamp for manifest
             manifest_ts = p.created_at.strftime("%Y-%m-%dT%H:%M:%S")

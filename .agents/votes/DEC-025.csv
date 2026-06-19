@@ -1,7 +1,7 @@
-team_id;team_name;count;paradigm_specialty;vote;rationale
-A;Functional Specialists;10;Functional Programming (Immutability, Pure Functions, Pipelines);Abstain;Neutral on administrative logging.
-B;OOP Specialists;10;Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns);Aye;Supports structured tracking of system state.
-C;Imperative Specialists;10;Imperative Programming (Explicit State, Procedural logic, Performance);Aye;Explicit logs help debugging execution flow.
-D;Declarative Specialists;10;Declarative Programming (Logic engines, Config-driven, DSLs);Aye;Consistent with schema-driven project management.
-E;Dynamic Specialists;10;Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping);Abstain;Low impact on rapid prototyping.
-F;Auditors/Project Managers;10;Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment);Aye;Primary tool for oversight mandate.
+voter_id;team_id;vote
+V-A;A;Abstain
+V-B;B;Aye
+V-C;C;Aye
+V-D;D;Aye
+V-E;E;Abstain
+V-F;F;Aye

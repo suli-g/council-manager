@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;YES;Decouples metadata from large blobs; enables pure data transformations on the metadata layer.
-B;OOP Specialists;YES;Correctly models the 'Submission' object by separating metadata properties from large content payloads.
-C;Imperative Specialists;YES;Massively improves database performance and migration speed by keeping large files on disk.
-D;Declarative Specialists;YES;Allows for declarative queries on submission metadata while leveraging standard file systems for storage.
-E;Dynamic Specialists;YES;Makes it easy to manually inspect or modify downloaded files during prototyping.
-F;Auditors/Project Managers;YES;Ensures the project remains lightweight (DEC-001) while providing structured search and lookup.
-G;Contrarians;YES;A robust compromise: provides the benefits of a DB without the 'God-file' bloat of storing all content in SQL.
+voter_id;team_id;vote
+V-A;A;YES
+V-B;B;YES
+V-C;C;YES
+V-D;D;YES
+V-E;E;YES
+V-F;F;YES
+V-G;G;YES

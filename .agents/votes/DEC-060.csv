@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;YES (Option 3);Correctly identifies that the output is a function of both the data and the logic version.
-B;OOP Specialists;YES (Option 3);Enables cleaner encapsulation of 'Versioned AI Result' objects.
-C;Imperative Specialists;NO (Option 2);Preferred simpler submission-linkage, but accepts the accuracy benefits of versioning.
-D;Declarative Specialists;YES (Option 3);Explicit versioning in the cache key makes the system behavior more predictable.
-E;Dynamic Specialists;YES (Option 3);Allows for seamless prompt iteration without manual cache clearing.
-F;Auditors/Project Managers;YES (Option 3);Provides the most accurate audit trail by linking feedback to both content and the specific AI logic used.
-G;Contrarians;YES (Option 3);Proposed this refinement to prevent the 'dumb cache' issue during Phase 2 prompt tuning.
+voter_id;team_id;vote
+V-A;A;YES (Option 3)
+V-B;B;YES (Option 3)
+V-C;C;NO (Option 2)
+V-D;D;YES (Option 3)
+V-E;E;YES (Option 3)
+V-F;F;YES (Option 3)
+V-G;G;YES (Option 3)

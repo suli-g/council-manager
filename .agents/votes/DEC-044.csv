@@ -1,8 +1,8 @@
-team_id;team_name;vote;rationale
-A;Functional Specialists;YES;Git Trees/Blobs offer a more primitive and immutable-friendly data model for repository state.
-B;OOP Specialists;YES;Refining the retrieval abstraction to handle Git-specific objects is a sound architectural evolution.
-C;Imperative Specialists;YES;Massive performance gains by reducing HTTP round-trips and base64 overhead.
-D;Declarative Specialists;YES;Single-call tree discovery allows for more robust declarative path filtering logic.
-E;Dynamic Specialists;YES;Enables building more responsive and dynamic repository browsers/explorers.
-F;Auditors/Project Managers;YES;Accepting architectural drift in exchange for critical UX stability and bandwidth efficiency.
-G;Contrarians;YES;Technically superior approach; risk of 100k file limit is negligible for current project scope.
+voter_id;team_id;vote
+V-A;A;YES
+V-B;B;YES
+V-C;C;YES
+V-D;D;YES
+V-E;E;YES
+V-F;F;YES
+V-G;G;YES

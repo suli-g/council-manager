@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import Generator
 from sqlalchemy import create_engine, event
@@ -12,10 +11,11 @@ class DatabaseManager:
         self._sessionmakers = {}
 
     def get_db_path(self, workspace_dir: str | Path) -> Path:
+        from council_manager.config import get_workspace_slug
         workspace_path = Path(workspace_dir).resolve()
-        agents_dir = workspace_path / ".agents"
-        agents_dir.mkdir(parents=True, exist_ok=True)
-        return agents_dir / settings.db_file
+        db_dir = settings.resolved_database_dir / get_workspace_slug(workspace_path)
+        db_dir.mkdir(parents=True, exist_ok=True)
+        return db_dir / settings.db_file
 
     def get_engine(self, workspace_dir: str | Path):
         db_path = self.get_db_path(workspace_dir)

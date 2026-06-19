@@ -1,9 +1,9 @@
-voter_id;team_id;vote;rationale
-V-001;A;Proposal;Supports clean boundaries between modules.
-V-002;B;Proposal;Defines high-level ports/adapters without details.
-V-003;C;Proposal;Clarifies component interdependencies.
-V-004;D;Proposal;Declaratively separates configurations and data access.
-V-005;E;Proposal;Allows dynamic injection of mock databases for testing.
-V-006;F;Proposal;Essential documentation for architecture audit.
-V-007;G;Proposal;Good compromise that avoids over-engineering classes.
-V-008;User;Proposal;Created diagram to lay out high-level slots for implementation.
+voter_id;team_id;vote
+V-001;A;Proposal
+V-002;B;Proposal
+V-003;C;Proposal
+V-004;D;Proposal
+V-005;E;Proposal
+V-006;F;Proposal
+V-007;G;Proposal
+V-008;User;Proposal
