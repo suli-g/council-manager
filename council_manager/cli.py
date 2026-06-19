@@ -473,6 +473,13 @@ def cmd_server(args):
     except KeyboardInterrupt:
         log_info("Server stopped by user.")
 
+def cmd_dashboard(args):
+    from council_manager.server.tui import CouncilDashboardApp
+    workspace = get_workspace_path(args.workspace)
+    log_info("Starting Council Manager Terminal Dashboard UI...")
+    app = CouncilDashboardApp(workspace=workspace)
+    app.run()
+
 def cmd_show_teams(args):
     workspace = get_workspace_path(args.workspace)
     log_info("Querying teams from registry database...")
@@ -884,6 +891,10 @@ def main():
     p_server.add_argument("--port", type=int, default=8000, help="Binding port number.")
     p_server.add_argument("--reload", action="store_true", help="Enable code hot-reloading for development.")
 
+    # Command: dashboard
+    p_dash = subparsers.add_parser("dashboard", help="Launch the interactive Terminal UI dashboard.")
+    p_dash.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+
     args = parser.parse_args()
     if args.debug:
         settings.debug = True
@@ -931,6 +942,8 @@ def main():
         cmd_task_logs(args)
     elif args.command == "start-server":
         cmd_server(args)
+    elif args.command == "dashboard":
+        cmd_dashboard(args)
 
 if __name__ == "__main__":
     main()

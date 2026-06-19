@@ -237,6 +237,10 @@ uv run council-manager --help
     ```bash
     uv run council-manager start-server --host 127.0.0.1 --port 8000 --reload
     ```
+8.  **Interactive Terminal UI Dashboard**:
+    ```bash
+    uv run council-manager dashboard [-w <workspace-dir>]
+    ```
 
 ---
 
@@ -273,3 +277,20 @@ Logical project-to-workspace path mappings can be registered via the `workspace_
 *   `GET /decisions`: Retrieve ratified decisions.
 *   `GET /roadmap`: Retrieve project roadmap task statuses.
 *   `GET /audits`: Retrieve history of quality alignment audits.
+
+---
+
+## Terminal User Interface (TUI) Dashboard
+
+Rather than a browser-based web application, the orchestrator includes a beautiful terminal-based dashboard UI (`P3-02a` and `P3-02b`) built with [Textual](https://github.com/Textualize/textual) and [Rich](https://github.com/Textualize/rich).
+
+To launch the interactive TUI dashboard:
+```bash
+uv run council-manager dashboard
+```
+
+### Dashboard Features
+*   **Proposals Tab**: Inspect proposals in real-time, view detailed agent deliberation justifications, see voting tallies, and run deliberations or voting loops directly via async worker threads in the terminal with live status toasts.
+*   **Ratified Decisions Tab**: Browse immutable ratified architectural decisions and review alternatives compared (with Pros and Cons comparison blocks).
+*   **Roadmap Tasks Tab**: View project roadmap milestones, notes, and task completion percentages via a visual progress bar.
+*   **Compliance Audits Tab**: Review historical alignment audits and auditor details in a structured table.
