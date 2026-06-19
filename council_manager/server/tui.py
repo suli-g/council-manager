@@ -1,14 +1,15 @@
 from pathlib import Path
 from datetime import datetime
-from typing import Generator, List, Dict, Any
+from typing import Generator, List, Dict, Any, Optional
 import asyncio
 
 from sqlalchemy.orm import Session
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical, ScrollableContainer
-from textual.widgets import Header, Footer, DataTable, Label, Button, TabbedContent, TabPane, Static
+from textual.widgets import Header, Footer, DataTable, Label, Button, TabbedContent, TabPane, Static, Input
 from textual.coordinate import Coordinate
 from textual.worker import Worker, WorkerState
+from textual.screen import ModalScreen
 
 from council_manager.db import db_manager, Proposal, Decision, Alternative, AuditLog, RoadmapTask, Project
 from council_manager.config import settings
@@ -20,6 +21,46 @@ class WorkerStateChanged(Event):
         super().__init__()
         self.worker = worker
         self.state = state
+
+class ProposalCreateModal(ModalScreen[dict | None]):
+    """Modal screen for creating a new proposal within the TUI."""
+    
+    def compose(self) -> ComposeResult:
+        with Vertical(id="modal-container"):
+            yield Label("[bold cyan]Create New Proposal[/bold cyan]", classes="modal-field")
+            yield Label("Description:")
+            yield Input(placeholder="Describe the proposal or issue...", id="input-desc", classes="modal-field")
+            yield Label("Topic / Title (optional):")
+            yield Input(placeholder="e.g. Database Architecture (leaves blank for auto-inception)", id="input-topic", classes="modal-field")
+            yield Label("Options (semicolon-delimited, optional):")
+            yield Input(placeholder="e.g. Option A; Option B; Option C (leaves blank for auto-inception)", id="input-options", classes="modal-field")
+            with Horizontal(classes="modal-buttons"):
+                yield Button("Cancel", id="btn-cancel", variant="error")
+                yield Button("Create", id="btn-create-submit", variant="primary")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "btn-cancel":
+            self.dismiss(None)
+        elif event.button.id == "btn-create-submit":
+            desc = self.query_one("#input-desc", Input).value.strip()
+            if not desc:
+                self.notify("Description is required.", severity="error")
+                return
+            
+            topic = self.query_one("#input-topic", Input).value.strip() or None
+            opts_str = self.query_one("#input-options", Input).value.strip()
+            options = [o.strip() for o in opts_str.split(";")] if opts_str else None
+            # Filter out empty options
+            if options:
+                options = [o for o in options if o]
+                if not options:
+                    options = None
+            
+            self.dismiss({
+                "description": desc,
+                "topic": topic,
+                "options": options
+            })
 
 class CouncilDashboardApp(App):
     """
@@ -103,15 +144,42 @@ class CouncilDashboardApp(App):
         width: 50%;
         height: 1fr;
     }
-    
+
     #decision-detail-pane {
         width: 50%;
         height: 1fr;
+    }
+
+    ProposalCreateModal {
+        align: center middle;
+    }
+    
+    #modal-container {
+        width: 60;
+        height: auto;
+        border: thick #38bdf8;
+        background: #1e293b;
+        padding: 1 2;
+    }
+    
+    .modal-field {
+        margin-bottom: 1;
+    }
+    
+    .modal-buttons {
+        margin-top: 1;
+        height: 3;
+        align: right middle;
+    }
+    
+    .modal-buttons Button {
+        margin-left: 1;
     }
     """
     
     BINDINGS = [
         ("r", "refresh", "Refresh Data"),
+        ("n", "new_proposal", "New Proposal"),
         ("d", "deliberate", "Deliberate selected"),
         ("v", "vote", "Vote selected"),
         ("q", "quit", "Quit Dashboard"),
@@ -136,9 +204,11 @@ class CouncilDashboardApp(App):
                         with ScrollableContainer(id="proposal-detail-scroll"):
                             yield Static(id="proposal-detail-content")
                         with Horizontal(classes="button-bar"):
+                            yield Button("New Proposal", id="btn-new-proposal")
                             yield Button("Deliberate", id="btn-deliberate", variant="primary")
                             yield Button("Vote Loop", id="btn-vote", variant="success")
                             yield Button("Refresh", id="btn-refresh")
+
             with TabPane("Ratified Decisions", id="decisions-tab"):
                 with Horizontal():
                     with Vertical(id="decisions-list-pane"):
@@ -358,6 +428,8 @@ class CouncilDashboardApp(App):
         button_id = event.button.id
         if button_id == "btn-refresh":
             self.refresh_all()
+        elif button_id == "btn-new-proposal":
+            self.action_new_proposal()
         elif button_id == "btn-deliberate":
             self.action_deliberate()
         elif button_id == "btn-vote":
@@ -367,8 +439,44 @@ class CouncilDashboardApp(App):
         self.refresh_all()
 
     def toggle_buttons(self, enabled: bool) -> None:
-        for btn_id in ["#btn-deliberate", "#btn-vote", "#btn-refresh"]:
+        for btn_id in ["#btn-new-proposal", "#btn-deliberate", "#btn-vote", "#btn-refresh"]:
             self.query_one(btn_id, Button).disabled = not enabled
+
+    def action_new_proposal(self) -> None:
+        self.show_new_proposal_modal()
+
+    def show_new_proposal_modal(self) -> None:
+        def on_modal_dismiss(data: dict | None) -> None:
+            if data is not None:
+                self.notify("Creating proposal in background...", title="Processing")
+                self.toggle_buttons(False)
+                self.run_worker(self.do_create_proposal(data), exclusive=True)
+
+        self.push_screen(ProposalCreateModal(), on_modal_dismiss)
+
+    async def do_create_proposal(self, data: dict) -> None:
+        loop = asyncio.get_running_loop()
+        
+        # Determine the project ID from the DB if available, otherwise fallback
+        session = db_manager.get_session(self.workspace)
+        project_id = "council_manager"
+        try:
+            proj = session.query(Project).first()
+            if proj:
+                project_id = proj.id
+        finally:
+            session.close()
+
+        def _run():
+            return council_orchestrator.create_proposal(
+                workspace_dir=self.workspace,
+                project_id=project_id,
+                description=data["description"],
+                topic=data.get("topic"),
+                options=data.get("options")
+            )
+            
+        await loop.run_in_executor(None, _run)
 
     def action_deliberate(self) -> None:
         if not self.selected_proposal_id:
@@ -406,4 +514,5 @@ class CouncilDashboardApp(App):
             self.toggle_buttons(True)
             self.refresh_all()
 
+                
 

@@ -83,4 +83,6 @@ ALT-081;DEC-091;Option B: Monitor-Only Dashboard;Keep dashboard read-only and en
 ALT-082;DEC-091;Option C: Hybrid Actions in TUI;Implement only proposal creation and ratification in the TUI, keeping imports/exports in the CLI.;Requires users to still use CLI for simple data sync tasks, breaking visual continuity of the dashboard experience.
 ALT-083;DEC-092;Option B: Patch Bump to 0.5.1;Bump the version to 0.5.1 instead of 0.6.0.;The addition of the TUI Dashboard introduces substantial new features and user-facing capabilities, which is more aligned with a minor version bump (0.6.0) than a patch bump (0.5.1) under SemVer.
 ALT-084;DEC-092;Option C: Defer Bump;Keep the version at 0.5.0 and postpone any bump until a later release cycle.;Delaying the version bump creates a mismatch between the codebase's current feature set (which includes the TUI Dashboard) and the published metadata, hindering release tracking.
+ALT-085;DEC-093;Option B: Keep dashboard read-only for proposal creation;Enforce CLI-first proposal creation to keep TUI lightweight.;Increases user context switching and breaks UI completeness.
+ALT-086;DEC-093;Option C: Minimal quick-create action;Implement a single-line input field that auto-incepts topic/options using AI.;Simplifies TUI layout but gives the user less manual control when creating standard structured proposals.
 
