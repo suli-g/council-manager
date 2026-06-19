@@ -77,3 +77,5 @@ ALT-075;DEC-088;Optional fallbacks to server process directory;Automatically def
 ALT-076;DEC-088;Keep path headers strictly mandatory;Explicit and stateless, forces clients to always specify absolute directory pathways.;Exposes absolute host paths in headers and makes single-workspace local manual testing very verbose.
 ALT-077;DEC-089;Separate Frontend Web SPA;Modern, highly interactive web components and rich dashboard visualizations in browser.;Requires Node build dependencies, running a separate dev server process, and CORS handling.
 ALT-078;DEC-089;Static HTML pages served by FastAPI;Lightweight, no Node modules, served directly by backend process.;Harder to maintain complex UI states and component updates programmatically.
+ALT-079;DEC-090;Minor Configuration Overrides in teams.csv;Allows configuring optional model/provider columns per team with fallback defaults.;Creates reasoning disparity during consensus rounds.
+ALT-080;DEC-090;Structured JSON Agent Config Profiles;Decouples model clients completely into separate agent configurations.;Requires breaking changes and complex multi-client connection management.
