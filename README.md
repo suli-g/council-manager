@@ -233,4 +233,40 @@ uv run council-manager --help
     uv run council-manager team-vote -w <workspace-dir> --team-id <team-id> --proposal-id <id>
     uv run council-manager team-vote -w <workspace-dir> --team-id <team-id>  # Targets latest proposal
     ```
+7.  **Starting the API Server**:
+    ```bash
+    uv run council-manager start-server --host 127.0.0.1 --port 8000 --reload
+    ```
 
+---
+
+## FastAPI API Backend Server
+
+The orchestrator includes a FastAPI-based backend server that supports dynamic multi-tenant database routing and optionally secured endpoints.
+
+### Running the Server
+You can launch the server via the CLI subcommand:
+```bash
+uv run council-manager start-server [--host <host>] [--port <port>] [--reload]
+```
+
+### Authorization & Security
+Endpoints can be secured by setting the `COUNCIL_API_KEY` environment variable. When configured, all requests to the server (except `/health`) must include the API key in the `X-API-Key` header.
+
+### Multi-Tenant Database Routing
+The server dynamically routes connection pools to isolated SQLite files based on the client workspace path. All project-related requests must provide the absolute workspace path via the `X-Workspace-Path` header:
+*   Header name: `X-Workspace-Path`
+*   Header value: `/absolute/path/to/workspace`
+
+### Key Endpoints
+*   `GET /health`: Health check verification (does not require auth or workspace headers).
+*   `GET /proposals`: Retrieve a list of all proposals.
+*   `GET /proposals/{proposal_id}`: Retrieve details for a specific proposal.
+*   `POST /proposals`: Create a new proposal.
+*   `POST /proposals/{proposal_id}/deliberate`: Queue Phase 1 Deliberation in the background (default `async_mode=true`) or run synchronously.
+*   `POST /proposals/{proposal_id}/vote`: Queue Phase 2 Consensus Voting loop in the background (default `async_mode=true`) or run synchronously.
+*   `GET /tasks/{task_id}/status`: Query execution status of a background task.
+*   `GET /tasks/{task_id}/logs`: Retrieve log output content of a background task worker.
+*   `GET /decisions`: Retrieve ratified decisions.
+*   `GET /roadmap`: Retrieve project roadmap task statuses.
+*   `GET /audits`: Retrieve history of quality alignment audits.
