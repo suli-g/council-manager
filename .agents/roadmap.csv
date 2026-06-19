@@ -13,5 +13,5 @@ phase;id;task;status;notes
 2;P2-02b;Task Status Query & CLI logging;DONE;CLI commands to check the status of running AI deliberations.
 3;P3-01a;FastAPI Server Setup;DONE;Setup FastAPI server and endpoints to submit proposals, trigger votes, and query decisions.
 3;P3-01b;Auth & Dynamic Database Routing Middleware;DONE;Secure API endpoints and route connections dynamically based on workspace header path.
-3;P3-02a;Interactive Terminal UI (TUI) Dashboard;TODO;Stunning terminal-based dashboard using Textual and Rich to visualize decisions, votes, and roadmap.
-3;P3-02b;TUI Dashboard Client Integration;TODO;Connect Textual terminal widgets to local database sessions and FastAPI routing clients.
+3;P3-02a;Interactive Terminal UI (TUI) Dashboard;DONE;Stunning terminal-based dashboard using Textual and Rich to visualize decisions, votes, and roadmap.
+3;P3-02b;TUI Dashboard Client Integration;DONE;Connect Textual terminal widgets to local database sessions and FastAPI routing clients.
