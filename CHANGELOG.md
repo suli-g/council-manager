@@ -5,9 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - 2026-06-18
+## [0.5.0] - 2026-06-19
 
 ### Added
+- **FastAPI API Backend Server**: Introduced a lightweight, concurrent API server featuring endpoints for managing proposals, triggering asynchronous background deliberations and voting loops, and querying decisions, roadmaps, and audits.
+- **Dynamic Database Routing & API Security**: Configured headers-based dynamic workspace database routing via `X-Workspace-Path` to isolate tenant data, and optional endpoint protection using `COUNCIL_API_KEY` verification through the `X-API-Key` header.
+- **CLI Subcommand `start-server`**: Added `start-server` subcommand to launch the FastAPI backend server using Uvicorn.
+- **Server Test Suite**: Implemented comprehensive unit tests in `tests/core/test_server.py` verifying header routing, auth security, endpoints, and asynchronous task execution.
 - **Configurable Database Location**: Relocated SQLite database files outside of the project workspace by default (stored slugified under the user's home directory `~/.council_manager/databases`) to eliminate workspace clutter, avoid file locking during parallel/cloned runs, and prevent the need for Git ignore rules. Supported custom path overrides using the `COUNCIL_DATABASE_DIR` environment variable.
 
 ## [0.4.3] - 2026-06-18
