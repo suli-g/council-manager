@@ -158,3 +158,85 @@ def test_task_logs_command(capsys):
         captured = capsys.readouterr()
         assert "Log line 1" in captured.out
         assert "Log line 2" in captured.out
+
+def test_task_worker_execution_failure():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        session = db_manager.get_session(workspace)
+        
+        proj = Project(id="council_manager", name="Council Manager")
+        prop = Proposal(
+            id="DEC-100",
+            project_id="council_manager",
+            topic="Test Topic 2",
+            description="Test Desc 2",
+            options=["Opt A", "Opt B"],
+            status="DELIBERATION_PENDING"
+        )
+        task = BackgroundTask(
+            id="TASK-002",
+            project_id="council_manager",
+            task_type="DELIBERATION",
+            proposal_id="DEC-100",
+            status="PENDING"
+        )
+        session.add_all([proj, prop, task])
+        session.commit()
+        session.close()
+        
+        # Mock run_deliberation to throw error
+        with patch("council_manager.cli.council_orchestrator.run_deliberation", new_callable=AsyncMock) as mock_delib:
+            mock_delib.side_effect = RuntimeError("Mocked prompter API error")
+            
+            args = argparse.Namespace(
+                workspace=str(workspace),
+                task_id="TASK-002"
+            )
+            with pytest.raises(SystemExit):
+                cmd_run_task_worker(args)
+            
+            # Verify task is FAILED
+            session = db_manager.get_session(workspace)
+            failed_task = session.query(BackgroundTask).filter_by(id="TASK-002").first()
+            assert failed_task.status == "FAILED"
+            assert "Mocked prompter API error" in failed_task.error_message
+            session.close()
+
+def test_spawn_background_task():
+    from council_manager.cli import spawn_background_task
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        
+        with patch("subprocess.Popen") as mock_popen:
+            spawn_background_task(workspace, "TASK-777", max_cycles=3)
+            
+            assert mock_popen.called
+            args, kwargs = mock_popen.call_args
+            cmd_list = args[0]
+            assert "run-task-worker" in cmd_list
+            assert "TASK-777" in cmd_list
+            assert "--max-cycles" in cmd_list
+            assert "3" in cmd_list
+            assert "--workspace" in cmd_list
+
+def test_invalid_task_commands():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        
+        # Test status not found exits
+        args_status = argparse.Namespace(
+            workspace=str(workspace),
+            task_id="NON_EXISTENT"
+        )
+        with pytest.raises(SystemExit):
+            cmd_task_status(args_status)
+            
+        # Test logs not found exits
+        args_logs = argparse.Namespace(
+            workspace=str(workspace),
+            task_id="NON_EXISTENT",
+            tail=False
+        )
+        with pytest.raises(SystemExit):
+            cmd_task_logs(args_logs)
+
