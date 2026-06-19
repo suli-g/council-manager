@@ -460,6 +460,19 @@ def cmd_task_logs(args):
     except KeyboardInterrupt:
         print(f"\n{COLOR_CYAN}Stopped tailing logs.{COLOR_RESET}\n")
 
+def cmd_server(args):
+    import uvicorn
+    log_info(f"Starting Council Manager API server on {args.host}:{args.port}...")
+    if settings.council_api_key:
+        log_warn("API security is enabled. Set COUNCIL_API_KEY environment variable or pass X-API-Key header to authorize requests.")
+    else:
+        log_info("API security is disabled. Enforce security by setting COUNCIL_API_KEY environment variable.")
+        
+    try:
+        uvicorn.run("council_manager.server.main:app", host=args.host, port=args.port, reload=args.reload)
+    except KeyboardInterrupt:
+        log_info("Server stopped by user.")
+
 def cmd_show_teams(args):
     workspace = get_workspace_path(args.workspace)
     log_info("Querying teams from registry database...")
@@ -865,6 +878,12 @@ def main():
     p_tlogs.add_argument("-w", "--workspace", help="Path to the workspace folder.")
     p_tlogs.add_argument("--tail", action="store_true", help="Tail the log output in real-time.")
 
+    # Command: start-server
+    p_server = subparsers.add_parser("start-server", help="Start the FastAPI API backend server.")
+    p_server.add_argument("--host", default="127.0.0.1", help="Binding host address.")
+    p_server.add_argument("--port", type=int, default=8000, help="Binding port number.")
+    p_server.add_argument("--reload", action="store_true", help="Enable code hot-reloading for development.")
+
     args = parser.parse_args()
     if args.debug:
         settings.debug = True
@@ -910,6 +929,8 @@ def main():
         cmd_task_status(args)
     elif args.command == "task-logs":
         cmd_task_logs(args)
+    elif args.command == "start-server":
+        cmd_server(args)
 
 if __name__ == "__main__":
     main()

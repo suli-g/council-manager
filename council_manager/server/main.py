@@ -1,0 +1,324 @@
+import sys
+from pathlib import Path
+from typing import Generator
+from fastapi import FastAPI, Header, HTTPException, Depends, status
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from council_manager.config import settings
+from council_manager.db import (
+    db_manager,
+    Proposal,
+    BackgroundTask,
+    Decision,
+    Alternative,
+    AuditLog,
+    RoadmapTask,
+    Project,
+)
+
+# Initialize FastAPI App with rich metadata
+app = FastAPI(
+    title="Council Manager API",
+    description="Isolated multi-team governance orchestrator server supporting dynamic workspace database routing.",
+    version="0.5.0",
+)
+
+# API Key Validation Dependency
+def verify_api_key(x_api_key: str | None = Header(None, alias="X-API-Key")):
+    """Ensure access is restricted if council_api_key is configured in settings."""
+    if settings.council_api_key:
+        if not x_api_key or x_api_key != settings.council_api_key:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or missing X-API-Key credentials.",
+            )
+
+# Dynamic DB Session Factory Dependency
+def get_db(x_workspace_path: str = Header(..., alias="X-Workspace-Path")) -> Generator[Session, None, None]:
+    """Dynamically route the database connection using the X-Workspace-Path header."""
+    workspace = Path(x_workspace_path).resolve()
+    if not workspace.exists():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Workspace path '{x_workspace_path}' does not exist.",
+        )
+    
+    session = db_manager.get_session(workspace)
+    try:
+        yield session
+    finally:
+        session.close()
+
+# Request Pydantic Schemas
+class ProposalCreate(BaseModel):
+    project_id: str = "council_manager"
+    description: str
+    topic: str | None = None
+    options: list[str] | None = None
+
+# --- Endpoints ---
+
+@app.get("/health")
+def health_check():
+    """Simple health check verification endpoint."""
+    return {"status": "healthy", "service": "council-manager-api", "version": "0.5.0"}
+
+@app.get("/proposals")
+def list_proposals(
+    db: Session = Depends(get_db),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Retrieve all proposals from the workspace database."""
+    return db.query(Proposal).order_by(Proposal.created_at.desc()).all()
+
+@app.get("/proposals/{proposal_id}")
+def get_proposal(
+    proposal_id: str,
+    db: Session = Depends(get_db),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Retrieve details for a specific proposal."""
+    prop = db.query(Proposal).filter_by(id=proposal_id).first()
+    if not prop:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Proposal '{proposal_id}' not found.",
+        )
+    return prop
+
+@app.post("/proposals", status_code=status.HTTP_201_CREATED)
+def create_proposal(
+    payload: ProposalCreate,
+    x_workspace_path: str = Header(..., alias="X-Workspace-Path"),
+    db: Session = Depends(get_db),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Create a new proposal, running AI-powered topic & option inception if omitted."""
+    workspace = Path(x_workspace_path).resolve()
+    
+    # Auto-initialize Project if missing in DB
+    proj = db.query(Project).filter_by(id=payload.project_id).first()
+    if not proj:
+        proj = Project(
+            id=payload.project_id,
+            name=payload.project_id.replace("_", " ").title()
+        )
+        db.add(proj)
+        db.commit()
+
+    from council_manager.core.orchestrator import council_orchestrator
+    try:
+        prop = council_orchestrator.create_proposal(
+            workspace_dir=workspace,
+            project_id=payload.project_id,
+            description=payload.description,
+            topic=payload.topic,
+            options=payload.options
+        )
+        prop = db.query(Proposal).filter_by(id=prop.id).first()
+        return prop
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create proposal: {e}"
+        )
+
+@app.post("/proposals/{proposal_id}/deliberate")
+def deliberate_proposal(
+    proposal_id: str,
+    async_mode: bool = True,
+    x_workspace_path: str = Header(..., alias="X-Workspace-Path"),
+    db: Session = Depends(get_db),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Trigger Phase 1 Deliberation for a proposal (defaults to async background run)."""
+    workspace = Path(x_workspace_path).resolve()
+    prop = db.query(Proposal).filter_by(id=proposal_id).first()
+    if not prop:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Proposal '{proposal_id}' not found.",
+        )
+
+    if async_mode:
+        from council_manager.cli import generate_task_id, spawn_background_task
+        task_id = generate_task_id(db, prop.project_id)
+        task = BackgroundTask(
+            id=task_id,
+            project_id=prop.project_id,
+            task_type="DELIBERATION",
+            proposal_id=proposal_id,
+            status="PENDING"
+        )
+        db.add(task)
+        db.commit()
+        
+        spawn_background_task(workspace, task_id)
+        return {
+            "task_id": task_id,
+            "status": "PENDING",
+            "message": "Deliberation queued in the background."
+        }
+    else:
+        # Synchronous execution within request lifecycle
+        import asyncio
+        from council_manager.core.orchestrator import council_orchestrator
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(
+                council_orchestrator.run_deliberation(workspace, proposal_id)
+            )
+            db.refresh(prop)
+            return prop
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Deliberation failed: {e}"
+            )
+        finally:
+            loop.close()
+
+@app.post("/proposals/{proposal_id}/vote")
+def vote_proposal(
+    proposal_id: str,
+    async_mode: bool = True,
+    max_cycles: int = 5,
+    x_workspace_path: str = Header(..., alias="X-Workspace-Path"),
+    db: Session = Depends(get_db),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Trigger Phase 2 Consensus Voting loop (defaults to async background run)."""
+    workspace = Path(x_workspace_path).resolve()
+    prop = db.query(Proposal).filter_by(id=proposal_id).first()
+    if not prop:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Proposal '{proposal_id}' not found.",
+        )
+
+    if async_mode:
+        from council_manager.cli import generate_task_id, spawn_background_task
+        task_id = generate_task_id(db, prop.project_id)
+        task = BackgroundTask(
+            id=task_id,
+            project_id=prop.project_id,
+            task_type="VOTING",
+            proposal_id=proposal_id,
+            status="PENDING"
+        )
+        db.add(task)
+        db.commit()
+        
+        spawn_background_task(workspace, task_id, max_cycles=max_cycles)
+        return {
+            "task_id": task_id,
+            "status": "PENDING",
+            "message": "Voting loop queued in the background."
+        }
+    else:
+        # Synchronous execution within request lifecycle
+        import asyncio
+        from council_manager.core.orchestrator import council_orchestrator
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(
+                council_orchestrator.run_voting(workspace, proposal_id, max_cycles=max_cycles)
+            )
+            db.refresh(prop)
+            return prop
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Voting loop failed: {e}"
+            )
+        finally:
+            loop.close()
+
+@app.get("/tasks/{task_id}/status")
+def get_task_status(
+    task_id: str,
+    db: Session = Depends(get_db),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Query execution status and errors of a queued background task."""
+    task = db.query(BackgroundTask).filter_by(id=task_id).first()
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Background task '{task_id}' not found.",
+        )
+    return {
+        "id": task.id,
+        "task_type": task.task_type,
+        "proposal_id": task.proposal_id,
+        "status": task.status,
+        "error_message": task.error_message,
+        "created_at": task.created_at,
+        "updated_at": task.updated_at
+    }
+
+@app.get("/tasks/{task_id}/logs")
+def get_task_logs(
+    task_id: str,
+    x_workspace_path: str = Header(..., alias="X-Workspace-Path"),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Retrieve execution log content generated by the worker process for a background task."""
+    workspace = Path(x_workspace_path).resolve()
+    log_file = workspace / ".agents" / "logs" / f"{task_id}.log"
+    if not log_file.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Log file for task '{task_id}' not found.",
+        )
+    try:
+        with open(log_file, "r", encoding="utf-8") as f:
+            log_content = f.read()
+        return {"task_id": task_id, "logs": log_content}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to read logs: {e}",
+        )
+
+@app.get("/decisions")
+def list_decisions(
+    db: Session = Depends(get_db),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Retrieve list of ratified decisions and corresponding alternatives."""
+    decisions = db.query(Decision).all()
+    result = []
+    for d in decisions:
+        result.append({
+            "id": d.id,
+            "date": d.date,
+            "topic": d.topic,
+            "decision": d.decision,
+            "rationale": d.rationale,
+            "alternatives": [
+                {"id": a.id, "option": a.option, "pros": a.pros, "cons": a.cons}
+                for a in d.alternatives
+            ]
+        })
+    return result
+
+@app.get("/roadmap")
+def get_roadmap(
+    db: Session = Depends(get_db),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Retrieve lists of completed and upcoming development roadmap tasks."""
+    tasks = db.query(RoadmapTask).order_by(RoadmapTask.phase, RoadmapTask.id).all()
+    return tasks
+
+@app.get("/audits")
+def list_audits(
+    db: Session = Depends(get_db),
+    api_key_check: None = Depends(verify_api_key)
+):
+    """Retrieve history of quality alignment audits."""
+    audits = db.query(AuditLog).order_by(AuditLog.timestamp.desc()).all()
+    return audits

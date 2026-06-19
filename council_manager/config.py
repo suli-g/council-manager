@@ -16,6 +16,10 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("council_database_dir", "database_dir", "db_dir")
     )
+    council_api_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("council_api_key", "api_key")
+    )
     debug: bool = False
 
     # AI Config
