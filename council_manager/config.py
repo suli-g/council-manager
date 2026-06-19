@@ -20,6 +20,10 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("council_api_key", "api_key")
     )
+    workspace_mappings: dict[str, str] = Field(
+        default_factory=dict,
+        validation_alias=AliasChoices("council_workspace_mappings", "workspace_mappings", "project_mappings")
+    )
     debug: bool = False
 
     # AI Config

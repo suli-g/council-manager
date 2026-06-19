@@ -53,3 +53,5 @@ DEC-083;Voting Subsystem;docs/.agents/votes/DEC-083.csv;2026-06-18T20:00:55
 DEC-084;Data Architecture;docs/.agents/votes/DEC-084.csv;2026-06-18T20:00:55
 DEC-085;Data Architecture;docs/.agents/votes/DEC-085.csv;2026-06-18T21:01:41
 DEC-086;API Architecture;docs/.agents/votes/DEC-086.csv;2026-06-19T10:42:00
+DEC-087;API Observability;docs/.agents/votes/DEC-087.csv;2026-06-19T11:42:00
+DEC-088;API Routing;docs/.agents/votes/DEC-088.csv;2026-06-19T11:46:00

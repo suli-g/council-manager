@@ -254,9 +254,12 @@ uv run council-manager start-server [--host <host>] [--port <port>] [--reload]
 Endpoints can be secured by setting the `COUNCIL_API_KEY` environment variable. When configured, all requests to the server (except `/health`) must include the API key in the `X-API-Key` header.
 
 ### Multi-Tenant Database Routing
-The server dynamically routes connection pools to isolated SQLite files based on the client workspace path. All project-related requests must provide the absolute workspace path via the `X-Workspace-Path` header:
-*   Header name: `X-Workspace-Path`
-*   Header value: `/absolute/path/to/workspace`
+The server dynamically routes database connections to isolated SQLite files based on the client workspace path or project slug. Requests can provide either the absolute path, a project slug, or omit headers to automatically resolve to the uvicorn process's working directory:
+*   Header: `X-Project-ID` (e.g. `council_manager` or a mapped custom slug)
+*   Header: `X-Workspace-Path` (e.g. `/absolute/path/to/workspace`)
+*   If both headers are omitted, the server automatically resolves database connections to the server process's configured workspace directory (`settings.workspace_dir`).
+
+Logical project-to-workspace path mappings can be registered via the `workspace_mappings` configuration setting (e.g. `COUNCIL_WORKSPACE_MAPPINGS='{"my_project": "B:/projects/my_project"}'`).
 
 ### Key Endpoints
 *   `GET /health`: Health check verification (does not require auth or workspace headers).

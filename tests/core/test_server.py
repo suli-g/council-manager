@@ -72,17 +72,44 @@ def test_health_endpoint():
     assert response.status_code == 200
     assert response.json()["status"] == "healthy"
 
-def test_missing_workspace_header():
+def test_optional_workspace_fallback(test_db_session):
+    # If header is missing, it should fallback to settings.workspace_dir.
+    with patch.object(settings, "workspace_dir", test_db_session):
+        client = TestClient(app)
+        response = client.get("/proposals")
+        assert response.status_code == 200
+        props = response.json()
+        assert len(props) == 1
+        assert props[0]["id"] == "DEC-088"
+
+def test_project_id_routing_slug(test_db_session):
+    # Test logical slug resolution matching default 'council_manager' ID
+    with patch.object(settings, "workspace_dir", test_db_session):
+        client = TestClient(app)
+        response = client.get("/proposals", headers={"X-Project-ID": "council_manager"})
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+
+def test_project_id_routing_custom_mapping(test_db_session):
+    # Test logical slug resolution via custom workspace_mappings dict
+    custom_mappings = {"my_custom_project": str(test_db_session)}
+    with patch.object(settings, "workspace_mappings", custom_mappings):
+        client = TestClient(app)
+        response = client.get("/proposals", headers={"X-Project-ID": "my_custom_project"})
+        assert response.status_code == 200
+        assert response.json()[0]["id"] == "DEC-088"
+
+def test_invalid_project_id_routing():
     client = TestClient(app)
-    response = client.get("/proposals")
-    # FastAPI automatically validates Header aliases, if required Header is missing, returns 422 Unprocessable Entity
-    assert response.status_code == 422
+    response = client.get("/proposals", headers={"X-Project-ID": "invalid_project_slug_xyz"})
+    assert response.status_code == 400
+    assert "Could not resolve workspace identifier" in response.json()["detail"]
 
 def test_invalid_workspace_path():
     client = TestClient(app)
     response = client.get("/proposals", headers={"X-Workspace-Path": "B:/non_existent_folder_xyz"})
     assert response.status_code == 400
-    assert "does not exist" in response.json()["detail"]
+    assert "Could not resolve workspace identifier" in response.json()["detail"]
 
 def test_get_proposals(test_db_session):
     client = TestClient(app)

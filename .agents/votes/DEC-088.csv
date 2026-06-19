@@ -1,0 +1,9 @@
+voter_id;team_id;vote
+V-001;A;Option A
+V-002;B;Option A
+V-003;C;Option A
+V-004;D;Option A
+V-005;E;Option A
+V-006;F;Option B
+V-007;G;Option C
+V-008;User;Option C
