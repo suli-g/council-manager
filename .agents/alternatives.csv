@@ -107,4 +107,6 @@ ALT-105;DEC-102;Option C (Manual File Deletion);Safest route; prevents accidenta
 ALT-106;DEC-103;Option A (Full UI/Middleware Diagrams);Document TUI/API views and middleware in UML;High risk of rot due to frequent frontend modifications.
 ALT-107;DEC-103;Option B (Consolidated Files);Keep all UML diagrams in single monolithic files;Less organized, harder to navigate.
 ALT-108;DEC-103;Option C (Core Only / Contrarian);Focus class and sequence diagrams strictly on core orchestration and database schemas;Easier to maintain, prevents rot, and keeps documentation focused on core contracts.
+ALT-109;DEC-104;Option A (Proceed to Sequences);Proceed directly to sequence diagram drafting;Keeps the pipeline moving forward.
+ALT-110;DEC-104;Option B (Request Edits);Block proceeding until edits are completed;Delays progression but addresses diagram defects.
 
