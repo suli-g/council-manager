@@ -1,0 +1,49 @@
+@startuml
+autonumber
+actor Developer
+participant CLI as "CLI/Client"
+participant Migration as "migration.py"
+participant DB as "SQLAlchemy Session"
+database Files as "Local CSV Files\n(.agents/*.csv)"
+
+alt Import Flow
+  Developer -> CLI : run import command
+  CLI -> Migration : import_csv_to_db(workspace, project_id)
+  activate Migration
+  Migration -> DB : get_session(workspace)
+  
+  Migration -> Files : read teams.csv, decisions.csv, alternatives.csv, audits.csv, audit_decisions.csv, roadmap.csv
+  activate Files
+  Files --> Migration : return CSV rows
+  deactivate Files
+  
+  Migration -> DB : bulk upsert Project, Team, Decision, Alternative, AuditLog, RoadmapTask
+  activate DB
+  Migration -> DB : commit()
+  deactivate DB
+  Migration --> CLI : success
+  deactivate Migration
+  CLI --> Developer : display import success
+end
+
+alt Export Flow
+  Developer -> CLI : run export command
+  CLI -> Migration : export_db_to_csv(workspace, project_id)
+  activate Migration
+  Migration -> DB : get_session(workspace)
+  
+  Migration -> DB : query all Decision, Alternative, AuditLog, AuditDecision, RoadmapTask, Vote, Proposal
+  activate DB
+  DB --> Migration : return database records
+  deactivate DB
+  
+  Migration -> Files : write/overwrite .csv files (using semi-colon delimiters)
+  activate Files
+  Files --> Migration : write complete
+  deactivate Files
+  Migration --> CLI : success
+  deactivate Migration
+  CLI --> Developer : display export success
+end
+
+@endum

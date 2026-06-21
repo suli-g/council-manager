@@ -1,0 +1,39 @@
+@startuml
+autonumber
+actor Developer
+participant CLI as "CLI/Client"
+participant Orchestrator as "CouncilOrchestrator"
+participant DB as "SQLAlchemy Session"
+
+Developer -> CLI : ratify proposal (proposal_id, selected_option, alternative_status)
+activate CLI
+CLI -> Orchestrator : ratify_proposal(workspace, proposal_id, selected_option, alternative_status, next_proposal_desc)
+activate Orchestrator
+
+Orchestrator -> DB : get_session(workspace)
+activate DB
+Orchestrator -> DB : query Proposal
+Orchestrator -> DB : update Proposal.status = "APPROVED" / "REJECTED"
+
+Orchestrator -> DB : create Decision (id=DEC-xxx, topic, decision=selected_option, rationale)
+loop For each other option in Proposal.options
+  Orchestrator -> DB : create Alternative (id=ALT-xxx, option, pros, cons)
+end
+
+Orchestrator -> DB : query RoadmapTask matching topic/id
+alt roadmap task found
+  Orchestrator -> DB : update RoadmapTask.status = "DONE"
+end
+
+Orchestrator -> DB : commit()
+deactivate DB
+
+alt next_proposal_desc is provided (Immediate new cycle triggered)
+  Orchestrator -> Orchestrator : create_proposal(...)
+end
+
+Orchestrator --> CLI : return updated objects
+deactivate Orchestrator
+CLI --> Developer : display ratified decision summary
+deactivate CLI
+@endum

@@ -1,0 +1,55 @@
+@startuml
+autonumber
+actor Developer
+participant CLI as "CLI/Client"
+participant Orchestrator as "CouncilOrchestrator"
+participant Prompter as "AgentPrompter"
+participant Registry as "AgentRegistry"
+participant DB as "SQLAlchemy Session"
+entity LLM as "LLM Provider"
+
+Developer -> CLI : run deliberation (proposal_id)
+activate CLI
+CLI -> Orchestrator : run_deliberation(workspace, proposal_id)
+activate Orchestrator
+
+Orchestrator -> Prompter : probe_connectivity_async()
+activate Prompter
+Prompter -> Prompter : validates API settings
+deactivate Prompter
+
+Orchestrator -> DB : get_session(workspace)
+activate DB
+Orchestrator -> DB : query Proposal
+Orchestrator -> DB : update Proposal.status = "DELIBERATION"
+Orchestrator -> DB : commit()
+deactivate DB
+
+Orchestrator -> Registry : get_teams(workspace)
+activate Registry
+Registry -> DB : query Team records
+DB --> Registry : return list of Teams
+Registry --> Orchestrator : return Teams (A-G)
+deactivate Registry
+
+loop For each team in parallel (asyncio.gather)
+  Orchestrator -> Prompter : generate_deliberation_async(...)
+  activate Prompter
+  Prompter -> LLM : API call (system prompt for Team Specialty)
+  LLM --> Prompter : Deliberation Response (stance, motivation, suggestion)
+  Prompter --> Orchestrator : return dict
+  deactivate Prompter
+end
+
+Orchestrator -> DB : get_session(workspace)
+activate DB
+Orchestrator -> DB : update Proposal.rationales = [collected_rationales]
+Orchestrator -> DB : update Proposal.status = "VOTING_PENDING"
+Orchestrator -> DB : commit()
+deactivate DB
+
+Orchestrator --> CLI : return updated Proposal
+deactivate Orchestrator
+CLI --> Developer : display rationales & status
+deactivate CLI
+@endum

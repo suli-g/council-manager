@@ -1,0 +1,44 @@
+@startuml
+autonumber
+actor Developer
+participant CLI as "CLI/Client"
+participant Orchestrator as "CouncilOrchestrator"
+participant Prompter as "AgentPrompter"
+participant DB as "SQLAlchemy Session"
+entity LLM as "LLM Provider"
+
+Developer -> CLI : create proposal (desc, [topic, options])
+activate CLI
+CLI -> Orchestrator : create_proposal(workspace, project_id, description, proposal_id, topic, options)
+activate Orchestrator
+
+alt topic or options is omitted
+  Orchestrator -> Prompter : probe_connectivity()
+  activate Prompter
+  Prompter -> Prompter : checks provider/endpoints
+  deactivate Prompter
+  Orchestrator -> Prompter : generate_proposal_inception(description)
+  activate Prompter
+  Prompter -> LLM : API Request
+  LLM --> Prompter : return JSON text
+  Prompter -> Prompter : clean_and_parse_json()
+  Prompter --> Orchestrator : InceptionResponse(topic, options)
+  deactivate Prompter
+end
+
+Orchestrator -> DB : get_session(workspace)
+activate DB
+Orchestrator -> DB : query Project & Proposal
+alt project does not exist
+  Orchestrator -> DB : create Project
+end
+Orchestrator -> DB : save/update Proposal (status="DELIBERATION_PENDING")
+Orchestrator -> DB : commit()
+DB --> Orchestrator : proposal saved
+deactivate DB
+
+Orchestrator --> CLI : return Proposal object
+deactivate Orchestrator
+CLI --> Developer : display proposal details (DEC-xxx)
+deactivate CLI
+@endum

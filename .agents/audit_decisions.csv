@@ -9,3 +9,5 @@ AUDIT-006;DEC-043;RESOLVED;2026-05-27;P1-03 implemented with structured Gemini o
 AUDIT-027;DEC-096;RESOLVED;2026-06-20;Structured Pydantic schema for rationales implemented.
 AUDIT-027;DEC-097;RESOLVED;2026-06-20;Reject real-time thinking stream on roadmap to avoid layout corruption.
 AUDIT-027;DEC-098;RESOLVED;2026-06-20;Add progress bar and timing feedback task P3-02c to roadmap.
+AUDIT-028;DEC-103;RESOLVED;2026-06-21;UML structure and subdirectory layout ratified.
+AUDIT-028;DEC-104;RESOLVED;2026-06-21;UML drafts (use-case and core classes) ratified.

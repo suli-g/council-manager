@@ -1,0 +1,55 @@
+@startuml
+autonumber
+actor Developer
+participant CLI as "CLI/Client"
+participant Orchestrator as "CouncilOrchestrator"
+participant Prompter as "AgentPrompter"
+participant DB as "SQLAlchemy Session"
+entity LLM as "LLM Provider"
+
+Developer -> CLI : run voting (proposal_id, max_cycles=5)
+activate CLI
+CLI -> Orchestrator : run_voting(workspace, proposal_id, max_cycles)
+activate Orchestrator
+
+Orchestrator -> Prompter : probe_connectivity_async()
+
+Orchestrator -> DB : get_session(workspace)
+activate DB
+Orchestrator -> DB : query Proposal & active Teams
+deactivate DB
+
+Orchestrator -> DB : update Proposal.status = "VOTING"
+activate DB
+Orchestrator -> DB : commit()
+deactivate DB
+
+loop cycle = 1 to max_cycles
+  loop For each team in parallel (asyncio.gather)
+    Orchestrator -> Prompter : generate_vote_async(...)
+    activate Prompter
+    Prompter -> LLM : API call (includes vote history & deliberation context)
+    LLM --> Prompter : Vote Response (vote_option, rationale)
+    Prompter --> Orchestrator : return dict
+    deactivate Prompter
+  end
+  
+  Orchestrator -> Orchestrator : Tally weighted votes using Team.vote_weight
+  Orchestrator -> Orchestrator : Check if any option achieves >= 70% consensus
+  
+  alt Consensus achieved or cycle == max_cycles
+    Orchestrator -> DB : update Proposal.votes = [final_votes]
+    Orchestrator -> DB : update Proposal.status = "RATIFICATION_PENDING"
+    activate DB
+    Orchestrator -> DB : commit()
+    deactivate DB
+    Orchestrator --> CLI : return completed Proposal
+    break
+  else Consensus not achieved
+    Orchestrator -> Orchestrator : Feed cycle vote distribution & rationales back as context
+  end
+end
+
+CLI --> Developer : display final tally & status (RATIFICATION_PENDING)
+deactivate CLI
+@endum

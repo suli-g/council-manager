@@ -109,4 +109,7 @@ ALT-107;DEC-103;Option B (Consolidated Files);Keep all UML diagrams in single mo
 ALT-108;DEC-103;Option C (Core Only / Contrarian);Focus class and sequence diagrams strictly on core orchestration and database schemas;Easier to maintain, prevents rot, and keeps documentation focused on core contracts.
 ALT-109;DEC-104;Option A (Proceed to Sequences);Proceed directly to sequence diagram drafting;Keeps the pipeline moving forward.
 ALT-110;DEC-104;Option B (Request Edits);Block proceeding until edits are completed;Delays progression but addresses diagram defects.
+ALT-111;DEC-105;Option A (Patch Bump to 0.6.6);Bump patch version to 0.6.6 for documentation release;Appropriate for doc-only updates under SemVer rules.
+ALT-112;DEC-105;Option B (Minor Bump to 0.7.0);Bump minor version to 0.7.0;Should be reserved for functional onboarding feature implementations.
+ALT-113;DEC-105;Option C (Reject/Revisions);Block release and request revisions;Delays deployment.
 
