@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     llm_provider: str = "google"
     llm_api_base: str | None = None
     llm_api_key: str | None = None
+    llm_timeout: float = 300.0
 
     @property
     def resolved_database_dir(self) -> Path:

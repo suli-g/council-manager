@@ -6,6 +6,7 @@ from pathlib import Path
 from council_manager.config import settings
 from council_manager.db import db_manager, Proposal, Team, Decision, AuditLog, RoadmapTask, BackgroundTask, initialize_new_project, import_csv_to_db, export_db_to_csv
 from council_manager.core.orchestrator import council_orchestrator
+from council_manager.core.prompter import format_rationale
 
 # ANSI escape codes for terminal aesthetics
 COLOR_GREEN = "\033[92m"
@@ -302,9 +303,13 @@ def cmd_show(args):
         print(f"{COLOR_BOLD}Created At:{COLOR_RESET}  {p.created_at}")
         
         if p.rationales:
-            print(f"\n{COLOR_BOLD}{COLOR_CYAN}--- PHASE 1: COLLECTED RATIONALES ---{COLOR_RESET}")
+            print(f"\n{COLOR_BOLD}{COLOR_CYAN}--- PHASE 1: DELIBERATION REPORTS ---{COLOR_RESET}")
+            print(f"{COLOR_BOLD}### PROPOSAL{COLOR_RESET}\n{p.description}\n\n{COLOR_BOLD}### Stances:{COLOR_RESET}")
             for r in p.rationales:
-                print(f"{COLOR_BOLD}[Team {r['team_id']}]{COLOR_RESET} {r['rationale']}")
+                formatted = format_rationale(r['rationale'])
+                # Indent formatted block slightly for readability
+                indented = "  " + formatted.replace("\n", "\n  ")
+                print(f"\n{COLOR_BOLD}Team: {r['team_id']}{COLOR_RESET}\n{indented}")
                 
         if p.votes:
             print(f"\n{COLOR_BOLD}{COLOR_CYAN}--- PHASE 2: CAST VOTES ---{COLOR_RESET}")
@@ -323,7 +328,9 @@ def cmd_show(args):
                             
                 print(f"{COLOR_BOLD}[Voter {voter_id} / Team {team_id}]{COLOR_RESET} voted {COLOR_GREEN}'{vote_val}'{COLOR_RESET}")
                 if rationale:
-                    print(f"  Rationale: {rationale}")
+                    formatted = format_rationale(rationale)
+                    indented = "  " + formatted.replace("\n", "\n  ")
+                    print(f"{indented}")
         print()
     except Exception as e:
         log_error(f"Query failed: {e}")
@@ -586,15 +593,21 @@ async def run_team_deliberate_async(args):
         session.close()
         
     try:
-        rationale = await council_orchestrator.prompter.generate_deliberation_async(
+        delib_res = await council_orchestrator.prompter.generate_deliberation_async(
             team_name=team.name,
             paradigm_specialty=team.paradigm_specialty,
             title=topic,
             description=desc,
             options=opts
         )
+        rat_dict = {
+            "stance": delib_res.stance,
+            "motivation": delib_res.motivation,
+            "suggestion": delib_res.suggestion
+        }
+        formatted = format_rationale(rat_dict)
         print(f"\n{COLOR_BOLD}{COLOR_CYAN}=== TEAM DELIBERATION RESULT: {team.name} ({team.id}) ==={COLOR_RESET}")
-        print(rationale)
+        print(formatted)
         print()
     except Exception as e:
         log_error(f"Failed to deliberate: {e}")
@@ -684,7 +697,9 @@ async def run_proposal_ratify_async(args):
                 rationale_val = v.get("rationale", "") or rat_dict.get(team_id, "")
                 
                 print(f"\n{COLOR_BOLD}[Team {team_id}] voted '{vote_val}'{COLOR_RESET}")
-                print(f"Rationale: {rationale_val}")
+                formatted = format_rationale(rationale_val)
+                indented = "  " + formatted.replace("\n", "\n  ")
+                print(f"{indented}")
                 print("-" * 50)
                 
         # Ask user for decision

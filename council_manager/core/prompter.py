@@ -54,6 +54,38 @@ class InceptionResponse(BaseModel):
     topic: str = Field(description="A concise title/topic for this proposal (maximum 4 words)")
     options: List[str] = Field(description="A list of 2 to 4 structured engineering alternatives/options extracted or derived from the description")
 
+class DeliberationResponse(BaseModel):
+    stance: str = Field(description="Strictly either 'FOR' or 'AGAINST'")
+    motivation: str = Field(description="A concise summary of why this stance is good or bad from your paradigm's perspective")
+    suggestion: str = Field(description="A constructive technical suggestion (if stance is FOR, suggest how implementation could work; if stance is AGAINST, suggest a concrete alternative)")
+
+def format_rationale(rationale: any) -> str:
+    from typing import Any
+    if isinstance(rationale, dict):
+        stance = rationale.get("stance", "UNKNOWN")
+        motivation = rationale.get("motivation", "")
+        suggestion = rationale.get("suggestion", "")
+        
+        # Format motivation and suggestion with proper indentation
+        indented_motivation = "\n  ".join(motivation.split("\n"))
+        indented_suggestion = "\n  ".join(suggestion.split("\n"))
+        
+        return (
+            f"Stance: {stance}\n"
+            f"Motivation:\n  {indented_motivation}\n"
+            f"Suggestion:\n  {indented_suggestion}"
+        )
+    return str(rationale)
+
+
+def get_simple_json_template(schema: BaseModel) -> str:
+    """Generate a clean, flat JSON template string showing the expected fields and descriptions."""
+    template = {}
+    for name, field in schema.model_fields.items():
+        desc = field.description or str(field.annotation)
+        template[name] = f"<{desc}>"
+    return json.dumps(template, indent=2)
+
 
 class AgentPrompter:
     def __init__(self, client: Optional[genai.Client] = None):
@@ -258,10 +290,14 @@ class AgentPrompter:
 
         if schema:
             payload["response_format"] = {"type": "json_object"}
-            schema_json = json.dumps(schema.model_json_schema())
+            template_json = get_simple_json_template(schema)
             payload["messages"].append({
                 "role": "user",
-                "content": f"You must return your JSON response conforming to this JSON Schema:\n{schema_json}"
+                "content": (
+                    f"You must return your response as a raw JSON object conforming strictly to this structure:\n"
+                    f"{template_json}\n\n"
+                    f"Fill in the field values with your actual responses. Do not include standard JSON schema definitions or keys like 'properties', 'required', 'title', or 'type' in your output."
+                )
             })
 
         if settings.debug:
@@ -271,7 +307,7 @@ class AgentPrompter:
             print(f"  Payload: {json.dumps(payload, indent=2)}")
 
         try:
-            response = httpx.post(url, json=payload, headers=headers, timeout=60.0)
+            response = httpx.post(url, json=payload, headers=headers, timeout=settings.llm_timeout)
             if settings.debug:
                 print(f"[DEBUG] Custom Provider HTTP Response Status: {response.status_code}")
                 print(f"[DEBUG] Custom Provider HTTP Response Content: {response.text}")
@@ -318,10 +354,14 @@ class AgentPrompter:
 
         if schema:
             payload["response_format"] = {"type": "json_object"}
-            schema_json = json.dumps(schema.model_json_schema())
+            template_json = get_simple_json_template(schema)
             payload["messages"].append({
                 "role": "user",
-                "content": f"You must return your JSON response conforming to this JSON Schema:\n{schema_json}"
+                "content": (
+                    f"You must return your response as a raw JSON object conforming strictly to this structure:\n"
+                    f"{template_json}\n\n"
+                    f"Fill in the field values with your actual responses. Do not include standard JSON schema definitions or keys like 'properties', 'required', 'title', or 'type' in your output."
+                )
             })
 
         if settings.debug:
@@ -332,7 +372,7 @@ class AgentPrompter:
 
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(url, json=payload, headers=headers, timeout=60.0)
+                response = await client.post(url, json=payload, headers=headers, timeout=settings.llm_timeout)
             if settings.debug:
                 print(f"[DEBUG] Custom Provider HTTP Response Status: {response.status_code}")
                 print(f"[DEBUG] Custom Provider HTTP Response Content: {response.text}")
@@ -351,12 +391,12 @@ class AgentPrompter:
         title: str,
         description: str,
         options: List[str]
-    ) -> str:
+    ) -> DeliberationResponse:
         """Query target LLM model for a paradigm-based deliberation rationale."""
         system_instruction = (
             f"You are an AI agent representing the '{team_name}' engineering team, "
             f"specializing in '{paradigm_specialty}'. Your goal is to deliberate on technical/architectural "
-            f"proposals from your paradigm's viewpoint. Provide clear, rigorous justifications."
+            f"proposals from your paradigm's viewpoint. Provide a structured deliberation response."
         )
 
         prompt = (
@@ -365,11 +405,12 @@ class AgentPrompter:
             f"Description: {description}\n"
             f"Options: {'; '.join(options)}\n\n"
             f"Provide a concise, professional justification of your team's stance. "
-            f"Focus strictly on how the proposal affects your team's paradigm and domain of expertise."
+            f"Conform strictly to the DeliberationResponse schema."
         )
 
         if settings.llm_provider.lower() != "google":
-            return self._generate_content_custom(system_instruction, prompt, temperature=0.7)
+            text = self._generate_content_custom(system_instruction, prompt, schema=DeliberationResponse, temperature=0.7)
+            return DeliberationResponse(**clean_and_parse_json(text))
 
         response = self.client.models.generate_content(
             model=settings.gemini_model,
@@ -377,9 +418,14 @@ class AgentPrompter:
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
                 temperature=0.7,
+                response_mime_type="application/json",
+                response_schema=DeliberationResponse,
             )
         )
-        return response.text.strip()
+        if hasattr(response, "parsed") and response.parsed:
+            return response.parsed
+        data = clean_and_parse_json(response.text)
+        return DeliberationResponse(**data)
 
     def generate_vote(
         self,
@@ -438,12 +484,12 @@ class AgentPrompter:
         title: str,
         description: str,
         options: List[str]
-    ) -> str:
+    ) -> DeliberationResponse:
         """Query target LLM model asynchronously for a paradigm-based deliberation rationale."""
         system_instruction = (
             f"You are an AI agent representing the '{team_name}' engineering team, "
             f"specializing in '{paradigm_specialty}'. Your goal is to deliberate on technical/architectural "
-            f"proposals from your paradigm's viewpoint. Provide clear, rigorous justifications."
+            f"proposals from your paradigm's viewpoint. Provide a structured deliberation response."
         )
 
         prompt = (
@@ -452,11 +498,12 @@ class AgentPrompter:
             f"Description: {description}\n"
             f"Options: {'; '.join(options)}\n\n"
             f"Provide a concise, professional justification of your team's stance. "
-            f"Focus strictly on how the proposal affects your team's paradigm and domain of expertise."
+            f"Conform strictly to the DeliberationResponse schema."
         )
 
         if settings.llm_provider.lower() != "google":
-            return await self._generate_content_custom_async(system_instruction, prompt, temperature=0.7)
+            text = await self._generate_content_custom_async(system_instruction, prompt, schema=DeliberationResponse, temperature=0.7)
+            return DeliberationResponse(**clean_and_parse_json(text))
 
         response = await self.client.aio.models.generate_content(
             model=settings.gemini_model,
@@ -464,9 +511,14 @@ class AgentPrompter:
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
                 temperature=0.7,
+                response_mime_type="application/json",
+                response_schema=DeliberationResponse,
             )
         )
-        return response.text.strip()
+        if hasattr(response, "parsed") and response.parsed:
+            return response.parsed
+        data = clean_and_parse_json(response.text)
+        return DeliberationResponse(**data)
 
     async def generate_vote_async(
         self,

@@ -1,15 +1,16 @@
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import MagicMock, AsyncMock, patch
 import json
 import pytest
-from council_manager.core.prompter import AgentPrompter, VoteResponse
-
+from council_manager.core.prompter import AgentPrompter, VoteResponse, DeliberationResponse
+ 
 def test_generate_deliberation_mocked():
     # Setup mock Client and Response
     mock_client = MagicMock()
     mock_response = MagicMock()
-    mock_response.text = "This is a deliberation rationale."
+    mock_parsed = DeliberationResponse(stance="FOR", motivation="Clean Functional style", suggestion="Use pure functions")
+    mock_response.parsed = mock_parsed
     mock_client.models.generate_content.return_value = mock_response
-
+ 
     prompter = AgentPrompter(client=mock_client)
     res = prompter.generate_deliberation(
         team_name="Team A",
@@ -18,8 +19,10 @@ def test_generate_deliberation_mocked():
         description="Desc Y",
         options=["Alt 1", "Alt 2"]
     )
-
-    assert res == "This is a deliberation rationale."
+ 
+    assert res.stance == "FOR"
+    assert res.motivation == "Clean Functional style"
+    assert res.suggestion == "Use pure functions"
     
     # Assert generate_content called with expected arguments
     mock_client.models.generate_content.assert_called_once()
@@ -59,7 +62,8 @@ def test_generate_vote_mocked():
 async def test_generate_deliberation_async_mocked():
     mock_client = MagicMock()
     mock_response = MagicMock()
-    mock_response.text = "Async deliberation response"
+    mock_parsed = DeliberationResponse(stance="AGAINST", motivation="Too complex", suggestion="Simplify design")
+    mock_response.parsed = mock_parsed
     
     # Setup async mock on client.aio.models.generate_content
     mock_client.aio.models.generate_content = AsyncMock(return_value=mock_response)
@@ -73,7 +77,9 @@ async def test_generate_deliberation_async_mocked():
         options=["Opt A", "Opt B"]
     )
     
-    assert res == "Async deliberation response"
+    assert res.stance == "AGAINST"
+    assert res.motivation == "Too complex"
+    assert res.suggestion == "Simplify design"
     mock_client.aio.models.generate_content.assert_called_once()
 
 @pytest.mark.anyio
@@ -173,7 +179,7 @@ def test_custom_provider_deliberation(monkeypatch):
         mock_response.json.return_value = {
             "choices": [{
                 "message": {
-                    "content": "Custom deliberation result"
+                    "content": '{"stance": "FOR", "motivation": "Custom deliberation result", "suggestion": "Try custom method"}'
                 }
             }]
         }
@@ -188,7 +194,9 @@ def test_custom_provider_deliberation(monkeypatch):
                 options=["Alt 1", "Alt 2"]
             )
             
-            assert res == "Custom deliberation result"
+            assert res.stance == "FOR"
+            assert res.motivation == "Custom deliberation result"
+            assert res.suggestion == "Try custom method"
             mock_post.assert_called_once()
             args, kwargs = mock_post.call_args
             assert args[0] == "https://api.custom.com/v1/chat/completions"
@@ -212,7 +220,7 @@ async def test_custom_provider_deliberation_async(monkeypatch):
         mock_response.json.return_value = {
             "choices": [{
                 "message": {
-                    "content": "Custom async deliberation"
+                    "content": '{"stance": "AGAINST", "motivation": "Custom async deliberation", "suggestion": "Try async custom method"}'
                 }
             }]
         }
@@ -234,7 +242,9 @@ async def test_custom_provider_deliberation_async(monkeypatch):
                 options=["Opt A", "Opt B"]
             )
             
-            assert res == "Custom async deliberation"
+            assert res.stance == "AGAINST"
+            assert res.motivation == "Custom async deliberation"
+            assert res.suggestion == "Try async custom method"
             mock_client.post.assert_called_once()
             args, kwargs = mock_client.post.call_args
             assert args[0] == "http://localhost:11434/v1/chat/completions"

@@ -85,4 +85,26 @@ ALT-083;DEC-092;Option B: Patch Bump to 0.5.1;Bump the version to 0.5.1 instead 
 ALT-084;DEC-092;Option C: Defer Bump;Keep the version at 0.5.0 and postpone any bump until a later release cycle.;Delaying the version bump creates a mismatch between the codebase's current feature set (which includes the TUI Dashboard) and the published metadata, hindering release tracking.
 ALT-085;DEC-093;Option B: Keep dashboard read-only for proposal creation;Enforce CLI-first proposal creation to keep TUI lightweight.;Increases user context switching and breaks UI completeness.
 ALT-086;DEC-093;Option C: Minimal quick-create action;Implement a single-line input field that auto-incepts topic/options using AI.;Simplifies TUI layout but gives the user less manual control when creating standard structured proposals.
+ALT-087;DEC-094;Option A: Retain version 0.6.1;Keeps current version tag unchanged;Fails to document codebase modifications introduced after version 0.6.1 release.
+ALT-088;DEC-094;Option B: Bump patch version to 0.6.2;Accurately reflects the new interactive modal feature additions under SemVer rules;Requires updating pyproject.toml and lockfile.
+ALT-089;DEC-095;Option A: Retain version 0.6.2;Keeps current version tag unchanged;Fails to document dashboard crash fix and improvements released in patch.
+ALT-090;DEC-095;Option B: Bump patch version to 0.6.3;Accurately reflects the dashboard error handling stability improvements under SemVer rules;Requires updating pyproject.toml, server main.py, and lockfile.
+ALT-091;DEC-096;Option A: Unstructured prompt styling;Try to instruct LLMs to print the layout directly using text formatting in the prompt.;Fragile, prone to LLM formatting errors, and does not separate data from representation.
+ALT-092;DEC-096;Option B: Structured Pydantic schema;Represent rationales as a schema containing stance, motivation, and suggestion, and format them dynamically in CLI/TUI.;Provides maximum reliability, clean parsing, and decouples representation from storage.
+ALT-093;DEC-097;Option A: Add streaming to roadmap;Implement real-time streaming of thinking processes in CLI/TUI;Adds substantial terminal rendering complexity and increases token/time overhead.
+ALT-094;DEC-097;Option B: Reject streaming;Rely on existing log files and simple progress indicators to keep CLI/TUI output clean.;Keeps terminal output robust and avoids terminal layout corruption.
+ALT-095;DEC-098;Option A: Add progress bar/elapsed time feedback to roadmap;Implement progress indicators or timing feedback during active deliberations to improve user feedback.;Adds tracking logic overhead to measure elapsed duration for each team.
+ALT-096;DEC-098;Option B: Defer deliberation progress feedback;Do not track or display deliberation timing feedback in CLI/TUI.;Keeps CLI/TUI output simpler but provides less real-time feedback to developers during slow LLM queries.
+ALT-097;DEC-099;Option A: Bump patch version to 0.6.4;Bump the version to 0.6.4 to reflect the changes in metadata under SemVer and ensure robust dependency synchronization in workspaces.;None.
+ALT-098;DEC-099;Option B: Defer version bump;Defer version bump until the deliberation progress indicator task is fully implemented.;Can lead to dependency sync issues due to package caching when testing workspace integrations.
+ALT-099;DEC-100;Option A: Bump patch version to 0.6.5;Bump the version to 0.6.5 to reflect the HTTP client timeout fix and ensure robust client response during slow concurrent LLM queues.;None.
+ALT-100;DEC-100;Option B: Defer version bump;Defer version bump and keep version at 0.6.4.;Limits client-side control over request timeouts.
+ALT-101;DEC-101;Implement onboarding immediately;Allows user to onboard right away;User prefers to defer implementation and focus on current robustness first.
+ALT-102;DEC-101;Reject onboarding from roadmap;Reduces roadmap scope;Fails to document the user's intent to add project description, roles, and use case tracking.
+ALT-103;DEC-102;Option A (Programmatic DB Reset);Drops and recreates tables programmatically using SQLAlchemy;Introduces risk of accidental data loss via accidental execution.
+ALT-104;DEC-102;Option B (File-Level DB Reset);Deletes and regenerates the database file dynamically;Still has high accidental data loss risk.
+ALT-105;DEC-102;Option C (Manual File Deletion);Safest route; prevents accidental CLI data destruction;Developers must run manual shell commands to reset.
+ALT-106;DEC-103;Option A (Full UI/Middleware Diagrams);Document TUI/API views and middleware in UML;High risk of rot due to frequent frontend modifications.
+ALT-107;DEC-103;Option B (Consolidated Files);Keep all UML diagrams in single monolithic files;Less organized, harder to navigate.
+ALT-108;DEC-103;Option C (Core Only / Contrarian);Focus class and sequence diagrams strictly on core orchestration and database schemas;Easier to maintain, prevents rot, and keeps documentation focused on core contracts.
 

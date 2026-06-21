@@ -20,7 +20,7 @@ from council_manager.db import (
 app = FastAPI(
     title="Council Manager API",
     description="Isolated multi-team governance orchestrator server supporting dynamic workspace database routing.",
-    version="0.6.1",
+    version="0.6.5",
 )
 
 # API Key Validation Dependency
@@ -90,7 +90,7 @@ class ProposalCreate(BaseModel):
 @app.get("/health")
 def health_check():
     """Simple health check verification endpoint."""
-    return {"status": "healthy", "service": "council-manager-api", "version": "0.6.1"}
+    return {"status": "healthy", "service": "council-manager-api", "version": "0.6.5"}
 
 @app.get("/proposals")
 def list_proposals(

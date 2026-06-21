@@ -142,7 +142,7 @@ class CouncilOrchestrator:
         async def query_team_deliberation(team):
             if settings.debug:
                 print(f"[DEBUG] orchestrator: Requesting deliberation from Team '{team.id}' ({team.name})")
-            rationale_text = await self.prompter.generate_deliberation_async(
+            delib_res = await self.prompter.generate_deliberation_async(
                 team_name=team.name,
                 paradigm_specialty=team.paradigm_specialty,
                 title=topic,
@@ -150,10 +150,14 @@ class CouncilOrchestrator:
                 options=opts
             )
             if settings.debug:
-                print(f"[DEBUG] orchestrator: Received deliberation rationale from Team '{team.id}' ({len(rationale_text)} chars)")
+                print(f"[DEBUG] orchestrator: Received deliberation rationale from Team '{team.id}'")
             return {
                 "team_id": team.id,
-                "rationale": rationale_text,
+                "rationale": {
+                    "stance": delib_res.stance,
+                    "motivation": delib_res.motivation,
+                    "suggestion": delib_res.suggestion
+                },
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
 

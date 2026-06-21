@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.5] - 2026-06-20
+
+### Fixed
+- **Ollama Timeout**: Resolved concurrent model inference timeouts for local custom providers by introducing a configurable `llm_timeout` setting (defaulting to 300 seconds), preventing early client disconnections.
+
+## [0.6.4] - 2026-06-20
+
+### Added
+- **Deliberation Progress Indicators**: Added a new roadmap task `P3-02c` to implement status indicators and duration tracking for each team during active deliberation in CLI/TUI viewports.
+- **Structured Deliberations Schema**: Configured structured Pydantic response models (`DeliberationResponse`) for custom LLM providers to ensure clean parsing, reliable execution, and dynamic layout presentation.
+
+## [0.6.3] - 2026-06-20
+
+### Fixed
+- **TUI Connection Failures**: Safely target the default main screen stack when toggle-disabling button controls in the dashboard background workers, preventing `NoMatches` exception crashes during LLM connectivity failures and ensuring error notifications are cleanly handled.
+
+## [0.6.2] - 2026-06-20
+
+### Added
+- **TUI Proposal Creation Dialog**: Added a thread-safe, interactive proposal creation modal directly within the TUI dashboard, allowing user-driven proposal entries with custom titles/topics and choices.
+
 ## [0.6.1] - 2026-06-19
 
 ### Added

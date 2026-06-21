@@ -60,4 +60,13 @@ DEC-090;AI Strategy;docs/.agents/votes/DEC-090.csv;2026-06-19T12:35:00
 DEC-091;UI Architecture;docs/.agents/votes/DEC-091.csv;2026-06-19T15:08:00
 DEC-092;Project Release Configuration;docs/.agents/votes/DEC-092.csv;2026-06-19T19:36:00
 DEC-093;UI Architecture;docs/.agents/votes/DEC-093.csv;2026-06-19T22:10:00
+DEC-094;Project Release Configuration;docs/.agents/votes/DEC-094.csv;2026-06-20T00:22:00
+DEC-096;Structured Deliberation Reports Schema;docs/.agents/votes/DEC-096.csv;2026-06-20T12:00:00
+DEC-097;Reject Deliberation Thinking Stream on Roadmap;docs/.agents/votes/DEC-097.csv;2026-06-20T12:10:00
+DEC-098;Add Deliberation Progress Feedback to Roadmap;docs/.agents/votes/DEC-098.csv;2026-06-20T13:16:00
+DEC-099;Bump version to 0.6.4;docs/.agents/votes/DEC-099.csv;2026-06-20T18:05:00
+DEC-100;Bump version to 0.6.5;docs/.agents/votes/DEC-100.csv;2026-06-20T21:40:00
+DEC-101;Roadmap Update for Onboarding & CLI;docs/.agents/votes/DEC-101.csv;2026-06-21T10:05:00
+DEC-102;Database Reset Option;docs/.agents/votes/DEC-102.csv;2026-06-21T12:06:00
+DEC-103;UML Documentation Overhaul Scope;docs/.agents/votes/DEC-103.csv;2026-06-21T12:59:00
 

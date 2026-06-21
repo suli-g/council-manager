@@ -14,6 +14,7 @@ from textual.screen import ModalScreen
 from council_manager.db import db_manager, Proposal, Decision, Alternative, AuditLog, RoadmapTask, Project
 from council_manager.config import settings
 from council_manager.core.orchestrator import council_orchestrator
+from council_manager.core.prompter import format_rationale
 from textual.events import Event
 
 class WorkerStateChanged(Event):
@@ -319,11 +320,14 @@ class CouncilDashboardApp(App):
                 
             # Show team rationales collected
             if prop.rationales:
-                text += "[bold yellow]═══════ Team Deliberation Justifications ═══════[/bold yellow]\n\n"
+                text += "[bold yellow]═══════ Deliberation Reports ═══════[/bold yellow]\n"
+                text += "### PROPOSAL\n"
+                text += f"{prop.description}\n\n"
+                text += "### Stances:\n\n"
                 for rat in prop.rationales:
                     team = rat.get("team_id", "Unknown")
-                    rationale_text = rat.get("rationale", "")
-                    text += f"[bold green]Team {team}[/bold green]:\n{rationale_text}\n"
+                    formatted = format_rationale(rat.get("rationale", ""))
+                    text += f"Team: {team}\n{formatted}\n"
                     text += "────────────────────────────────────────────────\n"
             else:
                 text += "[italic #94a3b8]No team deliberation justifications collected yet.[/italic #94a3b8]\n"
@@ -439,8 +443,12 @@ class CouncilDashboardApp(App):
         self.refresh_all()
 
     def toggle_buttons(self, enabled: bool) -> None:
+        target = self.screen_stack[0] if self.screen_stack else self.screen
         for btn_id in ["#btn-new-proposal", "#btn-deliberate", "#btn-vote", "#btn-refresh"]:
-            self.query_one(btn_id, Button).disabled = not enabled
+            try:
+                target.query_one(btn_id, Button).disabled = not enabled
+            except Exception:
+                pass
 
     def action_new_proposal(self) -> None:
         self.show_new_proposal_modal()

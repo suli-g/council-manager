@@ -6,3 +6,6 @@ AUDIT-004;DEC-037;RESOLVED;2026-05-26;P1-06 implemented with validated Settings 
 AUDIT-005;DEC-038;RESOLVED;2026-05-26;CSVs migrated to semi-colon delimiter to prevent formatting errors.
 AUDIT-005;DEC-040;RESOLVED;2026-05-26;P1-10 implemented with decoupled exploration and targeted download logic.
 AUDIT-006;DEC-043;RESOLVED;2026-05-27;P1-03 implemented with structured Gemini output and requirement caching.
+AUDIT-027;DEC-096;RESOLVED;2026-06-20;Structured Pydantic schema for rationales implemented.
+AUDIT-027;DEC-097;RESOLVED;2026-06-20;Reject real-time thinking stream on roadmap to avoid layout corruption.
+AUDIT-027;DEC-098;RESOLVED;2026-06-20;Add progress bar and timing feedback task P3-02c to roadmap.

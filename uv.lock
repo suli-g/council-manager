@@ -166,7 +166,7 @@ wheels = [
 
 [[package]]
 name = "council-manager"
-version = "0.6.1"
+version = "0.6.5"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },

@@ -15,3 +15,10 @@ phase;id;task;status;notes
 3;P3-01b;Auth & Dynamic Database Routing Middleware;DONE;Secure API endpoints and route connections dynamically based on workspace header path.
 3;P3-02a;Interactive Terminal UI (TUI) Dashboard;DONE;Stunning terminal-based dashboard using Textual and Rich to visualize decisions, votes, and roadmap.
 3;P3-02b;TUI Dashboard Client Integration;DONE;Connect Textual terminal widgets to local database sessions and FastAPI routing clients.
+3;P3-02c;Deliberation Progress & Timing Feedback;TODO;Implement progress bar or elapsed time indicators for each team during active deliberation in CLI/TUI.
+4;P4-01;Update README.md Documentation;TODO;Document TUI dialogs, structured prompter responses, and custom client timeouts in README.md.
+4;P4-02;CLI Command Inspection & Alignment;TODO;Audit and update the CLI usage/help output to correctly reflect all current commands and parameters.
+4;P4-03a;Interactive/Config Project Onboarding;TODO;Implement interactive CLI wizard and config-driven templates to capture project name, description, roles, and role-specific use cases.
+4;P4-03b;Immediate Description Ratification;TODO;Automatically ratify and record the initial project onboarding description as an immutable decision in database/CSV.
+4;P4-04;Phase 4 Alignment Audit;TODO;Run a formal quality alignment audit to verify new onboarding schemas and documentation.
+4;P4-05;Minor Version Bump to 0.7.0;TODO;Bump the minor version to 0.7.0 in pyproject.toml, lockfiles, and CHANGELOG.md.

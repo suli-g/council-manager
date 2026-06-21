@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 from council_manager.db import db_manager, Team, Proposal, Project
-from council_manager.core.prompter import AgentPrompter, VoteResponse
+from council_manager.core.prompter import AgentPrompter, VoteResponse, DeliberationResponse
 from council_manager.core.orchestrator import CouncilOrchestrator
 
 @pytest.fixture(autouse=True)
@@ -31,8 +31,8 @@ async def test_create_and_run_deliberation():
         # Define mock returns for each team
         async def mock_delib(team_name, paradigm_specialty, title, description, options):
             if "Team A" in team_name:
-                return "Functional rationale"
-            return "OOP rationale"
+                return DeliberationResponse(stance="FOR", motivation="Functional rationale", suggestion="Use pipelines")
+            return DeliberationResponse(stance="AGAINST", motivation="OOP rationale", suggestion="Use pure objects")
         
         mock_prompter.generate_deliberation_async.side_effect = mock_delib
 
@@ -65,8 +65,10 @@ async def test_create_and_run_deliberation():
         assert len(updated_proposal.rationales) == 2
         
         rat_dict = {r["team_id"]: r["rationale"] for r in updated_proposal.rationales}
-        assert rat_dict["A"] == "Functional rationale"
-        assert rat_dict["B"] == "OOP rationale"
+        assert rat_dict["A"]["motivation"] == "Functional rationale"
+        assert rat_dict["A"]["stance"] == "FOR"
+        assert rat_dict["B"]["motivation"] == "OOP rationale"
+        assert rat_dict["B"]["stance"] == "AGAINST"
 
         # Verify prompter was called asynchronously for both teams
         assert mock_prompter.generate_deliberation_async.call_count == 2
