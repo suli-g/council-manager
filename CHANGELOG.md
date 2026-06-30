@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-06-28
+
+### Added
+- **Workspace Governance Skill**: Introduced a workspace-level skill (`.agents/skills/council_manager/SKILL.md`) that automatically instructs agents on project-specific governance, including the `PROPOSAL:` halt and interactive voting.
+- **Onboarding Generation**: Updated the `init-project` initialization flow to automatically generate both the `AGENTS.md` and the workspace `SKILL.md` files for new projects.
+
+## [0.6.7] - 2026-06-24
+
+
+### Added
+- **QUERY: Prefix Rule**: Added the `QUERY:` rule to `AGENTS.md` (DEC-108) to support lightweight, non-voting team deliberations for impact inquiries without bloating static CSV files.
+- **Onboarding Constraints**: Documented and registered the architectural decision `DEC-109` to restrict individual team count overrides and enforce a global team member count configured during onboarding, supporting LLM-inferred counts.
+
 ## [0.6.6] - 2026-06-21
 
 ### Added

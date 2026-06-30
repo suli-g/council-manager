@@ -283,5 +283,22 @@ def test_clean_and_parse_json_fallback():
     assert truncated_result["vote"] == "Option A"
     assert truncated_result["rationale"] == "We should adopt this because it is clean"
 
+def test_infer_global_member_count_mocked():
+    from unittest.mock import MagicMock
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    from council_manager.core.prompter import OnboardingInferenceResponse
+    mock_parsed = OnboardingInferenceResponse(global_member_count=15, rationale="Moderate project complexity")
+    mock_response.parsed = mock_parsed
+    mock_client.models.generate_content.return_value = mock_response
+
+    prompter = AgentPrompter(client=mock_client)
+    res = prompter.infer_global_member_count("Description of the project")
+
+    assert res.global_member_count == 15
+    assert res.rationale == "Moderate project complexity"
+    mock_client.models.generate_content.assert_called_once()
+
+
 
 

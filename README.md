@@ -2,7 +2,7 @@
 
 A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, and structured project audits across multiple isolated workspaces.
 
-See the [CHANGELOG.md](file:///B:/projects/council_manager/CHANGELOG.md) for version release details.
+See the [CHANGELOG.md](./CHANGELOG.md) for version release details.
 
 ---
 
@@ -13,6 +13,60 @@ The system is designed around a decoupled **Ports & Adapters (Hexagonal)** archi
 *   **Subsystem & Component Boundaries**: Detailed in [use_case_planning.md](file:///C:/Users/sulig/.gemini/antigravity-cli/brain/3ee7a652-e3b9-4285-aa73-cc8ce7ebaa96/use_case_planning.md).
 *   **Use Cases Diagram**: [use_cases.puml](file:///B:/projects/council_manager/uml/use_cases.puml).
 *   **Component Diagram**: [components.puml](file:///B:/projects/council_manager/uml/components.puml).
+
+### Governance Orchestration Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Developer as Developer / User
+    participant CLI as CLI / TUI Client
+    participant Orc as Orchestrator
+    participant DB as SQLite DB (Project isolated)
+    participant AI as "AI Council Teams (A-G)"
+
+    Developer->>CLI: proposal-create "Description..."
+    CLI->>Orc: create_proposal()
+    Orc->>AI: generate_proposal_inception() [AI topic & options extraction]
+    Orc->>DB: Save proposal (status: DELIBERATION_PENDING)
+    DB-->>Developer: Return proposal ID (DEC-XXX)
+
+    Developer->>CLI: deliberate / vote (or auto-run)
+    CLI->>Orc: run_deliberation() & run_voting()
+    
+    rect rgb(240, 248, 255)
+        Note over Orc, AI: Phase 1: Deliberation
+        Orc->>AI: query_team_deliberation() [Concurrent requests]
+        AI-->>Orc: Return stances & rationales
+        Orc->>DB: Save rationales (status: VOTING_PENDING)
+    end
+
+    rect rgb(245, 245, 245)
+        Note over Orc, AI: Phase 2: Voting Loop (Up to 5 Cycles)
+        loop Multi-Cycle Consensus Loop
+            Orc->>AI: query_team_vote(with previous cycle tallies as context)
+            AI-->>Orc: Return blind vote and rationale
+            Orc->>Orc: Tally weighted votes
+            alt Consensus Reached (>70% weight)
+                Orc->>DB: Save final votes (status: RATIFICATION_PENDING)
+            else Max Cycles Reached without Consensus
+                Orc->>Orc: Fallback to majority winner
+                Orc->>DB: Save majority votes (status: RATIFICATION_PENDING)
+            end
+        end
+    end
+
+    Developer->>CLI: proposal-ratify
+    CLI->>Developer: Display team rationales & voting tally
+    Developer->>CLI: Select ratified option & open roadmap task ID
+    CLI->>Orc: ratify_proposal()
+    Orc->>DB: Save Decision & Alternatives, set task to DONE
+    Orc->>DB: Export DB tables to .agents/*.csv (auto-sync)
+    DB-->>Developer: Success confirmation
+```
+
+Detailed class and sequence diagrams mapping the implementation logic of these modules can be found under the [uml/sequences/](file:///B:/projects/council_manager/uml/sequences/) directory.
+
 
 ---
 

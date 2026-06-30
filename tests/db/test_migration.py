@@ -189,4 +189,52 @@ def test_initialize_new_project():
             session.close()
             db_manager.close_all()
 
+def test_initialize_new_project_with_custom_values():
+    import tempfile
+    from council_manager.db import Team, Decision
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        
+        initialize_new_project(
+            workspace, 
+            "my_new_project", 
+            project_name="Custom Name", 
+            global_member_count=15, 
+            project_description="This is a custom project description for testing."
+        )
+        
+        # Verify custom member count in CSV
+        teams_csv = workspace / ".agents" / "teams.csv"
+        assert teams_csv.exists()
+        with open(teams_csv, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert ";15;" in content
+
+        # Verify DEC-001 in decisions.csv
+        dec_csv = workspace / ".agents" / "decisions.csv"
+        assert dec_csv.exists()
+        with open(dec_csv, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert "DEC-001;" in content
+            assert "Custom Name" in content
+            assert "This is a custom project description for testing." in content
+            
+        # Verify DB was seeded correctly
+        session = db_manager.get_session(workspace)
+        try:
+            teams = session.query(Team).all()
+            assert len(teams) == 7
+            for t in teams:
+                assert t.vote_weight == 15
+                
+            dec = session.query(Decision).filter_by(id="DEC-001").first()
+            assert dec is not None
+            assert dec.topic == "Project Onboarding"
+            assert dec.decision == "Onboard Project Custom Name"
+            assert dec.rationale == "This is a custom project description for testing."
+        finally:
+            session.close()
+            db_manager.close_all()
+
+
 

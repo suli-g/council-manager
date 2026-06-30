@@ -1,23 +1,26 @@
-# Project Governance & Workflow
+---
+name: council-manager
+description: "Follows the multi-team, multi-tier governance model for this project. Use when the user submits a PROPOSAL: or QUERY: or when performing any development work in this workspace."
+---
 
-This file provides the meta-framework for how AI agents and LLMs must operate within this repository. It prioritizes dynamic configuration over hard-coded rules to ensure the project can scale its governance and team structure.
+# Council Manager Governance Skill
 
-## Dynamic Source-of-Truth
-Never assume the state of the project or its team structure. Always consult these live CSV indices before proposing or executing changes. 
+You are operating in a workspace governed by the `council_manager` system. You must strictly adhere to the following rules:
 
-**Format Standard:** All CSV files in this repository MUST use semi-colons (`;`) as delimiters to ensure compatibility with text fields containing commas.
+## 1. Dynamic Source-of-Truth
+Never assume the state of the project or its team structure. Always consult these live CSV indices before proposing or executing changes:
+*   **Teams & Roles (`.agents/teams.csv`):** Defines the current team makeup, paradigm specialties, and voting weights.
+*   **Ratified Decisions (`.agents/decisions.csv`):** The immutable log of all technical and architectural choices made by the project teams.
+*   **Voting Records (`.agents/votes_manifest.csv`):** The central index of all formal paradigm-weighted votes, pointing to detailed records in `.agents/votes/`.
+*   **Alternatives Evaluated (`.agents/alternatives.csv`):** Context on why certain paths were rejected, preserving the "design space" for future reference.
+*   **Development Roadmap (`.agents/roadmap.csv`):** The authoritative list of tasks, their priorities, and current implementation status.
+*   **Audit Logs (`.agents/audits.csv`):** Historical record of project alignment and quality assessments.
+*   **Audit Resolutions (`.agents/audit_decisions.csv`):** Relational mapping between audit findings and the architectural decisions that resolve them.
 
-*   **Teams & Roles (`docs/.agents/teams.csv`):** Defines the current team makeup, paradigm specialties, and voting weights.
-*   **Ratified Decisions (`docs/.agents/decisions.csv`):** The immutable log of all technical and architectural choices made by the project teams.
-*   **Voting Records (`docs/.agents/votes_manifest.csv`):** The central index of all formal paradigm-weighted votes, pointing to detailed records in `docs/.agents/votes/`.
-*   **Alternatives Evaluated (`docs/.agents/alternatives.csv`):** Context on why certain paths were rejected, preserving the "design space" for future reference.
-*   **Development Roadmap (`docs/.agents/roadmap.csv`):** The authoritative list of tasks, their priorities, and current implementation status.
-*   **Audit Logs (`docs/.agents/audits.csv`):** Historical record of project alignment and quality assessments.
-*   **Audit Resolutions (`docs/.agents/audit_decisions.csv`):** Relational mapping between audit findings and the architectural decisions that resolve them.
+All CSV files in this repository MUST use semi-colons (`;`) as delimiters.
 
-## Multi-Team, Multi-Tier Governance
+## 2. Multi-Team, Multi-Tier Governance
 The project operates under a decentralized, paradigm-weighted governance model.
-
 1.  **Perspective Gathering:** Before any significant change, identify which teams in `teams.csv` are affected by or have expertise in the domain.
 2.  **Tiered Evaluation:** 
     *   Any request starting with **PROPOSAL:** triggers a formal **interactive** vote.
@@ -26,12 +29,12 @@ The project operates under a decentralized, paradigm-weighted governance model.
     *   Any request starting with **QUERY:** triggers a lightweight, non-voting team deliberation flow. The agent will concurrently query all active teams for their immediate rationales and perspectives on how the queried item affects the project, presenting them to the user. This does not involve any voting or formal ratification, and query results are not written to the static decisions or alternatives CSV files to prevent documentation rot.
 3.  **Conflict Resolution:** If paradigms disagree, the decision is resolved through the multi-team voting system defined by the current weights in `teams.csv`. The **Contrarians (Team G)** provide critical friction to prevent groupthink.
 
-## Mandatory AI Workflow
+## 3. Mandatory AI Workflow
 Any AI agent (including yourself) must follow these procedural mandates:
 
 ### 0. Mandatory Deliberation
-*   **The PROPOSAL: Halt:** When a message starts with **PROPOSAL:**, you MUST NOT execute any state-changing tools (e.g., `write_file`, `replace`, `run_shell_command`) until a formal interactive vote has been conducted and documented in `votes_manifest.csv`.
-*   **Interactive Decision Making:** You must use the `ask_user` tool to present paradigm perspectives to the user. You are forbidden from simulating the final outcome of a vote without real-time human interaction.
+*   **The PROPOSAL: Halt:** When a message starts with **PROPOSAL:**, you MUST NOT execute any state-changing tools (e.g., `write_to_file`, `replace_file_content`, `run_command`) until a formal interactive vote has been conducted and documented in `votes_manifest.csv`.
+*   **Interactive Decision Making:** You must use the `ask_question` tool to present paradigm perspectives to the user. You are forbidden from simulating the final outcome of a vote without real-time human interaction.
 
 ### 1. Research & Alignment
 *   Search `decisions.csv` for any existing rulings that constrain your task.
@@ -47,9 +50,8 @@ Any AI agent (including yourself) must follow these procedural mandates:
 *   When spawning sub-agents or collaborating with other LLMs, ensure they are first directed to this file.
 *   The `.agents/` directory is the "nervous system" of the project; any teammate must be able to autonomously read its state to orient themselves without human intervention.
 
-## Protocol Breach & Alignment
+## 4. Protocol Breach & Alignment
 If an agent (AI or human) deviates from these principles (e.g., by executing changes without a vote):
 1.  **Immediate Halt:** Stop all current execution.
 2.  **Audit & Rollback:** Analyze the deviation and revert any unsanctioned changes if necessary.
 3.  **Formal Re-Alignment:** Re-document the current state and return to the proper deliberation phase for the original proposal.
-

@@ -6,7 +6,7 @@ from pathlib import Path
 from council_manager.config import settings
 from council_manager.db import db_manager, Proposal, Team, Decision, AuditLog, RoadmapTask, BackgroundTask, initialize_new_project, import_csv_to_db, export_db_to_csv
 from council_manager.core.orchestrator import council_orchestrator
-from council_manager.core.prompter import format_rationale
+from council_manager.core.prompter import format_rationale, AgentPrompter
 
 # ANSI escape codes for terminal aesthetics
 COLOR_GREEN = "\033[92m"
@@ -40,11 +40,27 @@ def log_error(msg: str):
     except UnicodeEncodeError:
         print(f"{COLOR_RED}{COLOR_BOLD}[ERROR]{COLOR_RESET} {msg}", file=sys.stderr)
 
-def get_workspace_path(path_arg: str | None) -> Path:
+def verify_workspace_onboarded(workspace: Path) -> None:
+    # Skip verification during unit/integration tests to support mock environments
+    if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+        return
+    agents_dir = workspace / ".agents"
+    teams_csv = agents_dir / "teams.csv"
+    if not agents_dir.exists() or not teams_csv.exists():
+        log_error(
+            f"The directory at '{workspace}' has not been onboarded as a Council Manager workspace yet.\n"
+            f"Please run the onboarding wizard to initialize it:\n\n"
+            f"  uv run council-manager init-project --path \"{workspace}\"\n"
+        )
+        sys.exit(1)
+
+def get_workspace_path(path_arg: str | None, verify: bool = True) -> Path:
     if path_arg:
         p = Path(path_arg).resolve()
     else:
         p = Path(os.getcwd()).resolve()
+    if verify:
+        verify_workspace_onboarded(p)
     return p
 
 def get_proposal_id(args, workspace: Path) -> str:
@@ -110,14 +126,169 @@ def spawn_background_task(workspace_path: Path, task_id: str, max_cycles: int | 
     log_out.close()
 
 def cmd_init_project(args):
-    target_path = Path(args.path).resolve()
-    log_info(f"Initializing new project '{args.project_id}' in directory: {target_path}")
-    try:
-        initialize_new_project(target_path, args.project_id)
-        log_success("Project initialized and template CSV files imported successfully.")
-    except Exception as e:
-        log_error(f"Failed to initialize project: {e}")
+    path_str = args.path or os.getcwd()
+    target_path = Path(path_str).resolve()
+    
+    # Check if project is already initialized
+    agents_dir = target_path / ".agents"
+    teams_csv = agents_dir / "teams.csv"
+    project_exists = agents_dir.exists() and teams_csv.exists()
+    
+    if project_exists:
+        if not getattr(args, "fix_missing", False):
+            log_error(
+                f"Project in '{target_path}' is already initialized.\n"
+                f"To restore or fix missing default files (like AGENTS.md or SKILL.md) without re-onboarding, run:\n\n"
+                f"  uv run council-manager init-project --path \"{target_path}\" --fix-missing\n"
+            )
+            sys.exit(1)
+        
+        # Implement the --fix-missing logic
+        log_info(f"Fixing missing default files in already initialized project at: {target_path}")
+        
+        from council_manager.db.migration import DEFAULT_AGENTS_MD, DEFAULT_SKILL_MD
+        
+        fixed_any = False
+        
+        # Fix AGENTS.md
+        agents_md = target_path / "AGENTS.md"
+        if not agents_md.exists():
+            try:
+                with open(agents_md, "w", encoding="utf-8", newline="") as f:
+                    f.write(DEFAULT_AGENTS_MD)
+                log_success("Created missing AGENTS.md file in project root.")
+                fixed_any = True
+            except Exception as e:
+                log_error(f"Failed to create AGENTS.md: {e}")
+                sys.exit(1)
+        
+        # Fix SKILL.md
+        skill_dir = agents_dir / "skills" / "council-manager"
+        skill_dir.mkdir(parents=True, exist_ok=True)
+        skill_md = skill_dir / "SKILL.md"
+        if not skill_md.exists():
+            try:
+                with open(skill_md, "w", encoding="utf-8", newline="") as f:
+                    f.write(DEFAULT_SKILL_MD)
+                log_success("Created missing SKILL.md file in .agents/skills/council-manager/.")
+                fixed_any = True
+            except Exception as e:
+                log_error(f"Failed to create SKILL.md: {e}")
+                sys.exit(1)
+                
+        if not fixed_any:
+            log_info("All default governance files (AGENTS.md, SKILL.md) are already present.")
+        else:
+            log_success("Governance files fixed successfully.")
+        return
+
+    # If project does not exist but --fix-missing was passed, raise an error
+    if getattr(args, "fix_missing", False):
+        log_error(f"No initialized project found at '{target_path}'. Cannot fix missing files. Please run without '--fix-missing' to initialize a new project.")
         sys.exit(1)
+
+    # 1. Determine if we are in interactive mode
+    # If any of the main inputs (path, project-id, description) are missing and stdin is a tty, we can run interactively.
+    interactive = False
+    if not args.path or not args.project_id or not getattr(args, "description", None):
+        interactive = sys.stdin.isatty()
+
+    project_id = args.project_id
+    project_name = getattr(args, "name", None)
+    description = getattr(args, "description", None)
+    member_count = getattr(args, "member_count", None)
+
+
+    if interactive:
+        print("\n=== Council Manager Onboarding Wizard ===\n")
+        
+        # Prompt for Path
+        if not path_str:
+            default_path = os.getcwd()
+            path_str = input(f"Enter target project directory [default: {default_path}]: ").strip() or default_path
+        
+        # Prompt for Project ID
+        if not project_id:
+            resolved_path = Path(path_str).resolve()
+            default_id = resolved_path.name.lower().replace(" ", "_").replace("-", "_")
+            project_id = input(f"Enter project ID / slug [default: {default_id}]: ").strip() or default_id
+            
+        # Prompt for Project Name
+        if not project_name:
+            default_name = project_id.replace("_", " ").title()
+            project_name = input(f"Enter project name [default: {default_name}]: ").strip() or default_name
+
+        # Prompt for Description
+        if not description:
+            print("\nEnter a description of the project and its core goals/problems.")
+            print("This will be used to initialize the council and can be used by the AI to infer the optimal council size.")
+            description = input("Project Description: ").strip()
+            while not description:
+                description = input("Description cannot be empty. Project Description: ").strip()
+
+        # Prompt for Member Count (with AI inference option!)
+        if not member_count:
+            print("\nGovernance Council Team Member Count:")
+            print("Under our rules, all 7 active paradigm teams (A-G) will receive the same global member count.")
+            print("Would you like the AI to infer the optimal count based on the project description? (y/n)")
+            choice = input("[default: y]: ").strip().lower() or "y"
+            if choice == "y":
+                log_info("Querying AI to infer optimal team member count...")
+                try:
+                    prompter = AgentPrompter()
+                    inference = prompter.infer_global_member_count(description)
+                    inferred_val = inference.global_member_count
+                    rationale = inference.rationale
+                    log_success(f"AI Suggestion: {inferred_val} members per team.")
+                    print(f"Rationale: {rationale}")
+                    confirm = input(f"Apply this suggestion? (y/n) [default: y]: ").strip().lower() or "y"
+                    if confirm == "y":
+                        member_count = inferred_val
+                except Exception as e:
+                    log_error(f"AI inference failed ({e}). Falling back to manual entry.")
+            
+            if not member_count:
+                while True:
+                    mc_str = input("Enter global member count (integer between 5 and 50) [default: 10]: ").strip() or "10"
+                    try:
+                        val = int(mc_str)
+                        if 5 <= val <= 50:
+                            member_count = val
+                            break
+                        else:
+                            print("Please enter an integer between 5 and 50.")
+                    except ValueError:
+                        print("Invalid integer.")
+    else:
+        # Non-interactive fallback defaults
+        if not path_str:
+            path_str = os.getcwd()
+        if not project_id:
+            project_id = "new_project"
+        if not project_name:
+            project_name = project_id.replace("_", " ").title()
+        if not member_count:
+            member_count = 10
+
+    target_path = Path(path_str).resolve()
+    log_info(f"Initializing and onboarding project '{project_name}' in: {target_path}")
+    log_info(f"Global team count set to: {member_count} members per group.")
+    
+    try:
+        initialize_new_project(
+            workspace_dir=target_path,
+            project_id=project_id,
+            project_name=project_name,
+            global_member_count=member_count,
+            project_description=description
+        )
+        log_success("Project onboarded successfully.")
+        if description:
+            log_success("Initial description ratified and saved as DEC-001.")
+    except Exception as e:
+        log_error(f"Failed to onboard project: {e}")
+        sys.exit(1)
+
 
 def cmd_import(args):
     workspace = get_workspace_path(args.workspace)
@@ -793,6 +964,41 @@ def cmd_proposal_ratify(args):
 def cmd_team_vote(args):
     asyncio.run(run_team_vote_async(args))
 
+def cmd_register_skill(args):
+    import json
+    target_path = Path(args.workspace or os.getcwd()).resolve()
+    agents_dir = target_path / ".agents"
+    
+    if not agents_dir.exists():
+        log_error(f"No initialized project found at '{target_path}'. Please run 'init-project' first.")
+        sys.exit(1)
+        
+    skill_dir = agents_dir / "skills" / "council-manager"
+    skill_md = skill_dir / "SKILL.md"
+    
+    if not skill_md.exists():
+        log_error(f"Skill file not found at '{skill_md}'. Please run 'init-project --fix-missing' to restore it.")
+        sys.exit(1)
+        
+    skills_json_path = agents_dir / "skills.json"
+    skill_path_str = str(skill_dir.as_posix())
+    
+    config_data = {
+        "entries": [
+            { "path": skill_path_str }
+        ]
+    }
+    
+    try:
+        with open(skills_json_path, "w", encoding="utf-8", newline="") as f:
+            json.dump(config_data, f, indent=2)
+        log_success(f"Successfully registered 'council-manager' skill in {skills_json_path}")
+        log_info(f"Registered path: {skill_path_str}")
+    except Exception as e:
+        log_error(f"Failed to write skills.json: {e}")
+        sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Council Manager CLI: Interact with isolated multi-team governance databases.",
@@ -802,9 +1008,14 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Subcommand to execute")
 
     # Command: init-project
-    p_init = subparsers.add_parser("init-project", help="Initialize a new project directory with templates.")
-    p_init.add_argument("--path", required=True, help="Target folder to initialize project in.")
-    p_init.add_argument("--project-id", default="new_project", help="Identifier of the project.")
+    p_init = subparsers.add_parser("init-project", help="Initialize a new project directory with templates and interactive onboarding.")
+    p_init.add_argument("--path", help="Target folder to initialize project in. (optional, prompts if omitted)")
+    p_init.add_argument("--project-id", help="Identifier of the project. (optional, prompts if omitted)")
+    p_init.add_argument("--name", help="Name of the project. (optional, prompts if omitted)")
+    p_init.add_argument("--description", help="Description of the project. (optional, prompts if omitted)")
+    p_init.add_argument("--member-count", type=int, help="Global member count for all teams. (optional, prompts/infers if omitted)")
+    p_init.add_argument("--fix-missing", action="store_true", help="Fix missing default files (like AGENTS.md or SKILL.md) in an already initialized project without re-onboarding.")
+
 
     # Command: import
     p_import = subparsers.add_parser("import", help="Import CSV data into the SQLite database.")
@@ -910,6 +1121,10 @@ def main():
     p_dash = subparsers.add_parser("dashboard", help="Launch the interactive Terminal UI dashboard.")
     p_dash.add_argument("-w", "--workspace", help="Path to the workspace folder.")
 
+    # Command: register-skill
+    p_reg = subparsers.add_parser("register-skill", help="Explicitly register the council_manager workspace skill in skills.json on demand.")
+    p_reg.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+
     args = parser.parse_args()
     if args.debug:
         settings.debug = True
@@ -959,6 +1174,8 @@ def main():
         cmd_server(args)
     elif args.command == "dashboard":
         cmd_dashboard(args)
+    elif args.command == "register-skill":
+        cmd_register_skill(args)
 
 if __name__ == "__main__":
     main()

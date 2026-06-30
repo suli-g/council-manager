@@ -305,13 +305,134 @@ def export_db_to_csv(workspace_dir: str | Path, project_id: str):
                 for task in roadmap_tasks:
                     writer.writerow([task.phase, task.id, task.task, task.status, task.notes or ""])
 
-
     finally:
         session.close()
 
 
-def initialize_new_project(workspace_dir: str | Path, project_id: str, project_name: str | None = None):
-    """Initialize a new project directory with default settings and empty template CSV files."""
+DEFAULT_AGENTS_MD = """# Project Governance & Workflow
+
+This file provides the meta-framework for how AI agents and LLMs must operate within this repository. It prioritizes dynamic configuration over hard-coded rules to ensure the project can scale its governance and team structure.
+
+## Dynamic Source-of-Truth
+Never assume the state of the project or its team structure. Always consult these live CSV indices before proposing or executing changes. 
+
+**Format Standard:** All CSV files in this repository MUST use semi-colons (`;`) as delimiters to ensure compatibility with text fields containing commas.
+
+*   **Teams & Roles (`.agents/teams.csv`):** Defines the current team makeup, paradigm specialties, and voting weights.
+*   **Ratified Decisions (`.agents/decisions.csv`):** The immutable log of all technical and architectural choices made by the project teams.
+*   **Voting Records (`.agents/votes_manifest.csv`):** The central index of all formal paradigm-weighted votes, pointing to detailed records in `.agents/votes/`.
+*   **Alternatives Evaluated (`.agents/alternatives.csv`):** Context on why certain paths were rejected, preserving the "design space" for future reference.
+*   **Development Roadmap (`.agents/roadmap.csv`):** The authoritative list of tasks, their priorities, and current implementation status.
+*   **Audit Logs (`.agents/audits.csv`):** Historical record of project alignment and quality assessments.
+*   **Audit Resolutions (`.agents/audit_decisions.csv`):** Relational mapping between audit findings and the architectural decisions that resolve them.
+
+## Multi-Team, Multi-Tier Governance
+The project operates under a decentralized, paradigm-weighted governance model.
+
+1.  **Perspective Gathering:** Before any significant change, identify which teams in `teams.csv` are affected by or have expertise in the domain.
+2.  **Tiered Evaluation:** 
+    *   Any request starting with **PROPOSAL:** triggers a formal **interactive** vote.
+    *   Every proposal must include at least **two alternatives** (including the Contrarian view).
+    *   **Human Oversight:** Votes must NEVER be simulated or handled autonomously by an agent. The agent must present the alternatives and team perspectives to the human user for explicit validation and selection. Human overseer decisions should only be documented in the vote record if they contradict all team-proposed options.
+    *   Any request starting with **QUERY:** triggers a lightweight, non-voting team deliberation flow. The agent will concurrently query all active teams for their immediate rationales and perspectives on how the queried item affects the project, presenting them to the user. This does not involve any voting or formal ratification, and query results are not written to the static decisions or alternatives CSV files to prevent documentation rot.
+3.  **Conflict Resolution:** If paradigms disagree, the decision is resolved through the multi-team voting system defined by the current weights in `teams.csv`. The **Contrarians (Team G)** provide critical friction to prevent groupthink.
+
+## Mandatory AI Workflow
+Any AI agent (including yourself) must follow these procedural mandates:
+
+### 0. Mandatory Deliberation
+*   **The PROPOSAL: Halt:** When a message starts with **PROPOSAL:**, you MUST NOT execute any state-changing tools (e.g., `write_file`, `replace`, `run_shell_command`) until a formal interactive vote has been conducted and documented in `votes_manifest.csv`.
+*   **Interactive Decision Making:** You must use the `ask_user` tool (e.g., `ask_question`) to present paradigm perspectives to the user. You are forbidden from simulating the final outcome of a vote without real-time human interaction.
+
+### 1. Research & Alignment
+*   Search `decisions.csv` for any existing rulings that constrain your task.
+*   Consult `alternatives.csv` to avoid re-proposing previously rejected strategies.
+*   Review `roadmap.csv` to ensure your work aligns with the current phase's priorities.
+
+### 2. Execution & Documentation
+*   **Ratification:** After a strategy is agreed upon, you must update `decisions.csv` and `alternatives.csv` to reflect the new state.
+*   **Roadmap Maintenance:** Update the status of tasks in `roadmap.csv` (and `README.md` if applicable) as you progress.
+*   **Scalability:** Do not hard-code team counts, tier counts, or specific paradigm names into the codebase or memory files. Reference `teams.csv` dynamically.
+
+### 3. Sub-Agent/Teammate Integration
+*   When spawning sub-agents or collaborating with other LLMs, ensure they are first directed to this file or the workspace skill.
+*   The `.agents/` directory is the "nervous system" of the project; any teammate must be able to autonomously read its state to orient themselves without human intervention.
+
+## Protocol Breach & Alignment
+If an agent (AI or human) deviates from these principles (e.g., by executing changes without a vote):
+1.  **Immediate Halt:** Stop all current execution.
+2.  **Audit & Rollback:** Analyze the deviation and revert any unsanctioned changes if necessary.
+3.  **Formal Re-Alignment:** Re-document the current state and return to the proper deliberation phase for the original proposal.
+"""
+
+DEFAULT_SKILL_MD = """---
+name: council-manager
+description: Follows the multi-team, multi-tier governance model for this project. Use when the user submits a PROPOSAL: or QUERY: or when performing any development work in this workspace.
+---
+
+# Council Manager Governance Skill
+
+You are operating in a workspace governed by the `council_manager` system. You must strictly adhere to the following rules:
+
+## 1. Dynamic Source-of-Truth
+Never assume the state of the project or its team structure. Always consult these live CSV indices before proposing or executing changes:
+*   **Teams & Roles (`.agents/teams.csv`):** Defines the current team makeup, paradigm specialties, and voting weights.
+*   **Ratified Decisions (`.agents/decisions.csv`):** The immutable log of all technical and architectural choices made by the project teams.
+*   **Voting Records (`.agents/votes_manifest.csv`):** The central index of all formal paradigm-weighted votes, pointing to detailed records in `.agents/votes/`.
+*   **Alternatives Evaluated (`.agents/alternatives.csv`):** Context on why certain paths were rejected, preserving the "design space" for future reference.
+*   **Development Roadmap (`.agents/roadmap.csv`):** The authoritative list of tasks, their priorities, and current implementation status.
+*   **Audit Logs (`.agents/audits.csv`):** Historical record of project alignment and quality assessments.
+*   **Audit Resolutions (`.agents/audit_decisions.csv`):** Relational mapping between audit findings and the architectural decisions that resolve them.
+
+All CSV files in this repository MUST use semi-colons (`;`) as delimiters.
+
+## 2. Multi-Team, Multi-Tier Governance
+The project operates under a decentralized, paradigm-weighted governance model.
+1.  **Perspective Gathering:** Before any significant change, identify which teams in `teams.csv` are affected by or have expertise in the domain.
+2.  **Tiered Evaluation:** 
+    *   Any request starting with **PROPOSAL:** triggers a formal **interactive** vote.
+    *   Every proposal must include at least **two alternatives** (including the Contrarian view).
+    *   **Human Oversight:** Votes must NEVER be simulated or handled autonomously by an agent. The agent must present the alternatives and team perspectives to the human user for explicit validation and selection. Human overseer decisions should only be documented in the vote record if they contradict all team-proposed options.
+    *   Any request starting with **QUERY:** triggers a lightweight, non-voting team deliberation flow. The agent will concurrently query all active teams for their immediate rationales and perspectives on how the queried item affects the project, presenting them to the user. This does not involve any voting or formal ratification, and query results are not written to the static decisions or alternatives CSV files to prevent documentation rot.
+3.  **Conflict Resolution:** If paradigms disagree, the decision is resolved through the multi-team voting system defined by the current weights in `teams.csv`. The **Contrarians (Team G)** provide critical friction to prevent groupthink.
+
+## 3. Mandatory AI Workflow
+Any AI agent (including yourself) must follow these procedural mandates:
+
+### 0. Mandatory Deliberation
+*   **The PROPOSAL: Halt:** When a message starts with **PROPOSAL:**, you MUST NOT execute any state-changing tools (e.g., `write_to_file`, `replace_file_content`, `run_command`) until a formal interactive vote has been conducted and documented in `votes_manifest.csv`.
+*   **Interactive Decision Making:** You must use the `ask_question` tool to present paradigm perspectives to the user. You are forbidden from simulating the final outcome of a vote without real-time human interaction.
+
+### 1. Research & Alignment
+*   Search `decisions.csv` for any existing rulings that constrain your task.
+*   Consult `alternatives.csv` to avoid re-proposing previously rejected strategies.
+*   Review `roadmap.csv` to ensure your work aligns with the current phase's priorities.
+
+### 2. Execution & Documentation
+*   **Ratification:** After a strategy is agreed upon, you must update `decisions.csv` and `alternatives.csv` to reflect the new state.
+*   **Roadmap Maintenance:** Update the status of tasks in `roadmap.csv` (and `README.md` if applicable) as you progress.
+*   **Scalability:** Do not hard-code team counts, tier counts, or specific paradigm names into the codebase or memory files. Reference `teams.csv` dynamically.
+
+### 3. Sub-Agent/Teammate Integration
+*   When spawning sub-agents or collaborating with other LLMs, ensure they are first directed to this file.
+*   The `.agents/` directory is the "nervous system" of the project; any teammate must be able to autonomously read its state to orient themselves without human intervention.
+
+## 4. Protocol Breach & Alignment
+If an agent (AI or human) deviates from these principles (e.g., by executing changes without a vote):
+1.  **Immediate Halt:** Stop all current execution.
+2.  **Audit & Rollback:** Analyze the deviation and revert any unsanctioned changes if necessary.
+3.  **Formal Re-Alignment:** Re-document the current state and return to the proper deliberation phase for the original proposal.
+"""
+
+
+def initialize_new_project(
+    workspace_dir: str | Path,
+    project_id: str,
+    project_name: str | None = None,
+    global_member_count: int = 10,
+    project_description: str | None = None
+):
+    """Initialize a new project directory with default settings, empty templates, and custom team counts."""
     workspace_path = Path(workspace_dir).resolve()
     agents_dir = workspace_path / ".agents"
     agents_dir.mkdir(parents=True, exist_ok=True)
@@ -319,18 +440,18 @@ def initialize_new_project(workspace_dir: str | Path, project_id: str, project_n
     votes_dir = agents_dir / "votes"
     votes_dir.mkdir(parents=True, exist_ok=True)
     
-    # Write default teams.csv
+    # Write default teams.csv with custom global member count
     teams_csv = agents_dir / "teams.csv"
     if not teams_csv.exists():
         with open(teams_csv, "w", encoding="utf-8", newline="") as f:
             f.write("team_id;team_name;count;paradigm_specialty\n")
-            f.write("A;Functional Specialists;10;Functional Programming (Immutability, Pure Functions, Pipelines)\n")
-            f.write("B;OOP Specialists;10;Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns)\n")
-            f.write("C;Imperative Specialists;10;Imperative Programming (Explicit State, Procedural logic, Performance)\n")
-            f.write("D;Declarative Specialists;10;Declarative Programming (Logic engines, Config-driven, DSLs)\n")
-            f.write("E;Dynamic Specialists;10;Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping)\n")
-            f.write("F;Auditors/Project Managers;10;Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment)\n")
-            f.write("G;Contrarians;10;Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives)\n")
+            f.write(f"A;Functional Specialists;{global_member_count};Functional Programming (Immutability, Pure Functions, Pipelines)\n")
+            f.write(f"B;OOP Specialists;{global_member_count};Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns)\n")
+            f.write(f"C;Imperative Specialists;{global_member_count};Imperative Programming (Explicit State, Procedural logic, Performance)\n")
+            f.write(f"D;Declarative Specialists;{global_member_count};Declarative Programming (Logic engines, Config-driven, DSLs)\n")
+            f.write(f"E;Dynamic Specialists;{global_member_count};Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping)\n")
+            f.write(f"F;Auditors/Project Managers;{global_member_count};Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment)\n")
+            f.write(f"G;Contrarians;{global_member_count};Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives)\n")
 
     # Write other template CSVs if they do not exist
     templates = {
@@ -345,7 +466,48 @@ def initialize_new_project(workspace_dir: str | Path, project_id: str, project_n
         if not filepath.exists():
             with open(filepath, "w", encoding="utf-8", newline="") as f:
                 f.write(headers)
-                
+
+    # If project_description is provided, record it as DEC-001 (Immediate Onboarding Ratification)
+    if project_description:
+        decisions_csv = agents_dir / "decisions.csv"
+        has_dec_001 = False
+        if decisions_csv.exists():
+            with open(decisions_csv, "r", encoding="utf-8") as f:
+                content = f.read()
+                if "DEC-001" in content:
+                    has_dec_001 = True
+        
+        if not has_dec_001:
+            today_str = date.today().strftime("%Y-%m-%d")
+            clean_desc = project_description.replace("\n", " ").replace(";", " ")
+            with open(decisions_csv, "a", encoding="utf-8", newline="") as f:
+                f.write(f"DEC-001;{today_str};Project Onboarding;Onboard Project {project_name or project_id};{clean_desc}\n")
+            
+            # Write corresponding vote manifest and vote file
+            votes_manifest = agents_dir / "votes_manifest.csv"
+            with open(votes_manifest, "a", encoding="utf-8", newline="") as f:
+                f.write(f"DEC-001;Project Onboarding;docs/.agents/votes/DEC-001.csv;{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}\n")
+            
+            dec_001_vote = votes_dir / "DEC-001.csv"
+            with open(dec_001_vote, "w", encoding="utf-8", newline="") as f:
+                f.write("voter_id;team_id;vote\n")
+                f.write("V-008;User;Onboard Project\n")
+
+    # Write default AGENTS.md in the workspace root
+    agents_md = workspace_path / "AGENTS.md"
+    if not agents_md.exists():
+        with open(agents_md, "w", encoding="utf-8", newline="") as f:
+            f.write(DEFAULT_AGENTS_MD)
+
+    # Write Workspace Skill in .agents/skills/council-manager/SKILL.md
+    skill_dir = agents_dir / "skills" / "council-manager"
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.exists():
+        with open(skill_md, "w", encoding="utf-8", newline="") as f:
+            f.write(DEFAULT_SKILL_MD)
+
     # Run the import to seed the SQLite database file
     import_csv_to_db(workspace_path, project_id)
+
 
