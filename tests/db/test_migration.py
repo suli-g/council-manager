@@ -2,7 +2,7 @@ import csv
 import tempfile
 import pytest
 from pathlib import Path
-from council_manager.db import db_manager, Project, Team, Proposal, Decision, Alternative, AuditLog
+from council_manager.db import db_manager, Project, Team, Proposal, Decision, Alternative, AuditLog, AuditDecision
 from council_manager.db.migration import import_csv_to_db, export_db_to_csv, initialize_new_project
 
 @pytest.fixture(autouse=True)
@@ -41,6 +41,11 @@ def test_migration_bidirectional():
             f.write("timestamp;audit_id;summary;alignment_score;auditor_team\n")
             f.write("2026-05-07T14:30:00;AUDIT-001;Alignment assessment;60%;F\n")
 
+        # Write mock audit_decisions.csv
+        with open(src_agents / "audit_decisions.csv", "w", encoding="utf-8", newline="") as f:
+            f.write("audit_id;decision_id;status;re_audit_date;notes\n")
+            f.write("AUDIT-001;DEC-001;FIXED;2026-05-15;Refactored code\n")
+
         # Write mock vote file
         with open(src_votes / "DEC-001.csv", "w", encoding="utf-8", newline="") as f:
             f.write("voter_id;team_id;vote;rationale\n")
@@ -72,6 +77,11 @@ def test_migration_bidirectional():
             assert audit is not None
             assert audit.alignment_score == 60.0
 
+            audit_dec = session.query(AuditDecision).filter_by(audit_id="AUDIT-001", decision_id="DEC-001").first()
+            assert audit_dec is not None
+            assert audit_dec.status == "FIXED"
+            assert audit_dec.notes == "Refactored code"
+
             prop = session.query(Proposal).filter_by(id="DEC-001").first()
             assert prop is not None
             assert prop.status == "RATIFIED"
@@ -90,8 +100,20 @@ def test_migration_bidirectional():
         assert (dest_agents / "decisions.csv").exists()
         assert (dest_agents / "alternatives.csv").exists()
         assert (dest_agents / "audits.csv").exists()
+        assert (dest_agents / "audit_decisions.csv").exists()
         assert (dest_agents / "votes_manifest.csv").exists()
         assert (dest_agents / "votes" / "DEC-001.csv").exists()
+
+        # Read exported audit_decisions.csv to verify contents and format
+        with open(dest_agents / "audit_decisions.csv", "r", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f, delimiter=";")
+            rows = list(reader)
+            assert len(rows) == 1
+            assert rows[0]["audit_id"] == "AUDIT-001"
+            assert rows[0]["decision_id"] == "DEC-001"
+            assert rows[0]["status"] == "FIXED"
+            assert rows[0]["re_audit_date"] == "2026-05-15"
+            assert rows[0]["notes"] == "Refactored code"
 
         # Read exported decisions.csv to verify contents and semi-colon format
         with open(dest_agents / "decisions.csv", "r", encoding="utf-8", newline="") as f:

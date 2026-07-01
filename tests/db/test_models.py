@@ -2,7 +2,7 @@ import pytest
 from pathlib import Path
 import tempfile
 from sqlalchemy.exc import IntegrityError
-from council_manager.db import db_manager, Project, Team, Proposal, Decision, Alternative, AuditLog, RoadmapTask
+from council_manager.db import db_manager, Project, Team, Proposal, Decision, Alternative, AuditLog, AuditDecision, RoadmapTask
 
 def test_models_crud():
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -102,6 +102,22 @@ def test_models_crud():
         assert db_task is not None
         assert db_task.task == "DB Init"
         assert db_task.status == "DONE"
+
+        # 5c. AuditDecision CRUD
+        audit_dec = AuditDecision(
+            audit_id="AUDIT-100",
+            decision_id="DEC-100",
+            project_id="cm",
+            status="RESOLVED",
+            notes="No issues remaining"
+        )
+        session.add(audit_dec)
+        session.commit()
+
+        db_audit_dec = session.query(AuditDecision).filter_by(audit_id="AUDIT-100", decision_id="DEC-100").first()
+        assert db_audit_dec is not None
+        assert db_audit_dec.status == "RESOLVED"
+        assert db_audit_dec.notes == "No issues remaining"
 
 
         # 6. Foreign Key Constraint Enforcement

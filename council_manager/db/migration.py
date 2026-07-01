@@ -3,13 +3,21 @@ from datetime import datetime, date
 from pathlib import Path
 from typing import List, Dict
 from council_manager.db import db_manager
-from council_manager.db.models import Project, Team, Proposal, Decision, Alternative, AuditLog, RoadmapTask
+from council_manager.db.models import Project, Team, Proposal, Decision, Alternative, AuditLog, AuditDecision, RoadmapTask
 
 def safe_parse_date(date_str: str) -> date:
     try:
         return datetime.strptime(date_str.strip(), "%Y-%m-%d").date()
     except Exception:
         return datetime.now().date()
+
+def safe_parse_nullable_date(date_str: str) -> date | None:
+    if not date_str or not date_str.strip():
+        return None
+    try:
+        return datetime.strptime(date_str.strip(), "%Y-%m-%d").date()
+    except Exception:
+        return None
 
 def safe_parse_datetime(dt_str: str) -> datetime:
     for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
@@ -119,6 +127,26 @@ def import_csv_to_db(workspace_dir: str | Path, project_id: str):
                         auditor_team=row["auditor_team"].strip(),
                     )
                     session.add(audit)
+            session.commit()
+
+        # 5b. Import Audit Decisions
+        audit_decs_csv = agents_dir / "audit_decisions.csv"
+        if audit_decs_csv.exists():
+            session.query(AuditDecision).filter_by(project_id=project_id).delete()
+            with open(audit_decs_csv, mode="r", encoding="utf-8", newline="") as f:
+                reader = csv.DictReader(f, delimiter=";")
+                for row in reader:
+                    audit_id = row["audit_id"].strip()
+                    dec_id = row["decision_id"].strip()
+                    audit_dec = AuditDecision(
+                        audit_id=audit_id,
+                        decision_id=dec_id,
+                        project_id=project_id,
+                        status=row["status"].strip(),
+                        re_audit_date=safe_parse_nullable_date(row["re_audit_date"]),
+                        notes=row["notes"].strip() if "notes" in row else None
+                    )
+                    session.add(audit_dec)
             session.commit()
 
 
@@ -263,6 +291,23 @@ def export_db_to_csv(workspace_dir: str | Path, project_id: str):
                     f"{int(a.alignment_score)}%",
                     a.auditor_team
                 ])
+
+        # 4b. Export Audit Decisions
+        audit_decs = session.query(AuditDecision).filter_by(project_id=project_id).order_by(AuditDecision.audit_id, AuditDecision.decision_id).all()
+        if audit_decs:
+            audit_decs_csv = agents_dir / "audit_decisions.csv"
+            with open(audit_decs_csv, mode="w", encoding="utf-8", newline="") as f:
+                writer = csv.writer(f, delimiter=";")
+                writer.writerow(["audit_id", "decision_id", "status", "re_audit_date", "notes"])
+                for ad in audit_decs:
+                    re_audit_date_str = ad.re_audit_date.strftime("%Y-%m-%d") if ad.re_audit_date else ""
+                    writer.writerow([
+                        ad.audit_id,
+                        ad.decision_id,
+                        ad.status,
+                        re_audit_date_str,
+                        ad.notes or ""
+                    ])
 
         # 5. Export Votes and Manifest
         proposals = session.query(Proposal).filter_by(project_id=project_id).all()

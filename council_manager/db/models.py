@@ -16,6 +16,7 @@ class Project(Base):
     proposals: Mapped[List["Proposal"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     decisions: Mapped[List["Decision"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     audit_logs: Mapped[List["AuditLog"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+    audit_decisions: Mapped[List["AuditDecision"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     roadmap_tasks: Mapped[List["RoadmapTask"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     background_tasks: Mapped[List["BackgroundTask"]] = relationship(back_populates="project", cascade="all, delete-orphan")
 
@@ -113,6 +114,19 @@ class BackgroundTask(Base):
 
     project: Mapped["Project"] = relationship(back_populates="background_tasks")
     proposal: Mapped["Proposal"] = relationship()
+
+
+class AuditDecision(Base):
+    __tablename__ = "audit_decisions"
+
+    audit_id: Mapped[str] = mapped_column(String, primary_key=True)
+    decision_id: Mapped[str] = mapped_column(String, primary_key=True)
+    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"), primary_key=True)
+    status: Mapped[str] = mapped_column(String, nullable=False)  # 'FIXED', 'RESOLVED', 'PENDING'
+    re_audit_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    notes: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    project: Mapped["Project"] = relationship(back_populates="audit_decisions")
 
 
 
