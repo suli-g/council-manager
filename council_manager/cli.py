@@ -8,6 +8,45 @@ from council_manager.db import db_manager, Proposal, Team, Decision, AuditLog, R
 from council_manager.core.orchestrator import council_orchestrator
 from council_manager.core.prompter import format_rationale, AgentPrompter
 
+COUNCIL_TEMPLATES = {
+    "software": [
+        {"id": "A", "name": "Functional Specialists", "specialty": "Functional Programming (Immutability, Pure Functions, Pipelines)"},
+        {"id": "B", "name": "OOP Specialists", "specialty": "Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns)"},
+        {"id": "C", "name": "Imperative Specialists", "specialty": "Imperative Programming (Explicit State, Procedural logic, Performance)"},
+        {"id": "D", "name": "Declarative Specialists", "specialty": "Declarative Programming (Logic engines, Config-driven, DSLs)"},
+        {"id": "E", "name": "Dynamic Specialists", "specialty": "Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping)"},
+        {"id": "F", "name": "Auditors/Project Managers", "specialty": "Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment)"},
+        {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives)"}
+    ],
+    "education": [
+        {"id": "A", "name": "Pedagogy Specialists", "specialty": "Learning theories, student needs, educational psychology"},
+        {"id": "B", "name": "Curriculum Setters", "specialty": "Subject matter experts, syllabus design, sequencing of topics"},
+        {"id": "C", "name": "Assessment Designers", "specialty": "Testing, grading rubrics, evaluations, feedback loops"},
+        {"id": "D", "name": "Instructional Technology Specialists", "specialty": "E-learning, digital tools, educational software integration"},
+        {"id": "E", "name": "Student Experience Designers", "specialty": "Engagement, accessibility, student feedback, inclusion"},
+        {"id": "F", "name": "Program Administrators", "specialty": "Resource allocation, scheduling, compliance, quality assurance"},
+        {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy (Student/Parent Mix, Design Focus, Alternative Perspectives)"}
+    ],
+    "marketing": [
+        {"id": "A", "name": "Brand Strategists", "specialty": "Brand identity, positioning, market research, brand guidelines"},
+        {"id": "B", "name": "Copywriters & Content Creators", "specialty": "Messaging, creative writing, storytelling, copy editing"},
+        {"id": "C", "name": "Media Buyers & Analysts", "specialty": "Ad spend, ROI, channel selection, analytics, performance tracking"},
+        {"id": "D", "name": "SEO & Growth Engineers", "specialty": "Conversion rate, traffic, search optimization, technical marketing"},
+        {"id": "E", "name": "Public Relations Specialists", "specialty": "Press, community engagement, influencer relations, outreach"},
+        {"id": "F", "name": "Campaign Managers", "specialty": "Timelines, budget tracking, execution, quality control"},
+        {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy (Target Audience representatives, consumer feedback, non-traditional ideas)"}
+    ],
+    "general": [
+        {"id": "A", "name": "Strategy & Finance", "specialty": "Planning, budgeting, ROI, resource allocation, financial modeling"},
+        {"id": "B", "name": "Operations & Execution", "specialty": "Process efficiency, delivery, supply chain, execution"},
+        {"id": "C", "name": "Customer Experience", "specialty": "User feedback, support, retention, customer success"},
+        {"id": "D", "name": "Compliance & Legal", "specialty": "Regulatory compliance, risk management, contracts, legal oversight"},
+        {"id": "E", "name": "Human Resources & Talent", "specialty": "Team culture, staffing, training, organizational development"},
+        {"id": "F", "name": "Operations Managers", "specialty": "Project oversight, requirement tracking, quality assurance, strategic alignment"},
+        {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy (External disruptors, alternative business models, risk-taking perspectives)"}
+    ]
+}
+
 # ANSI escape codes for terminal aesthetics
 COLOR_GREEN = "\033[92m"
 COLOR_CYAN = "\033[96m"
@@ -259,6 +298,64 @@ def cmd_init_project(args):
                             print("Please enter an integer between 5 and 50.")
                     except ValueError:
                         print("Invalid integer.")
+
+        # Prompt for Council Persona
+        inferred_teams = None
+        council_template = getattr(args, "council_template", None)
+        if council_template:
+            inferred_teams = COUNCIL_TEMPLATES[council_template]
+            log_success(f"Using specified council template: {council_template.upper()}")
+
+        if not inferred_teams and description:
+            print("\nGovernance Council Persona Selection:")
+            print("Would you like the AI to infer and customize the 7 council teams based on the project description? (y/n)")
+            choice_council = input("[default: y]: ").strip().lower() or "y"
+            if choice_council == "y":
+                log_info("Querying AI to infer optimal council teams...")
+                try:
+                    prompter = AgentPrompter()
+                    council_inference = prompter.infer_project_council(description)
+                    inferred_teams = []
+                    for t in council_inference.teams:
+                        inferred_teams.append({
+                            "id": t.id,
+                            "name": t.name,
+                            "specialty": t.paradigm_specialty
+                        })
+                    log_success(f"AI inferred council template: {council_inference.selected_template.upper()}")
+                    print("\nInferred Council Teams:")
+                    for t in inferred_teams:
+                        print(f"  Team {t['id']}: {t['name']} — {t['specialty']}")
+                    confirm_council = input(f"\nApply these council teams? (y/n) [default: y]: ").strip().lower() or "y"
+                    if confirm_council != "y":
+                        inferred_teams = None
+                except Exception as e:
+                    log_error(f"AI council inference failed ({e}). Falling back to manual template selection.")
+            
+            if not inferred_teams:
+                print("\nSelect a pre-defined council template:")
+                print("1. Software Engineering (Functional, OOP, Imperative, Declarative, Dynamic Specialists)")
+                print("2. Education / Pedagogy (Pedagogy, Curriculum, Assessment, Instructional Tech, Student Experience Specialists)")
+                print("3. Marketing & Branding (Brand, Copywriting, Media Buying, SEO/Growth, PR Specialists)")
+                print("4. General Business (Strategy/Finance, Operations, Customer Experience, Compliance, HR)")
+                while True:
+                    template_choice = input("Enter selection [1-4] [default: 1]: ").strip() or "1"
+                    if template_choice == "1":
+                        inferred_teams = COUNCIL_TEMPLATES["software"]
+                        break
+                    elif template_choice == "2":
+                        inferred_teams = COUNCIL_TEMPLATES["education"]
+                        break
+                    elif template_choice == "3":
+                        inferred_teams = COUNCIL_TEMPLATES["marketing"]
+                        break
+                    elif template_choice == "4":
+                        inferred_teams = COUNCIL_TEMPLATES["general"]
+                        break
+                    else:
+                        print("Invalid selection.")
+        elif not inferred_teams:
+            inferred_teams = COUNCIL_TEMPLATES["software"]
     else:
         # Non-interactive fallback defaults
         if not path_str:
@@ -269,6 +366,9 @@ def cmd_init_project(args):
             project_name = project_id.replace("_", " ").title()
         if not member_count:
             member_count = 10
+        
+        council_template = getattr(args, "council_template", None) or "software"
+        inferred_teams = COUNCIL_TEMPLATES[council_template]
 
     target_path = Path(path_str).resolve()
     log_info(f"Initializing and onboarding project '{project_name}' in: {target_path}")
@@ -280,7 +380,8 @@ def cmd_init_project(args):
             project_id=project_id,
             project_name=project_name,
             global_member_count=member_count,
-            project_description=description
+            project_description=description,
+            custom_teams=inferred_teams
         )
         log_success("Project onboarded successfully.")
         if description:
@@ -973,27 +1074,29 @@ def cmd_register_skill(args):
         log_error(f"No initialized project found at '{target_path}'. Please run 'init-project' first.")
         sys.exit(1)
         
-    skill_dir = agents_dir / "skills" / "council-manager"
-    skill_md = skill_dir / "SKILL.md"
+    skills_dir = agents_dir / "skills"
+    entries = []
     
-    if not skill_md.exists():
-        log_error(f"Skill file not found at '{skill_md}'. Please run 'init-project --fix-missing' to restore it.")
+    if skills_dir.exists():
+        for item in skills_dir.iterdir():
+            if item.is_dir() and (item / "SKILL.md").exists():
+                entries.append({ "path": str(item.as_posix()) })
+                
+    if not entries:
+        log_error(f"No skill files found in '{skills_dir}'. Please run 'init-project --fix-missing' to restore them.")
         sys.exit(1)
         
     skills_json_path = agents_dir / "skills.json"
-    skill_path_str = str(skill_dir.as_posix())
-    
     config_data = {
-        "entries": [
-            { "path": skill_path_str }
-        ]
+        "entries": entries
     }
     
     try:
         with open(skills_json_path, "w", encoding="utf-8", newline="") as f:
             json.dump(config_data, f, indent=2)
-        log_success(f"Successfully registered 'council-manager' skill in {skills_json_path}")
-        log_info(f"Registered path: {skill_path_str}")
+        log_success(f"Successfully registered skills in {skills_json_path}")
+        for entry in entries:
+            log_info(f"Registered path: {entry['path']}")
     except Exception as e:
         log_error(f"Failed to write skills.json: {e}")
         sys.exit(1)
@@ -1014,6 +1117,7 @@ def main():
     p_init.add_argument("--name", help="Name of the project. (optional, prompts if omitted)")
     p_init.add_argument("--description", help="Description of the project. (optional, prompts if omitted)")
     p_init.add_argument("--member-count", type=int, help="Global member count for all teams. (optional, prompts/infers if omitted)")
+    p_init.add_argument("--council-template", choices=["software", "education", "marketing", "general"], help="Pre-defined council template to use. (optional, prompts/infers if omitted)")
     p_init.add_argument("--fix-missing", action="store_true", help="Fix missing default files (like AGENTS.md or SKILL.md) in an already initialized project without re-onboarding.")
 
 

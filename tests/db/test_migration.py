@@ -237,4 +237,71 @@ def test_initialize_new_project_with_custom_values():
             db_manager.close_all()
 
 
+def test_initialize_new_project_custom_teams_and_skills():
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        workspace = Path(tmp_dir)
+        
+        custom_teams = [
+            {"id": "A", "name": "Pedagogy Specialists", "specialty": "Learning theories"},
+            {"id": "B", "name": "Curriculum Setters", "specialty": "Syllabus design"},
+            {"id": "C", "name": "Assessment Designers", "specialty": "Testing and rubrics"},
+            {"id": "D", "name": "Instructional Tech", "specialty": "E-learning"},
+            {"id": "E", "name": "Student Experience", "specialty": "Accessibility"},
+            {"id": "F", "name": "Program Administrators", "specialty": "Resource allocation"},
+            {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy"}
+        ]
+        
+        initialize_new_project(
+            workspace,
+            "custom_council_project",
+            project_name="Custom Council Project",
+            global_member_count=12,
+            project_description="Testing custom council and skills generation.",
+            custom_teams=custom_teams
+        )
+        
+        # 1. Verify custom teams in CSV
+        teams_csv = workspace / ".agents" / "teams.csv"
+        assert teams_csv.exists()
+        with open(teams_csv, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            assert len(lines) == 8  # header + 7 teams
+            assert "A;Pedagogy Specialists;12;Learning theories\n" in lines
+            assert "G;Contrarians;12;Devil's Advocacy\n" in lines
+            
+        # 2. Verify project-council skill generation
+        skill_md = workspace / ".agents" / "skills" / "project-council" / "SKILL.md"
+        assert skill_md.exists()
+        with open(skill_md, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert "name: project-council" in content
+            assert "- **Team A (Pedagogy Specialists)**: Learning theories" in content
+            assert "- **Team G (Contrarians)**: Devil's Advocacy" in content
+
+        # 3. Verify skills.json registration
+        skills_json = workspace / ".agents" / "skills.json"
+        assert skills_json.exists()
+        import json
+        with open(skills_json, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            assert "entries" in data
+            paths = [entry["path"] for entry in data["entries"]]
+            assert any("council-manager" in p for p in paths)
+            assert any("project-council" in p for p in paths)
+
+        # 4. Verify DB was seeded with custom teams
+        session = db_manager.get_session(workspace)
+        try:
+            teams = session.query(Team).all()
+            assert len(teams) == 7
+            team_a = session.query(Team).filter_by(id="A").first()
+            assert team_a is not None
+            assert team_a.name == "Pedagogy Specialists"
+            assert team_a.vote_weight == 12
+            assert team_a.paradigm_specialty == "Learning theories"
+        finally:
+            session.close()
+            db_manager.close_all()
+
+
 

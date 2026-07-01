@@ -1,6 +1,7 @@
 import csv
 from datetime import datetime, date
 from pathlib import Path
+from typing import List, Dict
 from council_manager.db import db_manager
 from council_manager.db.models import Project, Team, Proposal, Decision, Alternative, AuditLog, RoadmapTask
 
@@ -430,7 +431,8 @@ def initialize_new_project(
     project_id: str,
     project_name: str | None = None,
     global_member_count: int = 10,
-    project_description: str | None = None
+    project_description: str | None = None,
+    custom_teams: List[Dict[str, str]] | None = None
 ):
     """Initialize a new project directory with default settings, empty templates, and custom team counts."""
     workspace_path = Path(workspace_dir).resolve()
@@ -440,18 +442,23 @@ def initialize_new_project(
     votes_dir = agents_dir / "votes"
     votes_dir.mkdir(parents=True, exist_ok=True)
     
-    # Write default teams.csv with custom global member count
+    # Write default or custom teams.csv with custom global member count
     teams_csv = agents_dir / "teams.csv"
     if not teams_csv.exists():
         with open(teams_csv, "w", encoding="utf-8", newline="") as f:
             f.write("team_id;team_name;count;paradigm_specialty\n")
-            f.write(f"A;Functional Specialists;{global_member_count};Functional Programming (Immutability, Pure Functions, Pipelines)\n")
-            f.write(f"B;OOP Specialists;{global_member_count};Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns)\n")
-            f.write(f"C;Imperative Specialists;{global_member_count};Imperative Programming (Explicit State, Procedural logic, Performance)\n")
-            f.write(f"D;Declarative Specialists;{global_member_count};Declarative Programming (Logic engines, Config-driven, DSLs)\n")
-            f.write(f"E;Dynamic Specialists;{global_member_count};Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping)\n")
-            f.write(f"F;Auditors/Project Managers;{global_member_count};Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment)\n")
-            f.write(f"G;Contrarians;{global_member_count};Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives)\n")
+            if custom_teams:
+                for t in custom_teams:
+                    spec = t.get("specialty") or t.get("paradigm_specialty") or ""
+                    f.write(f"{t['id']};{t['name']};{global_member_count};{spec}\n")
+            else:
+                f.write(f"A;Functional Specialists;{global_member_count};Functional Programming (Immutability, Pure Functions, Pipelines)\n")
+                f.write(f"B;OOP Specialists;{global_member_count};Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns)\n")
+                f.write(f"C;Imperative Specialists;{global_member_count};Imperative Programming (Explicit State, Procedural logic, Performance)\n")
+                f.write(f"D;Declarative Specialists;{global_member_count};Declarative Programming (Logic engines, Config-driven, DSLs)\n")
+                f.write(f"E;Dynamic Specialists;{global_member_count};Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping)\n")
+                f.write(f"F;Auditors/Project Managers;{global_member_count};Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment)\n")
+                f.write(f"G;Contrarians;{global_member_count};Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives)\n")
 
     # Write other template CSVs if they do not exist
     templates = {
@@ -500,12 +507,76 @@ def initialize_new_project(
             f.write(DEFAULT_AGENTS_MD)
 
     # Write Workspace Skill in .agents/skills/council-manager/SKILL.md
-    skill_dir = agents_dir / "skills" / "council-manager"
+    skills_dir = agents_dir / "skills"
+    skill_dir = skills_dir / "council-manager"
     skill_dir.mkdir(parents=True, exist_ok=True)
     skill_md = skill_dir / "SKILL.md"
     if not skill_md.exists():
         with open(skill_md, "w", encoding="utf-8", newline="") as f:
             f.write(DEFAULT_SKILL_MD)
+
+    # Write Project Council Persona Skill in .agents/skills/project-council/SKILL.md
+    project_council_dir = skills_dir.parent / "skills" / "project-council"
+    project_council_dir.mkdir(parents=True, exist_ok=True)
+    project_council_md = project_council_dir / "SKILL.md"
+    
+    # Read the teams from teams.csv to make sure they are accurate
+    teams_list = []
+    if teams_csv.exists():
+        with open(teams_csv, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            for line in lines[1:]:
+                parts = line.strip().split(";")
+                if len(parts) >= 4:
+                    teams_list.append(f"- **Team {parts[0]} ({parts[1]})**: {parts[3]}")
+    if not teams_list:
+        teams_list = [
+            "- **Team A (Functional Specialists)**: Functional Programming (Immutability, Pure Functions, Pipelines)",
+            "- **Team B (OOP Specialists)**: Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns)",
+            "- **Team C (Imperative Specialists)**: Imperative Programming (Explicit State, Procedural logic, Performance)",
+            "- **Team D (Declarative Specialists)**: Declarative Programming (Logic engines, Config-driven, DSLs)",
+            "- **Team E (Dynamic Specialists)**: Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping)",
+            "- **Team F (Auditors/Project Managers)**: Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment)",
+            "- **Team G (Contrarians)**: Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives)"
+        ]
+    team_details_str = "\n".join(teams_list)
+    
+    project_council_content = f"""---
+name: project-council
+description: "Defines the project-specific council personas and specialties for deliberations and voting."
+---
+
+# Project Council Persona Skill
+
+This workspace is governed by a project-specific council. When you are asked to run deliberations or voting, or when you interact with this project, you must adopt these specific team personas.
+
+## Council Teams and Specialties
+
+Here are the active teams for this project:
+{team_details_str}
+
+## Instructions for Collaborating Agents
+
+1. **Deliberations**: When simulating or invoking deliberations, ensure the perspectives reflect the specialties listed above.
+2. **Voting**: When voting, each team must evaluate proposals from the lens of their specific paradigm and domain.
+3. **Impersonation**: Respect the distinct perspectives of each team. Do not merge their identities or dilute their specialties.
+"""
+    with open(project_council_md, "w", encoding="utf-8", newline="") as f:
+        f.write(project_council_content)
+
+    # Write/Update skills.json
+    skills_json = agents_dir / "skills.json"
+    import json
+    council_manager_path = str(skill_dir.as_posix())
+    project_council_path = str(project_council_dir.as_posix())
+    config_data = {
+        "entries": [
+            { "path": council_manager_path },
+            { "path": project_council_path }
+        ]
+    }
+    with open(skills_json, "w", encoding="utf-8", newline="") as f:
+        json.dump(config_data, f, indent=2)
 
     # Run the import to seed the SQLite database file
     import_csv_to_db(workspace_path, project_id)

@@ -300,5 +300,34 @@ def test_infer_global_member_count_mocked():
     mock_client.models.generate_content.assert_called_once()
 
 
+def test_infer_project_council_mocked():
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    from council_manager.core.prompter import CouncilInferenceResponse, TeamInference
+    mock_parsed = CouncilInferenceResponse(
+        selected_template="education",
+        teams=[
+            TeamInference(id="A", name="Pedagogy Specialists", paradigm_specialty="Learning theories"),
+            TeamInference(id="B", name="Curriculum Setters", paradigm_specialty="Syllabus design"),
+            TeamInference(id="C", name="Assessment Designers", paradigm_specialty="Testing and rubrics"),
+            TeamInference(id="D", name="Instructional Tech", paradigm_specialty="E-learning"),
+            TeamInference(id="E", name="Student Experience", paradigm_specialty="Accessibility"),
+            TeamInference(id="F", name="Program Administrators", paradigm_specialty="Resource allocation"),
+            TeamInference(id="G", name="Contrarians", paradigm_specialty="Devil's Advocacy")
+        ]
+    )
+    mock_response.parsed = mock_parsed
+    mock_client.models.generate_content.return_value = mock_response
+
+    prompter = AgentPrompter(client=mock_client)
+    res = prompter.infer_project_council("An educational curriculum project")
+
+    assert res.selected_template == "education"
+    assert len(res.teams) == 7
+    assert res.teams[0].id == "A"
+    assert res.teams[0].name == "Pedagogy Specialists"
+    mock_client.models.generate_content.assert_called_once()
+
+
 
 
