@@ -452,8 +452,15 @@ async def run_deliberation_async(args):
     workspace = get_workspace_path(args.workspace)
     proposal_id = get_proposal_id(args, workspace)
     log_info(f"Running Phase 1 Deliberation for proposal '{proposal_id}'...")
+    
+    def cli_progress(team_id: str, team_name: str, status: str, elapsed: float):
+        if status == "STARTED":
+            log_info(f"Team {team_id} ({team_name}) started deliberation...")
+        elif status == "COMPLETED":
+            log_success(f"Team {team_id} ({team_name}) completed in {elapsed:.2f}s.")
+
     try:
-        prop = await council_orchestrator.run_deliberation(workspace, proposal_id)
+        prop = await council_orchestrator.run_deliberation(workspace, proposal_id, on_progress=cli_progress)
         log_success(f"Deliberation complete. Status updated to: {prop.status}")
         log_info(f"Collected rationales from {len(prop.rationales)} teams.")
     except Exception as e:
