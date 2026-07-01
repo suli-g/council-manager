@@ -139,6 +139,7 @@ ALT-137;DEC-115;Option 3: No change / Manual;Do not add any registration helper.
 ALT-138;DEC-116;Option B (Keep Status Quo);Retain the snake_case name 'council_manager'.;Avoids any filesystem renaming and modification to codebase/tests.;Does not conform to the platform's standard kebab-case naming conventions for skills.
 ALT-139;DEC-117;Fully dynamic LLM-generated councils;The LLM designs a bespoke set of teams and personas from scratch for every project, writing them to teams.csv and generating a project-council skill.;Non-deterministic, requires LLM connectivity, could produce inconsistent structures.
 ALT-140;DEC-117;User-selected templates;Provide a hardcoded menu of templates in the CLI onboarding wizard, or let the user define teams manually, without LLM generation.;High friction for custom councils, less automated, requires manual effort.
+ALT-141;DEC-118;Sub-task fragmentation;Add a new sub-task (e.g. P5-02a) to the roadmap to specifically document the template/persona generation diversion.;Clutters the roadmap with redundant tasks.
 
 
 

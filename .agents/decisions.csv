@@ -112,6 +112,7 @@ DEC-114;2026-06-30;Workspace Skill Discovery;Option A (Align Workspace Skill Nam
 DEC-115;2026-06-30;Skill Registration CLI Functionality;Option 2 (Add dedicated CLI subcommand);Add an explicit subcommand (`register-skill` or `register-governance`) to the CLI to generate the `skills.json` registration file on demand, keeping initialization and registration concerns decoupled and giving the user explicit control.
 DEC-116;2026-06-30;Skill Naming Convention Alignment;Option A (Rename skill to kebab-case);Rename the workspace skill name, folder, configuration, and references from 'council_manager' to 'council-manager' to conform to the platform's kebab-case naming conventions.
 DEC-117;2026-06-30;Project-Specific Council Generation & Skill Customization;Option 1 (Hybrid);Use pre-defined domain templates with LLM fallback to dynamically generate custom teams. Write to teams.csv and generate a bespoke project-council skill.
+DEC-118;2026-07-01;Roadmap Update for Skills Implementation;Option 1 (Alternative 1);Mark task P5-02 as DONE and document implementation notes on the roadmap and README.md.
 
 
 

@@ -360,3 +360,44 @@ uv run council-manager dashboard
 *   **Ratified Decisions Tab**: Browse immutable ratified architectural decisions and review alternatives compared (with Pros and Cons comparison blocks).
 *   **Roadmap Tasks Tab**: View project roadmap milestones, notes, and task completion percentages via a visual progress bar.
 *   **Compliance Audits Tab**: Review historical alignment audits and auditor details in a structured table.
+
+---
+
+## Development Roadmap
+
+The development progress is tracked dynamically inside [roadmap.csv](file:///B:/projects/council_manager/.agents/roadmap.csv). Below is the authoritative outline of milestones:
+
+### Phase 1: Database & Persistence Layer (Completed)
+*   **`P1-01`**: Database Layer Initialization (SQLAlchemy - Unified SQLite)
+*   **`P1-02`**: Project Isolation Logic (Tenant-style workspace separation)
+*   **`P1-03`**: Governance CSV Import/Export Migration Tools
+
+### Phase 2: Deliberation & Voting Core (Completed)
+*   **`P2-01a`**: AI Team Agent Prompter & Agent Registry
+*   **`P2-01b`**: Deliberation Engine (Phase 1 concurrent justifications)
+*   **`P2-01c`**: Blind Voting Engine (Phase 2 concurrent anonymous votes)
+*   **`P2-01d`**: Weighted Tally & Consensus Verifier (Consensus loop & fallback)
+*   **`P2-01e`**: Token Safeguards & Caching Implementation (Ollama/OpenAI support)
+*   **`P2-01f`**: Database Roadmap Table & Sync Integration
+*   **`P2-01g`**: AI-Powered Proposal Inception (Topic & options extraction)
+*   **`P2-02a`**: Asynchronous Task Orchestrator (Asyncio queue)
+*   **`P2-02b`**: Task Status Query & CLI Logging
+
+### Phase 3: APIs & User Interface (Completed)
+*   **`P3-01a`**: FastAPI Server Setup & Endpoints
+*   **`P3-01b`**: Authentication & Dynamic Database Routing Middleware
+*   **`P3-02a`**: Interactive Terminal UI (TUI) Dashboard
+*   **`P3-02b`**: TUI Dashboard Client Integration
+*   **`P3-02c`**: Deliberation Progress & Timing Feedback (Indicators in CLI/TUI)
+
+### Phase 4: Onboarding, Audits & Alignment (Completed)
+*   **`P4-01`**: Update README.md Documentation
+*   **`P4-02`**: CLI Command Inspection & Alignment
+*   **`P4-03a`**: Interactive/Config Project Onboarding (Global member count suggestion)
+*   **`P4-03b`**: Immediate Description Ratification (Auto-ratify initial project description as DEC-001)
+*   **`P4-04`**: Phase 4 Alignment Audit (Compliance check)
+*   **`P4-05`**: Minor Version Bump to 0.7.0 (Release version setup)
+
+### Phase 5: Local Agent Skills Adapter (Completed)
+*   **`P5-01`**: Create and Publish Local Agent Skill Integration Adapter (Register `council-manager` skill adapter)
+*   **`P5-02`**: Implement Project-Specific Council Generation and Skill Customization (Generate custom `teams.csv` and bespoke agent skill based on project domain/description)

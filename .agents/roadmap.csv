@@ -23,6 +23,6 @@ phase;id;task;status;notes
 4;P4-04;Phase 4 Alignment Audit;TODO;Run a formal quality alignment audit to verify new onboarding schemas and documentation.
 4;P4-05;Minor Version Bump to 0.7.0;DONE;Bump the minor version to 0.7.0 in pyproject.toml, lockfiles, and CHANGELOG.md.
 5;P5-01;Create and publish local agent skill integration adapter;DONE;Create a .agents/skills/council-manager/ folder with SKILL.md to expose the CLI tools to workspace agents.
-5;P5-02;Implement project-specific council generation and skill customization;TODO;Generate custom teams.csv and bespoke agent skill based on project domain/description.
+5;P5-02;Implement project-specific council generation and skill customization;DONE;Generate custom teams.csv and bespoke agent skill based on project domain/description (Implemented via hybrid template/inference flow).
 
 
