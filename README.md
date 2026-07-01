@@ -240,11 +240,28 @@ uv run council-manager --help
 
 ### Key CLI Commands
 
-1.  **Project Initialization**:
+1.  **Project Initialization & Onboarding**:
+    Initialize a new isolated project space. You can supply a pre-defined domain-specific council template (`software`, `education`, `marketing`, `general`) or omit it to let the AI infer the optimal teams based on the project description:
     ```bash
-    uv run council-manager init-project --path <dir-path> --project-id <proj-id>
+    # Initialize using a software engineering template council
+    uv run council-manager init-project --path <dir-path> --project-id <proj-id> --council-template software
+
+    # Initialize and let the LLM infer the optimal team structures and member count from the description
+    uv run council-manager init-project --path <dir-path> --project-id <proj-id> --description "A curriculum review pipeline for pedagogy."
     ```
-2.  **CSV Import/Export Migrations**:
+    *Onboarding generates:*
+    *   `.agents/teams.csv` populated with the custom specialist teams.
+    *   `.agents/skills/council-manager/SKILL.md` (the general tool compliance skill).
+    *   `.agents/skills/project-council/SKILL.md` (the custom, project-specific agent persona instructions).
+    *   `.agents/skills.json` (auto-registered paths mapping both skills).
+
+2.  **Registering Agent Skills**:
+    Generate or update the `skills.json` registration configuration on demand to expose local skills to the agent environment:
+    ```bash
+    uv run council-manager register-skill -w <workspace-dir>
+    ```
+
+3.  **CSV Import/Export Migrations**:
     ```bash
     uv run council-manager import -w <workspace-dir> -p <project-id>
     uv run council-manager export -w <workspace-dir> -p <project-id>

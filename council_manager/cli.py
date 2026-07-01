@@ -1226,7 +1226,7 @@ def main():
     p_dash.add_argument("-w", "--workspace", help="Path to the workspace folder.")
 
     # Command: register-skill
-    p_reg = subparsers.add_parser("register-skill", help="Explicitly register the council_manager workspace skill in skills.json on demand.")
+    p_reg = subparsers.add_parser("register-skill", help="Explicitly register all local workspace skills (council-manager, project-council) in skills.json.")
     p_reg.add_argument("-w", "--workspace", help="Path to the workspace folder.")
 
     args = parser.parse_args()
