@@ -151,6 +151,9 @@ ALT-149;DEC-122;Option G (Contrarian): Minimalist & CLI-First Optimization;Optim
 ALT-150;DEC-123;Option A: Plot Phase 6 tasks;Add Phase 6 to the roadmap and run a full audit immediately.;Updates the project plan roadmap to reflect upcoming work.;Adds new phase descriptions before the current codebase has been fully verified and aligned.
 ALT-151;DEC-123;Option B: Plot Phase 6 but postpone audit;Plot Phase 6 tasks on the roadmap but postpone UML and test coverage alignment checks.;Allows proceeding with planning immediately.;Risks documentation and UML alignment drift.
 ALT-152;DEC-123;Option G (Contrarian): Do not plot Phase 6;Postpone plotting Phase 6 on the roadmap. Run the full alignment audit on the existing documentation and tests before making new phase proposals.;Maintains complete architectural integrity and keeps documentation accurate before expanding scope.;Requires completing the alignment audit before plotting the roadmap tasks.
+ALT-153;DEC-124;Option A: Expand test coverage;Add new test cases in tests/ verifying validation limits, CLI Wizard prompt parsing, offline inference fallbacks, and task worker error flows.;Ensures 100% compliance with new project onboarding and template use cases.;Slightly increases codebase test file size and test suite execution time.
+ALT-154;DEC-124;Option B: Keep existing test suite;Maintain the current 64 unit and integration tests.;Zero extra test maintenance code overhead.;Gaps remain in test coverage for CLI onboarding interactive prompts and fallback error handlers.
+ALT-155;DEC-124;Option G (Contrarian): Property-based testing;Introduce property-based testing (e.g. Hypothesis) to test the consensus and tally logic with wide ranges of random inputs.;Provides high structural security and finds rare consensus edge cases.;High complexity and setup overhead compared to standard unit tests.
 
 
 

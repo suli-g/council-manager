@@ -373,4 +373,36 @@ def test_cmd_init_project_fix_missing():
             assert "Official Tool Delegation (Critical)" in content
 
 
+def test_cmd_init_project_already_exists_fails():
+    from council_manager.cli import cmd_init_project
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        workspace = Path(tmp_dir)
+        
+        initialize_new_project(
+            workspace,
+            "already_exists_test",
+            project_name="Already Exists Test",
+            global_member_count=5,
+            project_description="Test project"
+        )
+        
+        # Call cmd_init_project without fix_missing; should raise SystemExit(1)
+        args = MockArgs(path=workspace, fix_missing=False, project_id="new_id")
+        with pytest.raises(SystemExit) as exc_info:
+            cmd_init_project(args)
+        assert exc_info.value.code == 1
+
+
+def test_cmd_init_project_fix_missing_on_uninitialized_fails():
+    from council_manager.cli import cmd_init_project
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        workspace = Path(tmp_dir)
+        
+        # Call cmd_init_project with fix_missing on empty directory; should raise SystemExit(1)
+        args = MockArgs(path=workspace, fix_missing=True)
+        with pytest.raises(SystemExit) as exc_info:
+            cmd_init_project(args)
+        assert exc_info.value.code == 1
+
+
 
