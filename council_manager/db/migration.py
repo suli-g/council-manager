@@ -448,6 +448,7 @@ Any AI agent (including yourself) must follow these procedural mandates:
 ### 0. Mandatory Deliberation
 *   **The PROPOSAL: Halt:** When a message starts with **PROPOSAL:**, you MUST NOT execute any state-changing tools (e.g., `write_to_file`, `replace_file_content`, `run_command`) until a formal interactive vote has been conducted and documented in `votes_manifest.csv`.
 *   **Interactive Decision Making:** You must use the `ask_question` tool to present paradigm perspectives to the user. You are forbidden from simulating the final outcome of a vote without real-time human interaction.
+*   **Tool Delegation (Critical):** Do NOT simulate deliberations or voting outcomes yourself within your model context. You MUST run all deliberations and votes by executing the official CLI commands `uv run council-manager deliberate` and `uv run council-manager vote`. This ensures the deliberations use the correct council-specific LLM configuration (such as Ollama or local settings) defined for the project, even if you are running on a different model (like Gemini).
 
 ### 1. Research & Alignment
 *   Search `decisions.csv` for any existing rulings that constrain your task.
@@ -602,9 +603,10 @@ Here are the active teams for this project:
 
 ## Instructions for Collaborating Agents
 
-1. **Deliberations**: When simulating or invoking deliberations, ensure the perspectives reflect the specialties listed above.
-2. **Voting**: When voting, each team must evaluate proposals from the lens of their specific paradigm and domain.
-3. **Impersonation**: Respect the distinct perspectives of each team. Do not merge their identities or dilute their specialties.
+1. **Official Tool Delegation (Critical)**: Do NOT write or simulate deliberations or voting results yourself within your model context. You MUST delegate all deliberations and voting loops to the `council-manager` CLI tools (e.g., `uv run council-manager deliberate` and `uv run council-manager vote`). This ensures they are processed through the official SQLite backend and using the project's configured council LLM provider (e.g., Ollama, local endpoints), even if you are operating on a different model (e.g. Gemini).
+2. **Deliberations**: When the official `council-manager` tool runs deliberations, the system will prompt the underlying LLM to adopt the specialties listed above.
+3. **Voting**: When the official `council-manager` tool runs voting, each team will evaluate proposals from the lens of their specific paradigm and domain.
+4. **Impersonation**: Respect the distinct perspectives of each team. Do not merge their identities or dilute their specialties.
 """
     with open(project_council_md, "w", encoding="utf-8", newline="") as f:
         f.write(project_council_content)

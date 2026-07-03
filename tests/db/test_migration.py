@@ -299,6 +299,8 @@ def test_initialize_new_project_custom_teams_and_skills():
             assert "name: project-council" in content
             assert "- **Team A (Pedagogy Specialists)**: Learning theories" in content
             assert "- **Team G (Contrarians)**: Devil's Advocacy" in content
+            assert "Official Tool Delegation (Critical)" in content
+            assert "council-manager deliberate" in content
 
         # 3. Verify skills.json registration
         skills_json = workspace / ".agents" / "skills.json"
@@ -324,6 +326,51 @@ def test_initialize_new_project_custom_teams_and_skills():
         finally:
             session.close()
             db_manager.close_all()
+
+
+class MockArgs:
+    def __init__(self, path, fix_missing=False, project_id=None, name=None, description=None, member_count=None, council_template=None):
+        self.path = str(path)
+        self.fix_missing = fix_missing
+        self.project_id = project_id
+        self.name = name
+        self.description = description
+        self.member_count = member_count
+        self.council_template = council_template
+
+
+def test_cmd_init_project_fix_missing():
+    from council_manager.cli import cmd_init_project
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        workspace = Path(tmp_dir)
+        
+        initialize_new_project(
+            workspace,
+            "fix_missing_test",
+            project_name="Fix Missing Test",
+            global_member_count=5,
+            project_description="Test project"
+        )
+        
+        project_council_md = workspace / ".agents" / "skills" / "project-council" / "SKILL.md"
+        skills_json = workspace / ".agents" / "skills.json"
+        
+        if project_council_md.exists():
+            project_council_md.unlink()
+        if skills_json.exists():
+            skills_json.unlink()
+            
+        assert not project_council_md.exists()
+        assert not skills_json.exists()
+        
+        args = MockArgs(path=workspace, fix_missing=True)
+        cmd_init_project(args)
+        
+        assert project_council_md.exists()
+        assert skills_json.exists()
+        with open(project_council_md, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert "Official Tool Delegation (Critical)" in content
 
 
 
