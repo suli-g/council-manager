@@ -116,6 +116,7 @@ DEC-118;2026-07-01;Roadmap Update for Skills Implementation;Option 1 (Alternativ
 DEC-119;2026-07-01;Version Bump Strategy for Phase 5;Option 2 (Alternative 2);Defer version bump and keep project version at 0.7.0.
 DEC-120;2026-07-01;Patch Release 0.7.1 & Onboarding Documentation;Option 1 (Alternative 1);Perform a patch bump to 0.7.1, update README.md with template/custom council details, and align cli.py help sections.
 DEC-121;2026-07-03;Tool Delegation in Council Skills;Option A (Alternative 1);Update generated skills to require collaborating agents to execute deliberations and voting loops via CLI tools (council-manager deliberate/vote) rather than simulating them. This guarantees the configured council provider (e.g. Ollama) is used.
+DEC-122;2026-07-03;Suggestions for Future Council Enhancements (Phase 6);Option A + Phase 6 Extensions;Ratified the design proposal for Phase 6 comprising real-time WebSocket dashboard extensions, automated commit compliance checks, JWT authentication, and multi-tenant server capabilities.
 
 
 

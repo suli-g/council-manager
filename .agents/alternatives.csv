@@ -145,6 +145,9 @@ ALT-143;DEC-120;Update Docs Only;Update the documentation and help sections but 
 ALT-144;DEC-121;Option A (Recommended): CLI mandate;Instruct agents to delegate deliberations and voting to the CLI commands (council-manager deliberate/vote).;Ensures proper configured provider execution (Ollama) and maintains SQLite integrity.;Relying on CLI execution requires terminal access.
 ALT-145;DEC-121;Option B: Status Quo;Maintain the existing instruction templates without CLI tool mandates.;Saves code modification and testing overhead.;Agents might simulate the council locally, bypassing the configured Ollama backend.
 ALT-146;DEC-121;Option G (Contrarian): Expose provider settings;Modify the skill definition to expose Ollama/provider endpoints for direct agent queries.;Allows direct API access for headless agents without CLI footprint.;Bypasses the centralized CLI orchestrator and SQLite transaction safety.
+ALT-147;DEC-122;Option A: Real-Time Dashboard & Web UI Extensions;Expand TUI to show real-time progress bars, develop a React/Vue web dashboard, and integrate OAuth2/JWT security.;Improves accessibility, UX, and provides visual proposal state tracking.;Requires setting up frontend web dependencies and packaging them.
+ALT-148;DEC-122;Option B: Enhanced AI Capabilities & Multi-Model Debates;Support hybrid-model debates across Ollama/Gemini and implement semantic search context indexing over decisions.csv.;Leverages model biases and prevents historical decision regression.;Increases token cost and local API key management complexity.
+ALT-149;DEC-122;Option G (Contrarian): Minimalist & CLI-First Optimization;Optimize memory, compile to single-binary (PyInstaller), and replace TUI/servers with git hooks/file watch scripts.;Extremely lightweight, zero network/server footprint, zero external dependencies.;Removes the FastAPI and graphical Textual TUI visualization completely.
 
 
 
