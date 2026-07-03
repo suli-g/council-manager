@@ -160,6 +160,9 @@ ALT-158;DEC-125;Option G (Contrarian): Bump to 1.0.0-rc1;Bump version to 1.0.0-r
 ALT-159;DEC-126;Option A: Bump patch to 0.8.2;Update version to 0.8.2 in pyproject.toml, server/main.py, and CHANGELOG.md.;Clearly signals a consumer-facing change to documentation and CLI output for downstream users.;Requires updating version config and lockfiles.
 ALT-160;DEC-126;Option B: Defer patch bump;Keep version at 0.8.1 since the documentation changes are non-functional.;Zero overhead.;Consumers cannot distinguish this documentation-only change from the prior release.
 ALT-161;DEC-126;Option G (Contrarian): Pre-bump to 0.9.0-dev;Signal that the Phase 6 branch is a pre-release development stream.;Communicates ongoing instability of the phase-6 branch to consumers.;Misleading version label for what is stable, committed work on a feature branch.
+ALT-162;DEC-127;Option A: Rewrite AGENTS.md with CLI mandates;Replace direct CSV-reading instructions with CLI command mandates in DEFAULT_AGENTS_MD template and live AGENTS.md.;Fixes the root cause consistently across all newly initialized projects and the current workspace.;Requires regenerating AGENTS.md via --fix-missing.
+ALT-163;DEC-127;Option B: Add skill-first preamble to AGENTS.md;Prepend a bold note instructing agents to read the project-council skill before acting on any file-access instructions.;Minimal change with no template rewrite needed.;Relies on agents following an ordering hint rather than removing the problematic instructions entirely.
+ALT-164;DEC-127;Option G (Contrarian): Remove AGENTS.md from workspace root;Move content to .agents/GOVERNANCE.md referenced only from the skill to prevent Antigravity auto-injection.;Cleanest separation of concerns.;Breaking change to the governance model; AGENTS.md is the established convention for agent rule injection.
 
 
 

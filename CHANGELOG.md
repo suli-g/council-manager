@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.3] - 2026-07-04
+
+### Fixed
+- **AGENTS.md CLI Encapsulation (DEC-127)**: Rewrote the `DEFAULT_AGENTS_MD` template and regenerated the live `AGENTS.md` to mandate CLI commands (`show-roadmap`, `show-teams`, `show-decisions`, etc.) instead of instructing agents to read `.agents/` CSV files directly. Eliminates the root conflict where Antigravity auto-injects `AGENTS.md` as hard system rules that override the skill encapsulation instructions.
+
 ## [0.8.2] - 2026-07-04
 
 ### Changed

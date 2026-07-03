@@ -121,6 +121,7 @@ DEC-123;2026-07-03;Scope of Phase 6 Roadmap Plotting and Documentation/UML Align
 DEC-124;2026-07-03;Scope of Additional Testing for Project Use Cases;Option A (Alternative 1);Expand the test suite to verify CLI onboarding validation failures, custom template edge cases, and LLM inference fallbacks to ensure total use-case compliance.
 DEC-125;2026-07-04;Version Bump Strategy for Phase 6 Extensions;Option A (Alternative 1);Bump the minor version to 0.8.0 in pyproject.toml, synchronize uv.lock, and document the Web UI dashboard release notes in CHANGELOG.md.
 DEC-126;2026-07-04;Version Bump Strategy for Documentation & CLI Patch;Option A (Alternative 1);Bump the patch version to 0.8.2 in pyproject.toml, server/main.py, and CHANGELOG.md to reflect documentation and CLI startup message changes.
+DEC-127;2026-07-04;AGENTS.md CLI Encapsulation Fix & Version 0.8.3;Option A (Alternative 1);Rewrite DEFAULT_AGENTS_MD template and live AGENTS.md to mandate CLI commands (show-roadmap, show-teams, etc.) instead of direct .agents/ file reads. Bump to 0.8.3.
 
 
 

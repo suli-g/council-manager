@@ -359,53 +359,57 @@ DEFAULT_AGENTS_MD = """# Project Governance & Workflow
 
 This file provides the meta-framework for how AI agents and LLMs must operate within this repository. It prioritizes dynamic configuration over hard-coded rules to ensure the project can scale its governance and team structure.
 
-## Dynamic Source-of-Truth
-Never assume the state of the project or its team structure. Always consult these live CSV indices before proposing or executing changes. 
+## Dynamic Source-of-Truth (CLI Encapsulation — CRITICAL)
 
-**Format Standard:** All CSV files in this repository MUST use semi-colons (`;`) as delimiters to ensure compatibility with text fields containing commas.
+**IMPORTANT: You MUST NOT manually navigate, list, or read files inside `.agents/` directly** (e.g., do not use `ListDir`, `Read`, or similar tools on `roadmap.csv`, `teams.csv`, `decisions.csv`, `alternatives.csv`, or the `votes/` folder). All governance data is managed through a SQLite database and must be accessed exclusively via the official `council-manager` CLI commands:
 
-*   **Teams & Roles (`.agents/teams.csv`):** Defines the current team makeup, paradigm specialties, and voting weights.
-*   **Ratified Decisions (`.agents/decisions.csv`):** The immutable log of all technical and architectural choices made by the project teams.
-*   **Voting Records (`.agents/votes_manifest.csv`):** The central index of all formal paradigm-weighted votes, pointing to detailed records in `.agents/votes/`.
-*   **Alternatives Evaluated (`.agents/alternatives.csv`):** Context on why certain paths were rejected, preserving the "design space" for future reference.
-*   **Development Roadmap (`.agents/roadmap.csv`):** The authoritative list of tasks, their priorities, and current implementation status.
-*   **Audit Logs (`.agents/audits.csv`):** Historical record of project alignment and quality assessments.
-*   **Audit Resolutions (`.agents/audit_decisions.csv`):** Relational mapping between audit findings and the architectural decisions that resolve them.
+*   **To check the roadmap:** `uv run council-manager show-roadmap`
+*   **To check registered teams:** `uv run council-manager show-teams`
+*   **To check ratified decisions:** `uv run council-manager show-decisions`
+*   **To check audit logs:** `uv run council-manager show-audits`
+*   **To create a proposal:** `uv run council-manager proposal-create "..." -w <workspace>`
+*   **To run deliberation:** `uv run council-manager deliberate -w <workspace>`
+*   **To run voting:** `uv run council-manager vote -w <workspace>`
+
+Direct file reads bypass the SQLite database cache and ORM schema boundaries, leading to stale or out-of-sync state.
+
+**Format Standard:** All CSV files in this repository use semi-colons (`;`) as delimiters.
 
 ## Multi-Team, Multi-Tier Governance
 The project operates under a decentralized, paradigm-weighted governance model.
 
-1.  **Perspective Gathering:** Before any significant change, identify which teams in `teams.csv` are affected by or have expertise in the domain.
+1.  **Perspective Gathering:** Before any significant change, identify which teams are affected. Use `uv run council-manager show-teams` to see the current team roster.
 2.  **Tiered Evaluation:** 
     *   Any request starting with **PROPOSAL:** triggers a formal **interactive** vote.
     *   Every proposal must include at least **two alternatives** (including the Contrarian view).
     *   **Human Oversight:** Votes must NEVER be simulated or handled autonomously by an agent. The agent must present the alternatives and team perspectives to the human user for explicit validation and selection. Human overseer decisions should only be documented in the vote record if they contradict all team-proposed options.
     *   Any request starting with **QUERY:** triggers a lightweight, non-voting team deliberation flow. The agent will concurrently query all active teams for their immediate rationales and perspectives on how the queried item affects the project, presenting them to the user. This does not involve any voting or formal ratification, and query results are not written to the static decisions or alternatives CSV files to prevent documentation rot.
-3.  **Conflict Resolution:** If paradigms disagree, the decision is resolved through the multi-team voting system defined by the current weights in `teams.csv`. The **Contrarians (Team G)** provide critical friction to prevent groupthink.
+3.  **Conflict Resolution:** If paradigms disagree, the decision is resolved through the multi-team voting system. The **Contrarians (Team G)** provide critical friction to prevent groupthink.
 
 ## Mandatory AI Workflow
 Any AI agent (including yourself) must follow these procedural mandates:
 
 ### 0. Mandatory Deliberation
 *   **The PROPOSAL: Halt:** When a message starts with **PROPOSAL:**, you MUST NOT execute any state-changing tools (e.g., `write_file`, `replace`, `run_shell_command`) until a formal interactive vote has been conducted and documented in `votes_manifest.csv`.
-*   **Interactive Decision Making:** You must use the `ask_user` tool (e.g., `ask_question`) to present paradigm perspectives to the user. You are forbidden from simulating the final outcome of a vote without real-time human interaction.
+*   **Interactive Decision Making:** You must use the `ask_question` tool to present paradigm perspectives to the user. You are forbidden from simulating the final outcome of a vote without real-time human interaction.
+*   **Tool Delegation (Critical):** Do NOT simulate deliberations or voting outcomes yourself. You MUST run all deliberations and votes via `uv run council-manager deliberate` and `uv run council-manager vote`.
 
 ### 1. Research & Alignment
-*   Search `decisions.csv` for any existing rulings that constrain your task.
-*   Consult `alternatives.csv` to avoid re-proposing previously rejected strategies.
-*   Review `roadmap.csv` to ensure your work aligns with the current phase's priorities.
+*   Run `uv run council-manager show-decisions` to check existing rulings that constrain your task.
+*   Run `uv run council-manager show-roadmap` to verify your work aligns with the current phase's priorities.
+*   Do NOT read `decisions.csv`, `roadmap.csv`, or any other `.agents/` file directly.
 
 ### 2. Execution & Documentation
-*   **Ratification:** After a strategy is agreed upon, you must update `decisions.csv` and `alternatives.csv` to reflect the new state.
+*   **Ratification:** After a strategy is agreed upon, update `decisions.csv` and `alternatives.csv` to reflect the new state (these CSVs are the append-only log; the SQLite DB is the canonical live state).
 *   **Roadmap Maintenance:** Update the status of tasks in `roadmap.csv` (and `README.md` if applicable) as you progress.
-*   **Scalability:** Do not hard-code team counts, tier counts, or specific paradigm names into the codebase or memory files. Reference `teams.csv` dynamically.
+*   **Scalability:** Do not hard-code team counts, tier counts, or specific paradigm names. Use `uv run council-manager show-teams` to read team structure dynamically.
 
 ### 3. Sub-Agent/Teammate Integration
-*   When spawning sub-agents or collaborating with other LLMs, ensure they are first directed to this file or the workspace skill.
-*   The `.agents/` directory is the "nervous system" of the project; any teammate must be able to autonomously read its state to orient themselves without human intervention.
+*   When spawning sub-agents or collaborating with other LLMs, ensure they are first directed to this file and the workspace skill at `.agents/skills/council-manager/SKILL.md`.
+*   Sub-agents must read both this file AND the skill before taking any action.
 
 ## Protocol Breach & Alignment
-If an agent (AI or human) deviates from these principles (e.g., by executing changes without a vote):
+If an agent (AI or human) deviates from these principles (e.g., by reading CSV files directly or executing changes without a vote):
 1.  **Immediate Halt:** Stop all current execution.
 2.  **Audit & Rollback:** Analyze the deviation and revert any unsanctioned changes if necessary.
 3.  **Formal Re-Alignment:** Re-document the current state and return to the proper deliberation phase for the original proposal.
