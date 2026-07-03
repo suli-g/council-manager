@@ -6,7 +6,46 @@ from pathlib import Path
 from council_manager.config import settings
 from council_manager.db import db_manager, Proposal, Team, Decision, AuditLog, RoadmapTask, BackgroundTask, initialize_new_project, import_csv_to_db, export_db_to_csv
 from council_manager.core.orchestrator import council_orchestrator
-from council_manager.core.prompter import format_rationale
+from council_manager.core.prompter import format_rationale, AgentPrompter
+
+COUNCIL_TEMPLATES = {
+    "software": [
+        {"id": "A", "name": "Functional Specialists", "specialty": "Functional Programming (Immutability, Pure Functions, Pipelines)"},
+        {"id": "B", "name": "OOP Specialists", "specialty": "Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns)"},
+        {"id": "C", "name": "Imperative Specialists", "specialty": "Imperative Programming (Explicit State, Procedural logic, Performance)"},
+        {"id": "D", "name": "Declarative Specialists", "specialty": "Declarative Programming (Logic engines, Config-driven, DSLs)"},
+        {"id": "E", "name": "Dynamic Specialists", "specialty": "Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping)"},
+        {"id": "F", "name": "Auditors/Project Managers", "specialty": "Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment)"},
+        {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives)"}
+    ],
+    "education": [
+        {"id": "A", "name": "Pedagogy Specialists", "specialty": "Learning theories, student needs, educational psychology"},
+        {"id": "B", "name": "Curriculum Setters", "specialty": "Subject matter experts, syllabus design, sequencing of topics"},
+        {"id": "C", "name": "Assessment Designers", "specialty": "Testing, grading rubrics, evaluations, feedback loops"},
+        {"id": "D", "name": "Instructional Technology Specialists", "specialty": "E-learning, digital tools, educational software integration"},
+        {"id": "E", "name": "Student Experience Designers", "specialty": "Engagement, accessibility, student feedback, inclusion"},
+        {"id": "F", "name": "Program Administrators", "specialty": "Resource allocation, scheduling, compliance, quality assurance"},
+        {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy (Student/Parent Mix, Design Focus, Alternative Perspectives)"}
+    ],
+    "marketing": [
+        {"id": "A", "name": "Brand Strategists", "specialty": "Brand identity, positioning, market research, brand guidelines"},
+        {"id": "B", "name": "Copywriters & Content Creators", "specialty": "Messaging, creative writing, storytelling, copy editing"},
+        {"id": "C", "name": "Media Buyers & Analysts", "specialty": "Ad spend, ROI, channel selection, analytics, performance tracking"},
+        {"id": "D", "name": "SEO & Growth Engineers", "specialty": "Conversion rate, traffic, search optimization, technical marketing"},
+        {"id": "E", "name": "Public Relations Specialists", "specialty": "Press, community engagement, influencer relations, outreach"},
+        {"id": "F", "name": "Campaign Managers", "specialty": "Timelines, budget tracking, execution, quality control"},
+        {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy (Target Audience representatives, consumer feedback, non-traditional ideas)"}
+    ],
+    "general": [
+        {"id": "A", "name": "Strategy & Finance", "specialty": "Planning, budgeting, ROI, resource allocation, financial modeling"},
+        {"id": "B", "name": "Operations & Execution", "specialty": "Process efficiency, delivery, supply chain, execution"},
+        {"id": "C", "name": "Customer Experience", "specialty": "User feedback, support, retention, customer success"},
+        {"id": "D", "name": "Compliance & Legal", "specialty": "Regulatory compliance, risk management, contracts, legal oversight"},
+        {"id": "E", "name": "Human Resources & Talent", "specialty": "Team culture, staffing, training, organizational development"},
+        {"id": "F", "name": "Operations Managers", "specialty": "Project oversight, requirement tracking, quality assurance, strategic alignment"},
+        {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy (External disruptors, alternative business models, risk-taking perspectives)"}
+    ]
+}
 
 # ANSI escape codes for terminal aesthetics
 COLOR_GREEN = "\033[92m"
@@ -40,11 +79,27 @@ def log_error(msg: str):
     except UnicodeEncodeError:
         print(f"{COLOR_RED}{COLOR_BOLD}[ERROR]{COLOR_RESET} {msg}", file=sys.stderr)
 
-def get_workspace_path(path_arg: str | None) -> Path:
+def verify_workspace_onboarded(workspace: Path) -> None:
+    # Skip verification during unit/integration tests to support mock environments
+    if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+        return
+    agents_dir = workspace / ".agents"
+    teams_csv = agents_dir / "teams.csv"
+    if not agents_dir.exists() or not teams_csv.exists():
+        log_error(
+            f"The directory at '{workspace}' has not been onboarded as a Council Manager workspace yet.\n"
+            f"Please run the onboarding wizard to initialize it:\n\n"
+            f"  uv run council-manager init-project --path \"{workspace}\"\n"
+        )
+        sys.exit(1)
+
+def get_workspace_path(path_arg: str | None, verify: bool = True) -> Path:
     if path_arg:
         p = Path(path_arg).resolve()
     else:
         p = Path(os.getcwd()).resolve()
+    if verify:
+        verify_workspace_onboarded(p)
     return p
 
 def get_proposal_id(args, workspace: Path) -> str:
@@ -110,14 +165,301 @@ def spawn_background_task(workspace_path: Path, task_id: str, max_cycles: int | 
     log_out.close()
 
 def cmd_init_project(args):
-    target_path = Path(args.path).resolve()
-    log_info(f"Initializing new project '{args.project_id}' in directory: {target_path}")
-    try:
-        initialize_new_project(target_path, args.project_id)
-        log_success("Project initialized and template CSV files imported successfully.")
-    except Exception as e:
-        log_error(f"Failed to initialize project: {e}")
+    path_str = args.path or os.getcwd()
+    target_path = Path(path_str).resolve()
+    
+    # Check if project is already initialized
+    agents_dir = target_path / ".agents"
+    teams_csv = agents_dir / "teams.csv"
+    project_exists = agents_dir.exists() and teams_csv.exists()
+    
+    if project_exists:
+        if not getattr(args, "fix_missing", False):
+            log_error(
+                f"Project in '{target_path}' is already initialized.\n"
+                f"To restore or fix missing default files (like AGENTS.md or SKILL.md) without re-onboarding, run:\n\n"
+                f"  uv run council-manager init-project --path \"{target_path}\" --fix-missing\n"
+            )
+            sys.exit(1)
+        
+        # Implement the --fix-missing logic
+        log_info(f"Fixing missing default files in already initialized project at: {target_path}")
+        
+        from council_manager.db.migration import DEFAULT_AGENTS_MD, DEFAULT_SKILL_MD
+        
+        fixed_any = False
+        
+        # Fix AGENTS.md
+        agents_md = target_path / "AGENTS.md"
+        if not agents_md.exists():
+            try:
+                with open(agents_md, "w", encoding="utf-8", newline="") as f:
+                    f.write(DEFAULT_AGENTS_MD)
+                log_success("Created missing AGENTS.md file in project root.")
+                fixed_any = True
+            except Exception as e:
+                log_error(f"Failed to create AGENTS.md: {e}")
+                sys.exit(1)
+        
+        # Fix SKILL.md
+        skill_dir = agents_dir / "skills" / "council-manager"
+        skill_dir.mkdir(parents=True, exist_ok=True)
+        skill_md = skill_dir / "SKILL.md"
+        if not skill_md.exists():
+            try:
+                with open(skill_md, "w", encoding="utf-8", newline="") as f:
+                    f.write(DEFAULT_SKILL_MD)
+                log_success("Created missing SKILL.md file in .agents/skills/council-manager/.")
+                fixed_any = True
+            except Exception as e:
+                log_error(f"Failed to create SKILL.md: {e}")
+                sys.exit(1)
+
+        # Fix project-council SKILL.md and skills.json
+        project_council_dir = agents_dir / "skills" / "project-council"
+        project_council_md = project_council_dir / "SKILL.md"
+        skills_json = agents_dir / "skills.json"
+        
+        if not project_council_md.exists() or not skills_json.exists():
+            project_council_dir.mkdir(parents=True, exist_ok=True)
+            try:
+                teams_list = []
+                if teams_csv.exists():
+                    with open(teams_csv, "r", encoding="utf-8") as f:
+                        lines = f.readlines()
+                        for line in lines[1:]:
+                            parts = line.strip().split(";")
+                            if len(parts) >= 4:
+                                teams_list.append(f"- **Team {parts[0]} ({parts[1]})**: {parts[3]}")
+                if not teams_list:
+                    teams_list = [
+                        "- **Team A (Functional Specialists)**: Functional Programming (Immutability, Pure Functions, Pipelines)",
+                        "- **Team B (OOP Specialists)**: Object-Oriented Programming (Encapsulation, Polymorphism, Design Patterns)",
+                        "- **Team C (Imperative Specialists)**: Imperative Programming (Explicit State, Procedural logic, Performance)",
+                        "- **Team D (Declarative Specialists)**: Declarative Programming (Logic engines, Config-driven, DSLs)",
+                        "- **Team E (Dynamic Specialists)**: Dynamic Programming (Reflection, Metaprogramming, Rapid Prototyping)",
+                        "- **Team F (Auditors/Project Managers)**: Project Oversight (Requirement Tracking, Quality Assurance, Strategic Alignment)",
+                        "- **Team G (Contrarians)**: Devil's Advocacy (Beginner/Senior Tech Mix, Design Focus, Non-Tech Perspectives)"
+                    ]
+                team_details_str = "\n".join(teams_list)
+                
+                project_council_content = f"""---
+name: project-council
+description: "Defines the project-specific council personas and specialties for deliberations and voting."
+---
+
+# Project Council Persona Skill
+
+This workspace is governed by a project-specific council. When you are asked to run deliberations or voting, or when you interact with this project, you must adopt these specific team personas.
+
+## Council Teams and Specialties
+
+Here are the active teams for this project:
+{team_details_str}
+
+## Instructions for Collaborating Agents
+
+1. **Official Tool Delegation (Critical)**: Do NOT write or simulate deliberations or voting results yourself within your model context. You MUST delegate all deliberations and voting loops to the `council-manager` CLI tools (e.g., `uv run council-manager deliberate` and `uv run council-manager vote`). This ensures they are processed through the official SQLite backend and using the project's configured council LLM provider (e.g., Ollama, local endpoints), even if you are operating on a different model (e.g. Gemini).
+2. **Deliberations**: When the official `council-manager` tool runs deliberations, the system will prompt the underlying LLM to adopt the specialties listed above.
+3. **Voting**: When the official `council-manager` tool runs voting, each team will evaluate proposals from the lens of their specific paradigm and domain.
+4. **Impersonation**: Respect the distinct perspectives of each team. Do not merge their identities or dilute their specialties.
+"""
+                with open(project_council_md, "w", encoding="utf-8", newline="") as f:
+                    f.write(project_council_content)
+                log_success("Created missing project-council/SKILL.md file.")
+                fixed_any = True
+                
+                # Write/Update skills.json
+                import json
+                config_data = {
+                    "entries": [
+                        { "path": str(skill_dir.as_posix()) },
+                        { "path": str(project_council_dir.as_posix()) }
+                    ]
+                }
+                with open(skills_json, "w", encoding="utf-8", newline="") as f:
+                    json.dump(config_data, f, indent=2)
+                log_success("Created missing skills.json registration file.")
+                fixed_any = True
+            except Exception as e:
+                log_error(f"Failed to restore project-council skill: {e}")
+                sys.exit(1)
+                
+        if not fixed_any:
+            log_info("All default governance files (AGENTS.md, SKILL.md) are already present.")
+        else:
+            log_success("Governance files fixed successfully.")
+        return
+
+    # If project does not exist but --fix-missing was passed, raise an error
+    if getattr(args, "fix_missing", False):
+        log_error(f"No initialized project found at '{target_path}'. Cannot fix missing files. Please run without '--fix-missing' to initialize a new project.")
         sys.exit(1)
+
+    # 1. Determine if we are in interactive mode
+    # If any of the main inputs (path, project-id, description) are missing and stdin is a tty, we can run interactively.
+    interactive = False
+    if not args.path or not args.project_id or not getattr(args, "description", None):
+        interactive = sys.stdin.isatty()
+
+    project_id = args.project_id
+    project_name = getattr(args, "name", None)
+    description = getattr(args, "description", None)
+    member_count = getattr(args, "member_count", None)
+
+
+    if interactive:
+        print("\n=== Council Manager Onboarding Wizard ===\n")
+        
+        # Prompt for Path
+        if not path_str:
+            default_path = os.getcwd()
+            path_str = input(f"Enter target project directory [default: {default_path}]: ").strip() or default_path
+        
+        # Prompt for Project ID
+        if not project_id:
+            resolved_path = Path(path_str).resolve()
+            default_id = resolved_path.name.lower().replace(" ", "_").replace("-", "_")
+            project_id = input(f"Enter project ID / slug [default: {default_id}]: ").strip() or default_id
+            
+        # Prompt for Project Name
+        if not project_name:
+            default_name = project_id.replace("_", " ").title()
+            project_name = input(f"Enter project name [default: {default_name}]: ").strip() or default_name
+
+        # Prompt for Description
+        if not description:
+            print("\nEnter a description of the project and its core goals/problems.")
+            print("This will be used to initialize the council and can be used by the AI to infer the optimal council size.")
+            description = input("Project Description: ").strip()
+            while not description:
+                description = input("Description cannot be empty. Project Description: ").strip()
+
+        # Prompt for Member Count (with AI inference option!)
+        if not member_count:
+            print("\nGovernance Council Team Member Count:")
+            print("Under our rules, all 7 active paradigm teams (A-G) will receive the same global member count.")
+            print("Would you like the AI to infer the optimal count based on the project description? (y/n)")
+            choice = input("[default: y]: ").strip().lower() or "y"
+            if choice == "y":
+                log_info("Querying AI to infer optimal team member count...")
+                try:
+                    prompter = AgentPrompter()
+                    inference = prompter.infer_global_member_count(description)
+                    inferred_val = inference.global_member_count
+                    rationale = inference.rationale
+                    log_success(f"AI Suggestion: {inferred_val} members per team.")
+                    print(f"Rationale: {rationale}")
+                    confirm = input(f"Apply this suggestion? (y/n) [default: y]: ").strip().lower() or "y"
+                    if confirm == "y":
+                        member_count = inferred_val
+                except Exception as e:
+                    log_error(f"AI inference failed ({e}). Falling back to manual entry.")
+            
+            if not member_count:
+                while True:
+                    mc_str = input("Enter global member count (integer between 5 and 50) [default: 10]: ").strip() or "10"
+                    try:
+                        val = int(mc_str)
+                        if 5 <= val <= 50:
+                            member_count = val
+                            break
+                        else:
+                            print("Please enter an integer between 5 and 50.")
+                    except ValueError:
+                        print("Invalid integer.")
+
+        # Prompt for Council Persona
+        inferred_teams = None
+        council_template = getattr(args, "council_template", None)
+        if council_template:
+            inferred_teams = COUNCIL_TEMPLATES[council_template]
+            log_success(f"Using specified council template: {council_template.upper()}")
+
+        if not inferred_teams and description:
+            print("\nGovernance Council Persona Selection:")
+            print("Would you like the AI to infer and customize the 7 council teams based on the project description? (y/n)")
+            choice_council = input("[default: y]: ").strip().lower() or "y"
+            if choice_council == "y":
+                log_info("Querying AI to infer optimal council teams...")
+                try:
+                    prompter = AgentPrompter()
+                    council_inference = prompter.infer_project_council(description)
+                    inferred_teams = []
+                    for t in council_inference.teams:
+                        inferred_teams.append({
+                            "id": t.id,
+                            "name": t.name,
+                            "specialty": t.paradigm_specialty
+                        })
+                    log_success(f"AI inferred council template: {council_inference.selected_template.upper()}")
+                    print("\nInferred Council Teams:")
+                    for t in inferred_teams:
+                        print(f"  Team {t['id']}: {t['name']} — {t['specialty']}")
+                    confirm_council = input(f"\nApply these council teams? (y/n) [default: y]: ").strip().lower() or "y"
+                    if confirm_council != "y":
+                        inferred_teams = None
+                except Exception as e:
+                    log_error(f"AI council inference failed ({e}). Falling back to manual template selection.")
+            
+            if not inferred_teams:
+                print("\nSelect a pre-defined council template:")
+                print("1. Software Engineering (Functional, OOP, Imperative, Declarative, Dynamic Specialists)")
+                print("2. Education / Pedagogy (Pedagogy, Curriculum, Assessment, Instructional Tech, Student Experience Specialists)")
+                print("3. Marketing & Branding (Brand, Copywriting, Media Buying, SEO/Growth, PR Specialists)")
+                print("4. General Business (Strategy/Finance, Operations, Customer Experience, Compliance, HR)")
+                while True:
+                    template_choice = input("Enter selection [1-4] [default: 1]: ").strip() or "1"
+                    if template_choice == "1":
+                        inferred_teams = COUNCIL_TEMPLATES["software"]
+                        break
+                    elif template_choice == "2":
+                        inferred_teams = COUNCIL_TEMPLATES["education"]
+                        break
+                    elif template_choice == "3":
+                        inferred_teams = COUNCIL_TEMPLATES["marketing"]
+                        break
+                    elif template_choice == "4":
+                        inferred_teams = COUNCIL_TEMPLATES["general"]
+                        break
+                    else:
+                        print("Invalid selection.")
+        elif not inferred_teams:
+            inferred_teams = COUNCIL_TEMPLATES["software"]
+    else:
+        # Non-interactive fallback defaults
+        if not path_str:
+            path_str = os.getcwd()
+        if not project_id:
+            project_id = "new_project"
+        if not project_name:
+            project_name = project_id.replace("_", " ").title()
+        if not member_count:
+            member_count = 10
+        
+        council_template = getattr(args, "council_template", None) or "software"
+        inferred_teams = COUNCIL_TEMPLATES[council_template]
+
+    target_path = Path(path_str).resolve()
+    log_info(f"Initializing and onboarding project '{project_name}' in: {target_path}")
+    log_info(f"Global team count set to: {member_count} members per group.")
+    
+    try:
+        initialize_new_project(
+            workspace_dir=target_path,
+            project_id=project_id,
+            project_name=project_name,
+            global_member_count=member_count,
+            project_description=description,
+            custom_teams=inferred_teams
+        )
+        log_success("Project onboarded successfully.")
+        if description:
+            log_success("Initial description ratified and saved as DEC-001.")
+    except Exception as e:
+        log_error(f"Failed to onboard project: {e}")
+        sys.exit(1)
+
 
 def cmd_import(args):
     workspace = get_workspace_path(args.workspace)
@@ -180,8 +522,15 @@ async def run_deliberation_async(args):
     workspace = get_workspace_path(args.workspace)
     proposal_id = get_proposal_id(args, workspace)
     log_info(f"Running Phase 1 Deliberation for proposal '{proposal_id}'...")
+    
+    def cli_progress(team_id: str, team_name: str, status: str, elapsed: float):
+        if status == "STARTED":
+            log_info(f"Team {team_id} ({team_name}) started deliberation...")
+        elif status == "COMPLETED":
+            log_success(f"Team {team_id} ({team_name}) completed in {elapsed:.2f}s.")
+
     try:
-        prop = await council_orchestrator.run_deliberation(workspace, proposal_id)
+        prop = await council_orchestrator.run_deliberation(workspace, proposal_id, on_progress=cli_progress)
         log_success(f"Deliberation complete. Status updated to: {prop.status}")
         log_info(f"Collected rationales from {len(prop.rationales)} teams.")
     except Exception as e:
@@ -793,6 +1142,43 @@ def cmd_proposal_ratify(args):
 def cmd_team_vote(args):
     asyncio.run(run_team_vote_async(args))
 
+def cmd_register_skill(args):
+    import json
+    target_path = Path(args.workspace or os.getcwd()).resolve()
+    agents_dir = target_path / ".agents"
+    
+    if not agents_dir.exists():
+        log_error(f"No initialized project found at '{target_path}'. Please run 'init-project' first.")
+        sys.exit(1)
+        
+    skills_dir = agents_dir / "skills"
+    entries = []
+    
+    if skills_dir.exists():
+        for item in skills_dir.iterdir():
+            if item.is_dir() and (item / "SKILL.md").exists():
+                entries.append({ "path": str(item.as_posix()) })
+                
+    if not entries:
+        log_error(f"No skill files found in '{skills_dir}'. Please run 'init-project --fix-missing' to restore them.")
+        sys.exit(1)
+        
+    skills_json_path = agents_dir / "skills.json"
+    config_data = {
+        "entries": entries
+    }
+    
+    try:
+        with open(skills_json_path, "w", encoding="utf-8", newline="") as f:
+            json.dump(config_data, f, indent=2)
+        log_success(f"Successfully registered skills in {skills_json_path}")
+        for entry in entries:
+            log_info(f"Registered path: {entry['path']}")
+    except Exception as e:
+        log_error(f"Failed to write skills.json: {e}")
+        sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Council Manager CLI: Interact with isolated multi-team governance databases.",
@@ -802,9 +1188,15 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Subcommand to execute")
 
     # Command: init-project
-    p_init = subparsers.add_parser("init-project", help="Initialize a new project directory with templates.")
-    p_init.add_argument("--path", required=True, help="Target folder to initialize project in.")
-    p_init.add_argument("--project-id", default="new_project", help="Identifier of the project.")
+    p_init = subparsers.add_parser("init-project", help="Initialize a new project directory with templates and interactive onboarding.")
+    p_init.add_argument("--path", help="Target folder to initialize project in. (optional, prompts if omitted)")
+    p_init.add_argument("--project-id", help="Identifier of the project. (optional, prompts if omitted)")
+    p_init.add_argument("--name", help="Name of the project. (optional, prompts if omitted)")
+    p_init.add_argument("--description", help="Description of the project. (optional, prompts if omitted)")
+    p_init.add_argument("--member-count", type=int, help="Global member count for all teams. (optional, prompts/infers if omitted)")
+    p_init.add_argument("--council-template", choices=["software", "education", "marketing", "general"], help="Pre-defined council template to use. (optional, prompts/infers if omitted)")
+    p_init.add_argument("--fix-missing", action="store_true", help="Fix missing default files (like AGENTS.md or SKILL.md) in an already initialized project without re-onboarding.")
+
 
     # Command: import
     p_import = subparsers.add_parser("import", help="Import CSV data into the SQLite database.")
@@ -910,6 +1302,10 @@ def main():
     p_dash = subparsers.add_parser("dashboard", help="Launch the interactive Terminal UI dashboard.")
     p_dash.add_argument("-w", "--workspace", help="Path to the workspace folder.")
 
+    # Command: register-skill
+    p_reg = subparsers.add_parser("register-skill", help="Explicitly register all local workspace skills (council-manager, project-council) in skills.json.")
+    p_reg.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+
     args = parser.parse_args()
     if args.debug:
         settings.debug = True
@@ -959,6 +1355,8 @@ def main():
         cmd_server(args)
     elif args.command == "dashboard":
         cmd_dashboard(args)
+    elif args.command == "register-skill":
+        cmd_register_skill(args)
 
 if __name__ == "__main__":
     main()

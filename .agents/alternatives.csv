@@ -112,4 +112,55 @@ ALT-110;DEC-104;Option B (Request Edits);Block proceeding until edits are comple
 ALT-111;DEC-105;Option A (Patch Bump to 0.6.6);Bump patch version to 0.6.6 for documentation release;Appropriate for doc-only updates under SemVer rules.
 ALT-112;DEC-105;Option B (Minor Bump to 0.7.0);Bump minor version to 0.7.0;Should be reserved for functional onboarding feature implementations.
 ALT-113;DEC-105;Option C (Reject/Revisions);Block release and request revisions;Delays deployment.
+ALT-114;DEC-106;Option A (Implement in Phase 4);Immediate integration capability for local agents during the current release.;Increases Phase 4 scope and potential feature creep.
+ALT-115;DEC-106;Option B (Defer to Phase 5);Keeps the 0.7.0 release focused on core stability and onboarding.;Delayed integration with workspace agents.
+ALT-116;DEC-106;Option C (Do not add to roadmap);Zero additional configuration overhead.;Lacks structured discovery for workspace agents.
+ALT-117;DEC-107;Option A (Inline in README.md);High visibility, immediately guides new users and developer agents.;Adds lines to README.md.
+ALT-118;DEC-107;Option B (Separate Markdown File);Keeps README.md brief.;Slightly less discoverable.
+ALT-119;DEC-107;Option C (Existing PUML Only);No documentation redundancy.;Harder for visual learners to find and parse.
+ALT-120;DEC-108;Option A (Declarative & Logged);Create a semi-colon delimited queries.csv and database schema to log advisory queries for O(1) lookups.;Adds metadata and maintenance overhead, and risk of documentation rot.
+ALT-121;DEC-108;Option C (Contrarian View);Reject the QUERY: prefix and queries database entirely to keep the governance workflow simple and focused strictly on proposals.;Lacks a structured, lightweight way to query team perspectives, forcing users to use the heavier PROPOSAL: flow or informal chat.
+ALT-122;DEC-109;Option B (Individual Team Count Modification);Allow editing the count/weight of each team independently in the CLI/TUI onboarding wizard.;Adds configuration complexity and increases the risk of 'echo chamber' governance manipulation.
+ALT-123;DEC-109;Option C (Fixed Constant Weight);Hardcode the team member count/weight to 10 for all teams with no onboarding configuration option.;Prevents tailoring the voting weights and scale to the project's complexity.
+ALT-124;DEC-110;Option 1: Use only a Workspace Skill;Clean root directory, native Antigravity integration.;Non-Antigravity agents and human developers lose a highly visible, standard entry point in the root.
+ALT-125;DEC-110;Option 3: Use only a root-level AGENTS.md;Simple, standard documentation approach.;AI agents may overlook or violate the rules without a registered workspace skill.
+ALT-126;DEC-111;Option 1: Add a dedicated 'Available CLI Commands' section to SKILL.md;Provides immediate, self-contained documentation of the command signatures.;High risk of documentation rot if the CLI command signatures change in the future.
+ALT-127;DEC-111;Option 2: Add a general instruction directing the agent to run 'uv run council-manager --help';Prevents rot by relying on dynamic runtime discovery.;Adds execution overhead for the agent to run help commands during orientation.
+ALT-128;DEC-112;Option 1: Automatically copy skill to global customizations directory;Immediate global availability of the skill for all workspaces.;Intrusive, silent file modification of home directories without explicit consent.
+ALT-129;DEC-112;Option 2: Provide a dedicated CLI command to copy skill globally;Explicit and transparent installation step.;Requires manual user execution, slightly increasing onboarding friction.
+ALT-130;DEC-113;Option 2: Add a separate 'install-skill' subcommand;Keeps initialization and maintenance CLI endpoints decoupled.;Increases CLI command surface area and adds redundant subcommands.
+ALT-131;DEC-113;Option 3: Keep CLI as is;Zero new code or CLI complexity.;No easy or safe way for existing projects to migrate to the new skill-based governance without manual file copying.
+ALT-132;DEC-114;Option A: Align Skill Name;Modify the frontmatter name in SKILL.md and migration.py to 'council_manager'.;Simple, zero filesystem renaming required, ensures immediate automatic discovery by Antigravity.;Changes the skill name from 'council-manager-governance' to 'council_manager'.
+ALT-133;DEC-114;Option B: Rename Folder;Rename the skill directory in .agents/skills/ and migration.py to 'council-manager-governance'.;Keeps the descriptive name 'council-manager-governance' in the frontmatter.;Mismatches the project/package name 'council_manager' on the filesystem, and renaming directories is more complex and error-prone.
+ALT-134;DEC-114;Option C (Contrarian): Keep as is;Do not change the names or directories. Rely on manual registration in skills.json.;Avoids any changes to existing files or directories.;Requires manual configuration by the user or agent in skills.json, increasing onboarding friction.
+ALT-135;DEC-115;Option 1: Automated skills.json creation;Automatically generate and maintain a portable skills.json during project initialization and --fix-missing execution.;Ensures out-of-the-box discovery without manual steps.;Hardcoding paths (even relative) during init might not be desired by all users, and decouples initialization from registration less cleanly.
+ALT-136;DEC-115;Option 2: Dedicated CLI subcommand;Add a dedicated subcommand (e.g., register-skill) to explicitly generate the skills.json file.;Keeps concerns decoupled, gives explicit control, and allows easy re-registration.;Requires an extra manual step from the user to enable the skill.
+ALT-137;DEC-115;Option 3: No change / Manual;Do not add any registration helper. Let the user create skills.json manually.;No code changes or CLI footprint increases.;Higher friction for onboarding and resolving agent discovery issues.
+ALT-138;DEC-116;Option B (Keep Status Quo);Retain the snake_case name 'council_manager'.;Avoids any filesystem renaming and modification to codebase/tests.;Does not conform to the platform's standard kebab-case naming conventions for skills.
+ALT-139;DEC-117;Fully dynamic LLM-generated councils;The LLM designs a bespoke set of teams and personas from scratch for every project, writing them to teams.csv and generating a project-council skill.;Non-deterministic, requires LLM connectivity, could produce inconsistent structures.
+ALT-140;DEC-117;User-selected templates;Provide a hardcoded menu of templates in the CLI onboarding wizard, or let the user define teams manually, without LLM generation.;High friction for custom councils, less automated, requires manual effort.
+ALT-141;DEC-118;Sub-task fragmentation;Add a new sub-task (e.g. P5-02a) to the roadmap to specifically document the template/persona generation diversion.;Clutters the roadmap with redundant tasks.
+ALT-142;DEC-119;Bump version to 0.8.0;Bump version to 0.8.0 in pyproject.toml, regenerate lockfile, and document the 0.8.0 release in CHANGELOG.md.;Adds package version increments before Phase 5 is fully closed out.
+ALT-143;DEC-120;Update Docs Only;Update the documentation and help sections but keep the version at 0.7.0.;Version metadata does not reflect the new onboarding capabilities.
+ALT-144;DEC-121;Option A (Recommended): CLI mandate;Instruct agents to delegate deliberations and voting to the CLI commands (council-manager deliberate/vote).;Ensures proper configured provider execution (Ollama) and maintains SQLite integrity.;Relying on CLI execution requires terminal access.
+ALT-145;DEC-121;Option B: Status Quo;Maintain the existing instruction templates without CLI tool mandates.;Saves code modification and testing overhead.;Agents might simulate the council locally, bypassing the configured Ollama backend.
+ALT-146;DEC-121;Option G (Contrarian): Expose provider settings;Modify the skill definition to expose Ollama/provider endpoints for direct agent queries.;Allows direct API access for headless agents without CLI footprint.;Bypasses the centralized CLI orchestrator and SQLite transaction safety.
+ALT-147;DEC-122;Option A: Real-Time Dashboard & Web UI Extensions;Expand TUI to show real-time progress bars, develop a React/Vue web dashboard, and integrate OAuth2/JWT security.;Improves accessibility, UX, and provides visual proposal state tracking.;Requires setting up frontend web dependencies and packaging them.
+ALT-148;DEC-122;Option B: Enhanced AI Capabilities & Multi-Model Debates;Support hybrid-model debates across Ollama/Gemini and implement semantic search context indexing over decisions.csv.;Leverages model biases and prevents historical decision regression.;Increases token cost and local API key management complexity.
+ALT-149;DEC-122;Option G (Contrarian): Minimalist & CLI-First Optimization;Optimize memory, compile to single-binary (PyInstaller), and replace TUI/servers with git hooks/file watch scripts.;Extremely lightweight, zero network/server footprint, zero external dependencies.;Removes the FastAPI and graphical Textual TUI visualization completely.
+ALT-150;DEC-123;Option A: Plot Phase 6 tasks;Add Phase 6 to the roadmap and run a full audit immediately.;Updates the project plan roadmap to reflect upcoming work.;Adds new phase descriptions before the current codebase has been fully verified and aligned.
+ALT-151;DEC-123;Option B: Plot Phase 6 but postpone audit;Plot Phase 6 tasks on the roadmap but postpone UML and test coverage alignment checks.;Allows proceeding with planning immediately.;Risks documentation and UML alignment drift.
+ALT-152;DEC-123;Option G (Contrarian): Do not plot Phase 6;Postpone plotting Phase 6 on the roadmap. Run the full alignment audit on the existing documentation and tests before making new phase proposals.;Maintains complete architectural integrity and keeps documentation accurate before expanding scope.;Requires completing the alignment audit before plotting the roadmap tasks.
+ALT-153;DEC-124;Option A: Expand test coverage;Add new test cases in tests/ verifying validation limits, CLI Wizard prompt parsing, offline inference fallbacks, and task worker error flows.;Ensures 100% compliance with new project onboarding and template use cases.;Slightly increases codebase test file size and test suite execution time.
+ALT-154;DEC-124;Option B: Keep existing test suite;Maintain the current 64 unit and integration tests.;Zero extra test maintenance code overhead.;Gaps remain in test coverage for CLI onboarding interactive prompts and fallback error handlers.
+ALT-155;DEC-124;Option G (Contrarian): Property-based testing;Introduce property-based testing (e.g. Hypothesis) to test the consensus and tally logic with wide ranges of random inputs.;Provides high structural security and finds rare consensus edge cases.;High complexity and setup overhead compared to standard unit tests.
+
+
+
+
+
+
+
+
+
 

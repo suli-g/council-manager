@@ -58,8 +58,12 @@ async def test_create_and_run_deliberation():
         assert db_prop.status == "DELIBERATION_PENDING"
         session.close()
 
-        # 4. Run Deliberation (Async)
-        updated_proposal = await orchestrator.run_deliberation(workspace, "DEC-101")
+        # 4. Run Deliberation (Async) with progress tracking
+        progress_events = []
+        def test_on_progress(team_id, team_name, status, elapsed):
+            progress_events.append((team_id, team_name, status))
+
+        updated_proposal = await orchestrator.run_deliberation(workspace, "DEC-101", on_progress=test_on_progress)
 
         assert updated_proposal.status == "VOTING_PENDING"
         assert len(updated_proposal.rationales) == 2
@@ -69,6 +73,13 @@ async def test_create_and_run_deliberation():
         assert rat_dict["A"]["stance"] == "FOR"
         assert rat_dict["B"]["motivation"] == "OOP rationale"
         assert rat_dict["B"]["stance"] == "AGAINST"
+
+        # Verify progress events were captured
+        assert len(progress_events) == 4  # (started, completed) for both teams
+        assert ("A", "Team A", "STARTED") in progress_events
+        assert ("A", "Team A", "COMPLETED") in progress_events
+        assert ("B", "Team B", "STARTED") in progress_events
+        assert ("B", "Team B", "COMPLETED") in progress_events
 
         # Verify prompter was called asynchronously for both teams
         assert mock_prompter.generate_deliberation_async.call_count == 2

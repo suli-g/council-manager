@@ -59,6 +59,11 @@ class DeliberationResponse(BaseModel):
     motivation: str = Field(description="A concise summary of why this stance is good or bad from your paradigm's perspective")
     suggestion: str = Field(description="A constructive technical suggestion (if stance is FOR, suggest how implementation could work; if stance is AGAINST, suggest a concrete alternative)")
 
+class OnboardingInferenceResponse(BaseModel):
+    global_member_count: int = Field(description="A suggested integer between 5 and 50 representing the global member count for all paradigm teams, based on the project size and complexity.")
+    rationale: str = Field(description="A brief explanation of why this member count is appropriate for the described project.")
+
+
 def format_rationale(rationale: any) -> str:
     from typing import Any
     if isinstance(rationale, dict):
@@ -637,5 +642,119 @@ class AgentPrompter:
 
         data = clean_and_parse_json(response.text)
         return InceptionResponse(**data)
+
+    def infer_global_member_count(self, description: str) -> OnboardingInferenceResponse:
+        """Query target LLM model to suggest a global member count for the project based on its description."""
+        system_instruction = (
+            "You are an AI assistant designed to bootstrap project councils. "
+            "Given a project description, you must suggest a single global member count/weight (an integer between 5 and 50, usually 10 for standard projects, 20-30 for large or complex projects) "
+            "that will be applied to all 7 active paradigm teams (A-G)."
+        )
+
+        prompt = (
+            f"Please suggest a global member count for the following project description:\n"
+            f"Description: {description}\n\n"
+            f"Return a structured JSON containing the suggested global_member_count and a brief rationale."
+        )
+
+        if settings.llm_provider.lower() != "google":
+            text = self._generate_content_custom(system_instruction, prompt, schema=OnboardingInferenceResponse, temperature=0.2)
+            return OnboardingInferenceResponse(**clean_and_parse_json(text))
+
+        response = self.client.models.generate_content(
+            model=settings.gemini_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.2,
+                response_mime_type="application/json",
+                response_schema=OnboardingInferenceResponse,
+            )
+        )
+
+        if hasattr(response, "parsed") and response.parsed:
+            return response.parsed
+
+        data = clean_and_parse_json(response.text)
+        return OnboardingInferenceResponse(**data)
+
+    def infer_project_council(self, description: str) -> "CouncilInferenceResponse":
+        """Query target LLM model to suggest a customized council of 7 teams based on the project description."""
+        system_instruction = (
+            "You are an AI assistant designed to bootstrap project councils. "
+            "Given a project description, you must classify the project and define a council of exactly 7 teams (A to G) that are best suited to govern this project.\n\n"
+            "Your response must include:\n"
+            "- selected_template: 'software', 'education', 'marketing', 'general', or 'custom'.\n"
+            "- teams: A list of exactly 7 teams.\n\n"
+            "For the teams:\n"
+            "- The IDs must be exactly 'A', 'B', 'C', 'D', 'E', 'F', 'G'.\n"
+            "- Team F must always represent the Auditors/Project Managers (focused on strategic alignment, quality assurance, requirement tracking, and auditing).\n"
+            "- Team G must always represent the Contrarians (focused on devil's advocacy, design friction, and critical analysis of assumptions).\n"
+            "- Teams A, B, C, D, E should represent the key specialist paradigms for the domain.\n\n"
+            "For example:\n"
+            "- For 'software':\n"
+            "  A: Functional Specialists (Functional Programming, Immutability)\n"
+            "  B: OOP Specialists (Object-Oriented Programming, Design Patterns)\n"
+            "  C: Imperative Specialists (Explicit State, Procedural logic)\n"
+            "  D: Declarative Specialists (Logic engines, Config-driven, DSLs)\n"
+            "  E: Dynamic Specialists (Reflection, Metaprogramming)\n"
+            "- For 'education' (curriculum, teaching, pedagogy):\n"
+            "  A: Pedagogy Specialists (Learning theories, student needs)\n"
+            "  B: Curriculum Setters (Subject matter experts, syllabus design)\n"
+            "  C: Assessment Designers (Testing, grading rubrics, evaluations)\n"
+            "  D: Instructional Technology Specialists (E-learning, digital tools)\n"
+            "  E: Student Experience Designers (Engagement, accessibility, student feedback)\n"
+            "- For 'marketing' (campaigns, branding, growth):\n"
+            "  A: Brand Strategists (Brand identity, positioning)\n"
+            "  B: Copywriters & Content Creators (Messaging, creative writing)\n"
+            "  C: Media Buyers & Analysts (Ad spend, ROI, channel selection)\n"
+            "  D: SEO & Growth Engineers (Conversion rate, traffic, search optimization)\n"
+            "  E: Public Relations Specialists (Press, community engagement)\n"
+            "- For 'general' (business operations, general projects):\n"
+            "  A: Strategy & Finance (Planning, budgeting, ROI)\n"
+            "  B: Operations & Execution (Process efficiency, delivery)\n"
+            "  C: Customer Experience (User feedback, support, retention)\n"
+            "  D: Compliance & Legal (Regulatory, risk management, contracts)\n"
+            "  E: Human Resources & Talent (Team culture, staffing, training)"
+        )
+
+        prompt = (
+            f"Please suggest a project-specific council for the following project description:\n"
+            f"Description: {description}\n\n"
+            f"Return a structured JSON containing the selected_template and the list of 7 teams."
+        )
+
+        if settings.llm_provider.lower() != "google":
+            text = self._generate_content_custom(system_instruction, prompt, schema=CouncilInferenceResponse, temperature=0.2)
+            return CouncilInferenceResponse(**clean_and_parse_json(text))
+
+        response = self.client.models.generate_content(
+            model=settings.gemini_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.2,
+                response_mime_type="application/json",
+                response_schema=CouncilInferenceResponse,
+            )
+        )
+
+        if hasattr(response, "parsed") and response.parsed:
+            return response.parsed
+
+        data = clean_and_parse_json(response.text)
+        return CouncilInferenceResponse(**data)
+
+
+class TeamInference(BaseModel):
+    id: str = Field(description="The team ID, which must be exactly one of: 'A', 'B', 'C', 'D', 'E', 'F', 'G'")
+    name: str = Field(description="The name of the team (e.g. 'Pedagogy Specialists', 'Curriculum Setters')")
+    paradigm_specialty: str = Field(description="The team's paradigm specialty and focus area (e.g. 'Learning theories, student needs')")
+
+
+class CouncilInferenceResponse(BaseModel):
+    selected_template: str = Field(description="The matching template name: 'software', 'education', 'marketing', 'general', or 'custom'")
+    teams: List[TeamInference] = Field(description="A list of exactly 7 teams (A to G). F must be the Auditors/Project Managers, G must be the Contrarians.")
+
 
 

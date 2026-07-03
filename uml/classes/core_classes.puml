@@ -16,6 +16,7 @@ package "db" {
     + proposals: List[Proposal]
     + decisions: List[Decision]
     + audit_logs: List[AuditLog]
+    + audit_decisions: List[AuditDecision]
     + roadmap_tasks: List[RoadmapTask]
     + background_tasks: List[BackgroundTask]
   }
@@ -75,6 +76,17 @@ package "db" {
     + project: Project
   }
 
+  class AuditDecision {
+    + audit_id: str
+    + decision_id: str
+    + project_id: str
+    + status: str
+    + re_audit_date: Optional[date]
+    + notes: Optional[str]
+    --
+    + project: Project
+  }
+
   class RoadmapTask {
     + id: str
     + project_id: str
@@ -106,12 +118,14 @@ package "db" {
   Base <|-- Decision
   Base <|-- Alternative
   Base <|-- AuditLog
+  Base <|-- AuditDecision
   Base <|-- RoadmapTask
   Base <|-- BackgroundTask
 
   Project "1" *-- "*" Proposal
   Project "1" *-- "*" Decision
   Project "1" *-- "*" AuditLog
+  Project "1" *-- "*" AuditDecision
   Project "1" *-- "*" RoadmapTask
   Project "1" *-- "*" BackgroundTask
   Decision "1" *-- "*" Alternative
@@ -125,7 +139,7 @@ package "core" {
     + __init__(prompter: Optional[AgentPrompter])
     + prompter(): AgentPrompter
     + create_proposal(workspace_dir, project_id, description, proposal_id, topic, options): Proposal
-    + run_deliberation(workspace_dir, proposal_id): Proposal
+    + run_deliberation(workspace_dir, proposal_id, on_progress: Optional[Callable]): Proposal
     + run_voting(workspace_dir, proposal_id, max_cycles): Proposal
     + ratify_proposal(workspace_dir, proposal_id, selected_option, alternative_status, next_proposal_desc): Proposal
   }
@@ -140,6 +154,7 @@ package "core" {
     + generate_proposal_inception(description: str): InceptionResponse
     + generate_deliberation_async(team_name, paradigm_specialty, title, description, options): DeliberationResponse
     + generate_vote_async(team_name, paradigm_specialty, title, description, options, rationales, vote_history, round_num): VoteResponse
+    + infer_project_council(description: str): CouncilInferenceResponse
   }
 
   class AgentRegistry {

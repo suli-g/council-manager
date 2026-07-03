@@ -496,7 +496,15 @@ class CouncilDashboardApp(App):
         self.run_worker(self.do_deliberate(self.selected_proposal_id), exclusive=True)
 
     async def do_deliberate(self, proposal_id: str) -> None:
-        await council_orchestrator.run_deliberation(self.workspace, proposal_id)
+        def tui_progress(team_id: str, team_name: str, status: str, elapsed: float):
+            if status == "COMPLETED":
+                self.notify(
+                    f"Team {team_id} ({team_name}) completed in {elapsed:.2f}s.",
+                    title="Deliberation Progress",
+                    severity="information",
+                    timeout=5.0
+                )
+        await council_orchestrator.run_deliberation(self.workspace, proposal_id, on_progress=tui_progress)
 
     def action_vote(self) -> None:
         if not self.selected_proposal_id:

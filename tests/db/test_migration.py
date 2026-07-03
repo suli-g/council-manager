@@ -2,7 +2,7 @@ import csv
 import tempfile
 import pytest
 from pathlib import Path
-from council_manager.db import db_manager, Project, Team, Proposal, Decision, Alternative, AuditLog
+from council_manager.db import db_manager, Project, Team, Proposal, Decision, Alternative, AuditLog, AuditDecision
 from council_manager.db.migration import import_csv_to_db, export_db_to_csv, initialize_new_project
 
 @pytest.fixture(autouse=True)
@@ -41,6 +41,11 @@ def test_migration_bidirectional():
             f.write("timestamp;audit_id;summary;alignment_score;auditor_team\n")
             f.write("2026-05-07T14:30:00;AUDIT-001;Alignment assessment;60%;F\n")
 
+        # Write mock audit_decisions.csv
+        with open(src_agents / "audit_decisions.csv", "w", encoding="utf-8", newline="") as f:
+            f.write("audit_id;decision_id;status;re_audit_date;notes\n")
+            f.write("AUDIT-001;DEC-001;FIXED;2026-05-15;Refactored code\n")
+
         # Write mock vote file
         with open(src_votes / "DEC-001.csv", "w", encoding="utf-8", newline="") as f:
             f.write("voter_id;team_id;vote;rationale\n")
@@ -72,6 +77,11 @@ def test_migration_bidirectional():
             assert audit is not None
             assert audit.alignment_score == 60.0
 
+            audit_dec = session.query(AuditDecision).filter_by(audit_id="AUDIT-001", decision_id="DEC-001").first()
+            assert audit_dec is not None
+            assert audit_dec.status == "FIXED"
+            assert audit_dec.notes == "Refactored code"
+
             prop = session.query(Proposal).filter_by(id="DEC-001").first()
             assert prop is not None
             assert prop.status == "RATIFIED"
@@ -90,8 +100,20 @@ def test_migration_bidirectional():
         assert (dest_agents / "decisions.csv").exists()
         assert (dest_agents / "alternatives.csv").exists()
         assert (dest_agents / "audits.csv").exists()
+        assert (dest_agents / "audit_decisions.csv").exists()
         assert (dest_agents / "votes_manifest.csv").exists()
         assert (dest_agents / "votes" / "DEC-001.csv").exists()
+
+        # Read exported audit_decisions.csv to verify contents and format
+        with open(dest_agents / "audit_decisions.csv", "r", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f, delimiter=";")
+            rows = list(reader)
+            assert len(rows) == 1
+            assert rows[0]["audit_id"] == "AUDIT-001"
+            assert rows[0]["decision_id"] == "DEC-001"
+            assert rows[0]["status"] == "FIXED"
+            assert rows[0]["re_audit_date"] == "2026-05-15"
+            assert rows[0]["notes"] == "Refactored code"
 
         # Read exported decisions.csv to verify contents and semi-colon format
         with open(dest_agents / "decisions.csv", "r", encoding="utf-8", newline="") as f:
@@ -188,5 +210,199 @@ def test_initialize_new_project():
         finally:
             session.close()
             db_manager.close_all()
+
+def test_initialize_new_project_with_custom_values():
+    import tempfile
+    from council_manager.db import Team, Decision
+    with tempfile.TemporaryDirectory() as tmpdir:
+        workspace = Path(tmpdir)
+        
+        initialize_new_project(
+            workspace, 
+            "my_new_project", 
+            project_name="Custom Name", 
+            global_member_count=15, 
+            project_description="This is a custom project description for testing."
+        )
+        
+        # Verify custom member count in CSV
+        teams_csv = workspace / ".agents" / "teams.csv"
+        assert teams_csv.exists()
+        with open(teams_csv, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert ";15;" in content
+
+        # Verify DEC-001 in decisions.csv
+        dec_csv = workspace / ".agents" / "decisions.csv"
+        assert dec_csv.exists()
+        with open(dec_csv, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert "DEC-001;" in content
+            assert "Custom Name" in content
+            assert "This is a custom project description for testing." in content
+            
+        # Verify DB was seeded correctly
+        session = db_manager.get_session(workspace)
+        try:
+            teams = session.query(Team).all()
+            assert len(teams) == 7
+            for t in teams:
+                assert t.vote_weight == 15
+                
+            dec = session.query(Decision).filter_by(id="DEC-001").first()
+            assert dec is not None
+            assert dec.topic == "Project Onboarding"
+            assert dec.decision == "Onboard Project Custom Name"
+            assert dec.rationale == "This is a custom project description for testing."
+        finally:
+            session.close()
+            db_manager.close_all()
+
+
+def test_initialize_new_project_custom_teams_and_skills():
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        workspace = Path(tmp_dir)
+        
+        custom_teams = [
+            {"id": "A", "name": "Pedagogy Specialists", "specialty": "Learning theories"},
+            {"id": "B", "name": "Curriculum Setters", "specialty": "Syllabus design"},
+            {"id": "C", "name": "Assessment Designers", "specialty": "Testing and rubrics"},
+            {"id": "D", "name": "Instructional Tech", "specialty": "E-learning"},
+            {"id": "E", "name": "Student Experience", "specialty": "Accessibility"},
+            {"id": "F", "name": "Program Administrators", "specialty": "Resource allocation"},
+            {"id": "G", "name": "Contrarians", "specialty": "Devil's Advocacy"}
+        ]
+        
+        initialize_new_project(
+            workspace,
+            "custom_council_project",
+            project_name="Custom Council Project",
+            global_member_count=12,
+            project_description="Testing custom council and skills generation.",
+            custom_teams=custom_teams
+        )
+        
+        # 1. Verify custom teams in CSV
+        teams_csv = workspace / ".agents" / "teams.csv"
+        assert teams_csv.exists()
+        with open(teams_csv, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            assert len(lines) == 8  # header + 7 teams
+            assert "A;Pedagogy Specialists;12;Learning theories\n" in lines
+            assert "G;Contrarians;12;Devil's Advocacy\n" in lines
+            
+        # 2. Verify project-council skill generation
+        skill_md = workspace / ".agents" / "skills" / "project-council" / "SKILL.md"
+        assert skill_md.exists()
+        with open(skill_md, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert "name: project-council" in content
+            assert "- **Team A (Pedagogy Specialists)**: Learning theories" in content
+            assert "- **Team G (Contrarians)**: Devil's Advocacy" in content
+            assert "Official Tool Delegation (Critical)" in content
+            assert "council-manager deliberate" in content
+
+        # 3. Verify skills.json registration
+        skills_json = workspace / ".agents" / "skills.json"
+        assert skills_json.exists()
+        import json
+        with open(skills_json, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            assert "entries" in data
+            paths = [entry["path"] for entry in data["entries"]]
+            assert any("council-manager" in p for p in paths)
+            assert any("project-council" in p for p in paths)
+
+        # 4. Verify DB was seeded with custom teams
+        session = db_manager.get_session(workspace)
+        try:
+            teams = session.query(Team).all()
+            assert len(teams) == 7
+            team_a = session.query(Team).filter_by(id="A").first()
+            assert team_a is not None
+            assert team_a.name == "Pedagogy Specialists"
+            assert team_a.vote_weight == 12
+            assert team_a.paradigm_specialty == "Learning theories"
+        finally:
+            session.close()
+            db_manager.close_all()
+
+
+class MockArgs:
+    def __init__(self, path, fix_missing=False, project_id=None, name=None, description=None, member_count=None, council_template=None):
+        self.path = str(path)
+        self.fix_missing = fix_missing
+        self.project_id = project_id
+        self.name = name
+        self.description = description
+        self.member_count = member_count
+        self.council_template = council_template
+
+
+def test_cmd_init_project_fix_missing():
+    from council_manager.cli import cmd_init_project
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        workspace = Path(tmp_dir)
+        
+        initialize_new_project(
+            workspace,
+            "fix_missing_test",
+            project_name="Fix Missing Test",
+            global_member_count=5,
+            project_description="Test project"
+        )
+        
+        project_council_md = workspace / ".agents" / "skills" / "project-council" / "SKILL.md"
+        skills_json = workspace / ".agents" / "skills.json"
+        
+        if project_council_md.exists():
+            project_council_md.unlink()
+        if skills_json.exists():
+            skills_json.unlink()
+            
+        assert not project_council_md.exists()
+        assert not skills_json.exists()
+        
+        args = MockArgs(path=workspace, fix_missing=True)
+        cmd_init_project(args)
+        
+        assert project_council_md.exists()
+        assert skills_json.exists()
+        with open(project_council_md, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert "Official Tool Delegation (Critical)" in content
+
+
+def test_cmd_init_project_already_exists_fails():
+    from council_manager.cli import cmd_init_project
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        workspace = Path(tmp_dir)
+        
+        initialize_new_project(
+            workspace,
+            "already_exists_test",
+            project_name="Already Exists Test",
+            global_member_count=5,
+            project_description="Test project"
+        )
+        
+        # Call cmd_init_project without fix_missing; should raise SystemExit(1)
+        args = MockArgs(path=workspace, fix_missing=False, project_id="new_id")
+        with pytest.raises(SystemExit) as exc_info:
+            cmd_init_project(args)
+        assert exc_info.value.code == 1
+
+
+def test_cmd_init_project_fix_missing_on_uninitialized_fails():
+    from council_manager.cli import cmd_init_project
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        workspace = Path(tmp_dir)
+        
+        # Call cmd_init_project with fix_missing on empty directory; should raise SystemExit(1)
+        args = MockArgs(path=workspace, fix_missing=True)
+        with pytest.raises(SystemExit) as exc_info:
+            cmd_init_project(args)
+        assert exc_info.value.code == 1
+
 
 

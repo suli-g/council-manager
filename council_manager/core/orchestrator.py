@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime, timezone, date
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Callable
 from council_manager.config import settings
 from council_manager.db import db_manager, Proposal, Project, Decision, Alternative, RoadmapTask
 from council_manager.core.registry import agent_registry
@@ -105,7 +105,8 @@ class CouncilOrchestrator:
     async def run_deliberation(
         self,
         workspace_dir: str | Path,
-        proposal_id: str
+        proposal_id: str,
+        on_progress: Optional[Callable[[str, str, str, float], None]] = None
     ) -> Proposal:
         """Run Phase 1 (Deliberation): Collect agent rationales concurrently and save to database."""
         if settings.debug:
@@ -140,6 +141,12 @@ class CouncilOrchestrator:
 
         # 3. Formulate and run concurrent prompter tasks
         async def query_team_deliberation(team):
+            start_time = asyncio.get_event_loop().time()
+            if on_progress:
+                try:
+                    on_progress(team.id, team.name, "STARTED", 0.0)
+                except Exception:
+                    pass
             if settings.debug:
                 print(f"[DEBUG] orchestrator: Requesting deliberation from Team '{team.id}' ({team.name})")
             delib_res = await self.prompter.generate_deliberation_async(
@@ -149,8 +156,15 @@ class CouncilOrchestrator:
                 description=desc,
                 options=opts
             )
+            end_time = asyncio.get_event_loop().time()
+            elapsed = end_time - start_time
+            if on_progress:
+                try:
+                    on_progress(team.id, team.name, "COMPLETED", elapsed)
+                except Exception:
+                    pass
             if settings.debug:
-                print(f"[DEBUG] orchestrator: Received deliberation rationale from Team '{team.id}'")
+                print(f"[DEBUG] orchestrator: Received deliberation rationale from Team '{team.id}' in {elapsed:.2f}s")
             return {
                 "team_id": team.id,
                 "rationale": {
