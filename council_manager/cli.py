@@ -704,14 +704,55 @@ def cmd_run_task_worker(args):
         task_type = task.task_type
         project_id = task.project_id
         
+        def send_event(event_payload):
+            import urllib.request
+            import json
+            import os
+            server_url = os.environ.get("COUNCIL_SERVER_URL", "http://127.0.0.1:8000")
+            url = f"{server_url}/tasks/{task_id}/events"
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(event_payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            if workspace:
+                req.add_header("X-Workspace-Path", str(workspace.resolve()))
+            if settings.council_api_key:
+                req.add_header("X-API-Key", settings.council_api_key)
+            try:
+                with urllib.request.urlopen(req, timeout=1.0) as response:
+                    response.read()
+            except Exception:
+                pass
+
+        def delib_progress(team_id: str, team_name: str, progress_status: str, elapsed: float):
+            print(f"[PROGRESS] Team {team_id} ({team_name}): {progress_status} (elapsed: {elapsed:.2f}s)", flush=True)
+            send_event({
+                "event": "deliberation_progress",
+                "team_id": team_id,
+                "team_name": team_name,
+                "status": progress_status,
+                "elapsed": elapsed
+            })
+
+        def vote_progress(cycle: int, max_cycles: int, tally: dict, consensus_reached: bool):
+            print(f"[PROGRESS] Cycle {cycle}/{max_cycles} complete. Tally: {tally}. Consensus: {consensus_reached}", flush=True)
+            send_event({
+                "event": "voting_cycle_complete",
+                "cycle": cycle,
+                "max_cycles": max_cycles,
+                "tally": tally,
+                "consensus_reached": consensus_reached
+            })
+
         # Close connection handles before spawning the async run
         session.close()
         db_manager.close_all()
         
         if task_type == "DELIBERATION":
-            asyncio.run(council_orchestrator.run_deliberation(workspace, proposal_id))
+            asyncio.run(council_orchestrator.run_deliberation(workspace, proposal_id, on_progress=delib_progress))
         elif task_type == "VOTING":
-            asyncio.run(council_orchestrator.run_voting(workspace, proposal_id, max_cycles=args.max_cycles))
+            asyncio.run(council_orchestrator.run_voting(workspace, proposal_id, max_cycles=args.max_cycles, on_cycle_complete=vote_progress))
             
         # Re-open session to complete task
         session = db_manager.get_session(workspace)

@@ -198,7 +198,8 @@ class CouncilOrchestrator:
         self,
         workspace_dir: str | Path,
         proposal_id: str,
-        max_cycles: int = 5
+        max_cycles: int = 5,
+        on_cycle_complete: Optional[Callable[[int, int, dict, bool], None]] = None
     ) -> Proposal:
         """Run Phase 2 (Voting): Conduct up to 5 cycles of blind weighted voting with feedback."""
         if settings.debug:
@@ -310,6 +311,12 @@ class CouncilOrchestrator:
                     if settings.debug:
                         print(f"[DEBUG] orchestrator: Consensus REACHED (>70% threshold) on option '{opt}'!")
                     break
+
+            if on_cycle_complete:
+                try:
+                    on_cycle_complete(cycle, max_cycles, tally, consensus_reached)
+                except Exception:
+                    pass
 
             if consensus_reached:
                 break

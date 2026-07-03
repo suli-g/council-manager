@@ -312,3 +312,44 @@ def test_get_task_logs_endpoint(test_db_session):
     assert response.status_code == 200
     assert response.json()["logs"] == "Server log content"
 
+
+def test_websocket_broadcasting(test_db_session):
+    client = TestClient(app)
+    with client.websocket_connect(f"/ws/workspace?path={str(test_db_session)}") as websocket:
+        websocket.send_text("ping")
+        data = websocket.receive_text()
+        assert data == "pong"
+
+        event_payload = {
+            "event": "deliberation_progress",
+            "team_id": "A",
+            "team_name": "Team A",
+            "status": "STARTED",
+            "elapsed": 0.0
+        }
+        response = client.post(
+            "/tasks/TASK-123/events",
+            json=event_payload,
+            headers={"X-Workspace-Path": str(test_db_session)}
+        )
+        assert response.status_code == 200
+        assert response.json() == {"status": "broadcasted"}
+
+        websocket_data = websocket.receive_json()
+        assert websocket_data["event"] == "deliberation_progress"
+        assert websocket_data["team_id"] == "A"
+        assert websocket_data["task_id"] == "TASK-123"
+
+
+def test_dashboard_routes(test_db_session):
+    client = TestClient(app)
+    # Get root URL
+    res_root = client.get("/")
+    assert res_root.status_code == 200
+    assert "Council Manager Dashboard" in res_root.text
+
+    # Get /dashboard
+    res_dash = client.get("/dashboard")
+    assert res_dash.status_code == 200
+    assert "Council Manager Dashboard" in res_dash.text
+

@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Council Manager Dashboard</title>
+    <!-- Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #0B0F19;
+            --bg-surface: rgba(22, 28, 45, 0.7);
+            --bg-card: rgba(30, 41, 59, 0.4);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(59, 130, 246, 0.5);
+            
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --text-muted: #6B7280;
+            
+            --color-primary: #3B82F6;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-danger: #EF4444;
+            --color-purple: #8B5CF6;
+            
+            --font-sans: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--color-danger);
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.connected {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--color-success);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .workspace-selector {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .workspace-selector input {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.875rem;
+            min-width: 320px;
+            transition: all 0.2s ease;
+        }
+
+        .workspace-selector input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+
+        .btn {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .dashboard-main {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .glass-panel {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .panel-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Grid of Specialist Teams */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .team-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .team-card.running {
+            border-color: var(--border-active);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+            animation: pulse-border 1.5s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: rgba(59, 130, 246, 0.3); }
+            50% { border-color: rgba(59, 130, 246, 0.7); }
+            100% { border-color: rgba(59, 130, 246, 0.3); }
+        }
+
+        .team-card.completed {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.02);
+        }
+
+        .team-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .team-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--color-primary);
+        }
+
+        .team-card.completed .team-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--color-success);
+        }
+
+        .team-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .team-specialty {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .team-status-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .team-card.running .team-status-label {
+            color: var(--color-primary);
+        }
+
+        .team-card.completed .team-status-label {
+            color: var(--color-success);
+        }
+
+        /* Voting Tally Chart */
+        .tally-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tally-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .tally-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+        }
+
+        .tally-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .tally-value {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .tally-bar-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            height: 10px;
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tally-bar {
+            background: linear-gradient(to right, var(--color-primary), var(--color-purple));
+            height: 100%;
+            border-radius: 9999px;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Live Logs Panel */
+        .logs-content {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            height: 240px;
+            overflow-y: auto;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .log-time {
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .log-message {
+            word-break: break-all;
+        }
+
+        .log-progress {
+            color: var(--color-primary);
+        }
+
+        .log-success {
+            color: var(--color-success);
+        }
+
+        /* Sidebar Control Center */
+        .control-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .form-group input, .form-group textarea {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-group textarea {
+            resize: none;
+            height: 100px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .proposal-item {
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+        }
+
+        .proposal-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-active);
+        }
+
+        .proposal-item.selected {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--color-primary);
+        }
+
+        .proposal-item-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .proposal-item-desc {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <span class="status-dot" id="header-status-dot" style="color: var(--color-danger)"></span>
+            <h1>Council Manager</h1>
+            <div class="status-badge" id="conn-badge">
+                <span class="status-dot"></span>
+                <span id="conn-text">Disconnected</span>
+            </div>
+        </div>
+        <div class="workspace-selector">
+            <input type="text" id="ws-input" placeholder="Absolute path or project slug...">
+            <button class="btn" id="btn-connect">Connect</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="dashboard-main">
+            <!-- Council Specialist grid -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h2>Council Deliberation Progress</h2>
+                    <span id="delib-status-text" style="font-size: 0.8rem; color: var(--text-secondary);">Idle</span>
+                </div>
+                <div class="teams-grid" id="teams-container">
+                    <!-- Dynamic Team Cards -->
+                    <div class="team-card" id="card-A">
+                        <div class="team-card-header">
+                            <div class="team-badge">A</div>
+                            <span class="team-name">Team A</span>
+                        </div>
+                        <p class="team-specialty">Functional Specialist</p>
+                        <div class="team-status-label">Idle</div>
+                    </div>
+                    <div class="team-card" id="card-B">
+                        <div class="team-card-header">
+                            <div class="team-badge">B</div>
+                            <span class="team-name">Team B</span>
+                        </div>
+                        <p class="team-specialty">OOP Specialist</p>
+                        <div class="team-status-label">Idle</div>
+                    </div>
+                    <div class="team-card" id="card-C">
+                        <div class="team-card-header">
+                            <div class="team-badge">C</div>
+                            <span class="team-name">Team C</span>
+                        </div>
+                        <p class="team-specialty">Imperative Specialist</p>
+                        <div class="team-status-label">Idle</div>
+                    </div>
+                    <div class="team-card" id="card-D">
+                        <div class="team-card-header">
+                            <div class="team-badge">D</div>
+                            <span class="team-name">Team D</span>
+                        </div>
+                        <p class="team-specialty">Declarative Specialist</p>
+                        <div class="team-status-label">Idle</div>
+                    </div>
+                    <div class="team-card" id="card-E">
+                        <div class="team-card-header">
+                            <div class="team-badge">E</div>
+                            <span class="team-name">Team E</span>
+                        </div>
+                        <p class="team-specialty">Dynamic Specialist</p>
+                        <div class="team-status-label">Idle</div>
+                    </div>
+                    <div class="team-card" id="card-F">
+                        <div class="team-card-header">
+                            <div class="team-badge">F</div>
+                            <span class="team-name">Team F</span>
+                        </div>
+                        <p class="team-specialty">Auditor Specialist</p>
+                        <div class="team-status-label">Idle</div>
+                    </div>
+                    <div class="team-card" id="card-G">
+                        <div class="team-card-header">
+                            <div class="team-badge">G</div>
+                            <span class="team-name">Team G</span>
+                        </div>
+                        <p class="team-specialty">Contrarian Specialist</p>
+                        <div class="team-status-label">Idle</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consensus Voting Chart -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h2>Consensus Vote Tallies</h2>
+                    <span id="vote-round-text" style="font-size: 0.8rem; color: var(--text-secondary);">Cycle 0/5</span>
+                </div>
+                <div class="tally-container" id="tally-container">
+                    <p style="text-align: center; color: var(--text-muted); font-size: 0.875rem; padding: 2rem 0;">No active voting cycle details available.</p>
+                </div>
+            </div>
+
+            <!-- Live Events Log Console -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h2>Real-Time Server Events Console</h2>
+                    <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" id="btn-clear-logs">Clear</button>
+                </div>
+                <div class="logs-content" id="logs-container">
+                    <div class="log-entry">
+                        <span class="log-time">[00:00:00]</span>
+                        <span class="log-message">Console initialized. Awaiting workspace connection...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-sidebar">
+            <!-- Project Action Controls -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h2>Governance Controls</h2>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <button class="btn" style="width: 100%;" id="btn-deliberate-action" disabled>Start Deliberation</button>
+                    <button class="btn btn-secondary" style="width: 100%;" id="btn-vote-action" disabled>Start Voting Loop</button>
+                </div>
+            </div>
+
+            <!-- Proposal Creation Section -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h2>Create Proposal</h2>
+                </div>
+                <form id="create-proposal-form">
+                    <div class="form-group">
+                        <label for="prop-desc">Description</label>
+                        <textarea id="prop-desc" placeholder="Describe the change or proposal..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="prop-topic">Topic (Optional)</label>
+                        <input type="text" id="prop-topic" placeholder="e.g. Database Migration">
+                    </div>
+                    <div class="form-group">
+                        <label for="prop-options">Options (Semicolon Separated)</label>
+                        <input type="text" id="prop-options" placeholder="e.g. Option A; Option B">
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;" id="btn-submit-proposal" disabled>Submit Proposal</button>
+                </form>
+            </div>
+
+            <!-- Proposals List -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h2>Workspace Proposals</h2>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 300px; overflow-y: auto;" id="proposals-list">
+                    <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem 0;">Connect to a workspace to load proposals.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let selectedProposalId = null;
+        let workspacePath = "";
+
+        const wsInput = document.getElementById('ws-input');
+        const btnConnect = document.getElementById('btn-connect');
+        const connBadge = document.getElementById('conn-badge');
+        const connText = document.getElementById('conn-text');
+        const headerStatusDot = document.getElementById('header-status-dot');
+        
+        const btnDeliberate = document.getElementById('btn-deliberate-action');
+        const btnVote = document.getElementById('btn-vote-action');
+        const btnSubmitProposal = document.getElementById('btn-submit-proposal');
+        const createForm = document.getElementById('create-proposal-form');
+        
+        const logsContainer = document.getElementById('logs-container');
+        const btnClearLogs = document.getElementById('btn-clear-logs');
+        
+        const proposalsList = document.getElementById('proposals-list');
+        const tallyContainer = document.getElementById('tally-container');
+        const delibStatusText = document.getElementById('delib-status-text');
+        const voteRoundText = document.getElementById('vote-round-text');
+
+        // Restore last connected workspace from localStorage
+        const cachedWs = localStorage.getItem('council_ws_path');
+        if (cachedWs) {
+            wsInput.value = cachedWs;
+        }
+
+        function logEvent(message, type = '') {
+            const timeStr = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            
+            let typeClass = '';
+            if (type === 'success') typeClass = 'log-success';
+            if (type === 'progress') typeClass = 'log-progress';
+
+            div.innerHTML = `
+                <span class="log-time">[${timeStr}]</span>
+                <span class="log-message ${typeClass}">${message}</span>
+            `;
+            logsContainer.appendChild(div);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        btnClearLogs.addEventListener('click', () => {
+            logsContainer.innerHTML = '';
+        });
+
+        // Load proposals from server HTTP API
+        async function loadProposals() {
+            if (!workspacePath) return;
+            try {
+                const res = await fetch('/proposals', {
+                    headers: { 'X-Workspace-Path': workspacePath }
+                });
+                if (!res.ok) throw new Error('API server returned error');
+                const data = await res.json();
+                
+                proposalsList.innerHTML = '';
+                if (data.length === 0) {
+                    proposalsList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">No proposals found.</p>';
+                    return;
+                }
+
+                data.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = `proposal-item ${p.id === selectedProposalId ? 'selected' : ''}`;
+                    div.innerHTML = `
+                        <div class="proposal-item-title">${p.id}: ${p.topic || 'No Topic'}</div>
+                        <div class="proposal-item-desc">${p.description}</div>
+                        <div style="font-size: 0.7rem; margin-top: 0.25rem; font-weight: bold; color: ${
+                            p.status.includes('PENDING') ? 'var(--color-warning)' : 
+                            p.status.includes('RUNNING') || p.status.includes('DELIBERATION') ? 'var(--color-primary)' : 'var(--color-success)'
+                        }">${p.status}</div>
+                    `;
+                    div.addEventListener('click', () => {
+                        document.querySelectorAll('.proposal-item').forEach(el => el.classList.remove('selected'));
+                        div.classList.add('selected');
+                        selectedProposalId = p.id;
+                        btnDeliberate.disabled = false;
+                        btnVote.disabled = false;
+                        
+                        // Render tallies if available
+                        renderTallies(p);
+                    });
+                    proposalsList.appendChild(div);
+                });
+            } catch (err) {
+                logEvent(`Failed to load proposals: ${err.message}`, 'error');
+            }
+        }
+
+        function renderTallies(proposal) {
+            if (!proposal.votes || proposal.votes.length === 0) {
+                tallyContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.875rem; padding: 2rem 0;">No active voting cycle details available.</p>';
+                voteRoundText.textContent = 'Cycle 0/5';
+                return;
+            }
+
+            // Tally options
+            const tally = {};
+            proposal.options.forEach(opt => tally[opt] = 0);
+            proposal.votes.forEach(v => {
+                tally[v.vote] = (tally[v.vote] || 0) + 10; // Default weight is 10 if team lookup skipped
+            });
+
+            const total = Object.values(tally).reduce((a, b) => a + b, 0) || 1;
+
+            tallyContainer.innerHTML = '';
+            Object.entries(tally).forEach(([opt, wt]) => {
+                const pct = Math.round((wt / total) * 100);
+                const row = document.createElement('div');
+                row.className = 'tally-row';
+                row.innerHTML = `
+                    <div class="tally-info">
+                        <span class="tally-label">${opt}</span>
+                        <span class="tally-value">${pct}% (${wt} wt)</span>
+                    </div>
+                    <div class="tally-bar-wrapper">
+                        <div class="tally-bar" style="width: ${pct}%"></div>
+                    </div>
+                `;
+                tallyContainer.appendChild(row);
+            });
+            voteRoundText.textContent = `Completed Tally`;
+        }
+
+        // Deliberation progress visual update
+        function updateDelibProgress(teamId, status) {
+            const card = document.getElementById(`card-${teamId}`);
+            if (!card) return;
+            
+            if (status === 'STARTED') {
+                card.classList.add('running');
+                card.classList.remove('completed');
+                card.querySelector('.team-status-label').textContent = 'Deliberating...';
+            } else if (status === 'COMPLETED') {
+                card.classList.remove('running');
+                card.classList.add('completed');
+                card.querySelector('.team-status-label').textContent = 'Stance Ready';
+            }
+        }
+
+        function resetTeamCards() {
+            document.querySelectorAll('.team-card').forEach(card => {
+                card.classList.remove('running', 'completed');
+                card.querySelector('.team-status-label').textContent = 'Idle';
+            });
+        }
+
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
+
+            workspacePath = wsInput.value.trim();
+            if (!workspacePath) return;
+
+            logEvent(`Connecting to workspace: ${workspacePath}...`);
+            const loc = window.location;
+            const wsProto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProto}//${loc.host}/ws/workspace?path=${encodeURIComponent(workspacePath)}`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                connBadge.classList.add('connected');
+                connText.textContent = 'Connected';
+                headerStatusDot.style.color = 'var(--color-success)';
+                btnSubmitProposal.disabled = false;
+                logEvent('WebSocket connection established.', 'success');
+                localStorage.setItem('council_ws_path', workspacePath);
+                loadProposals();
+            };
+
+            ws.onclose = () => {
+                connBadge.classList.remove('connected');
+                connText.textContent = 'Disconnected';
+                headerStatusDot.style.color = 'var(--color-danger)';
+                btnDeliberate.disabled = true;
+                btnVote.disabled = true;
+                btnSubmitProposal.disabled = true;
+                logEvent('WebSocket connection closed.', 'error');
+            };
+
+            ws.onerror = (err) => {
+                logEvent(`WebSocket encountered error.`, 'error');
+            };
+
+            ws.onmessage = (event) => {
+                let data;
+                try {
+                    data = JSON.parse(event.data);
+                } catch (e) {
+                    // String ping response
+                    return;
+                }
+
+                if (data.event === 'deliberation_progress') {
+                    delibStatusText.textContent = `Processing Team ${data.team_id}`;
+                    updateDelibProgress(data.team_id, data.status);
+                    logEvent(`Team ${data.team_id} (${data.team_name}): ${data.status} (elapsed: ${data.elapsed.toFixed(2)}s)`, 'progress');
+                } 
+                else if (data.event === 'voting_cycle_complete') {
+                    voteRoundText.textContent = `Cycle ${data.cycle}/${data.max_cycles}`;
+                    
+                    // Render dynamic voting tallies
+                    const total = Object.values(data.tally).reduce((a, b) => a + b, 0) || 1;
+                    tallyContainer.innerHTML = '';
+                    Object.entries(data.tally).forEach(([opt, wt]) => {
+                        const pct = Math.round((wt / total) * 100);
+                        const row = document.createElement('div');
+                        row.className = 'tally-row';
+                        row.innerHTML = `
+                            <div class="tally-info">
+                                <span class="tally-label">${opt}</span>
+                                <span class="tally-value">${pct}% (${wt} wt)</span>
+                            </div>
+                            <div class="tally-bar-wrapper">
+                                <div class="tally-bar" style="width: ${pct}%"></div>
+                            </div>
+                        `;
+                        tallyContainer.appendChild(row);
+                    });
+                    
+                    logEvent(`Voting Cycle ${data.cycle}/${data.max_cycles} complete. Consensus: ${data.consensus_reached}`, 'progress');
+                    if (data.consensus_reached) {
+                        logEvent(`Consensus achieved!`, 'success');
+                    }
+                }
+                
+                // Refresh list on status updates
+                loadProposals();
+            };
+        }
+
+        btnConnect.addEventListener('click', connectWebSocket);
+
+        // Deliberation HTTP Action
+        btnDeliberate.addEventListener('click', async () => {
+            if (!selectedProposalId || !workspacePath) return;
+            resetTeamCards();
+            delibStatusText.textContent = 'Starting Deliberation...';
+            logEvent(`Triggering Deliberation for ${selectedProposalId}...`);
+            try {
+                const res = await fetch(`/proposals/${selectedProposalId}/deliberate?async_mode=true`, {
+                    method: 'POST',
+                    headers: { 'X-Workspace-Path': workspacePath }
+                });
+                if (res.ok) {
+                    const info = await res.json();
+                    logEvent(`Deliberation background task spawned: ${info.task_id}`, 'success');
+                } else {
+                    throw new Error('API server failed to start deliberation');
+                }
+            } catch (err) {
+                logEvent(`Deliberation trigger failed: ${err.message}`, 'error');
+            }
+        });
+
+        // Voting HTTP Action
+        btnVote.addEventListener('click', async () => {
+            if (!selectedProposalId || !workspacePath) return;
+            logEvent(`Triggering Voting Loop for ${selectedProposalId}...`);
+            try {
+                const res = await fetch(`/proposals/${selectedProposalId}/vote?async_mode=true`, {
+                    method: 'POST',
+                    headers: { 'X-Workspace-Path': workspacePath }
+                });
+                if (res.ok) {
+                    const info = await res.json();
+                    logEvent(`Voting loop background task spawned: ${info.task_id}`, 'success');
+                } else {
+                    throw new Error('API server failed to start voting');
+                }
+            } catch (err) {
+                logEvent(`Voting trigger failed: ${err.message}`, 'error');
+            }
+        });
+
+        // Proposal Creation Submission
+        createForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!workspacePath) return;
+            
+            const desc = document.getElementById('prop-desc').value.trim();
+            const topic = document.getElementById('prop-topic').value.trim();
+            const optionsRaw = document.getElementById('prop-options').value.trim();
+            
+            const options = optionsRaw ? optionsRaw.split(';').map(o => o.trim()) : null;
+
+            logEvent('Submitting new proposal...');
+            try {
+                const res = await fetch('/proposals', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Workspace-Path': workspacePath
+                    },
+                    body: JSON.stringify({
+                        project_id: 'council_manager',
+                        description: desc,
+                        topic: topic || null,
+                        options: options
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    logEvent(`Proposal successfully created: ${data.id}`, 'success');
+                    createForm.reset();
+                    loadProposals();
+                } else {
+                    throw new Error('API server failed to create proposal');
+                }
+            } catch (err) {
+                logEvent(`Proposal creation failed: ${err.message}`, 'error');
+            }
+        });
+
+        // Auto ping to keep connection alive
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send('ping');
+            }
+        }, 15000);
+    </script>
+</body>
+</html>

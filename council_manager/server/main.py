@@ -1,7 +1,9 @@
 import sys
 from pathlib import Path
 from typing import Generator
-from fastapi import FastAPI, Header, HTTPException, Depends, status
+from fastapi import FastAPI, Header, HTTPException, Depends, status, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from council_manager.config import settings
@@ -84,6 +86,73 @@ class ProposalCreate(BaseModel):
     description: str
     topic: str | None = None
     options: list[str] | None = None
+
+# Connection Manager for WebSockets
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: dict[str, list[WebSocket]] = {}
+
+    async def connect(self, websocket: WebSocket, workspace_path: str):
+        await websocket.accept()
+        self.active_connections.setdefault(workspace_path, []).append(websocket)
+
+    async def disconnect(self, websocket: WebSocket, workspace_path: str):
+        if workspace_path in self.active_connections:
+            if websocket in self.active_connections[workspace_path]:
+                self.active_connections[workspace_path].remove(websocket)
+            if not self.active_connections[workspace_path]:
+                del self.active_connections[workspace_path]
+
+    async def broadcast(self, workspace_path: str, message: dict):
+        connections = self.active_connections.get(workspace_path, [])
+        for connection in connections:
+            try:
+                await connection.send_json(message)
+            except Exception:
+                pass
+
+manager = ConnectionManager()
+
+@app.websocket("/ws/workspace")
+async def websocket_endpoint(
+    websocket: WebSocket,
+    path: str | None = None,
+    project_id: str | None = None
+):
+    identifier = project_id or path
+    try:
+        if not identifier:
+            workspace = settings.workspace_dir.resolve()
+        else:
+            workspace = resolve_workspace(identifier)
+    except ValueError:
+        await websocket.accept()
+        await websocket.send_json({"error": "Invalid workspace path or project ID"})
+        await websocket.close()
+        return
+
+    workspace_key = str(workspace.resolve().as_posix())
+    await manager.connect(websocket, workspace_key)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_text("pong")
+    except WebSocketDisconnect:
+        await manager.disconnect(websocket, workspace_key)
+
+@app.post("/tasks/{task_id}/events")
+async def post_task_event(
+    task_id: str,
+    event: dict,
+    workspace: Path = Depends(get_workspace),
+    api_key_check: None = Depends(verify_api_key)
+):
+    workspace_key = str(workspace.resolve().as_posix())
+    event["task_id"] = task_id
+    await manager.broadcast(workspace_key, event)
+    return {"status": "broadcasted"}
+
 
 # --- Endpoints ---
 
@@ -347,3 +416,16 @@ def list_audits(
     """Retrieve history of quality alignment audits."""
     audits = db.query(AuditLog).order_by(AuditLog.timestamp.desc()).all()
     return audits
+
+
+# Mount static files folder and define index routes
+static_path = Path(__file__).parent / "static"
+static_path.mkdir(parents=True, exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+
+@app.get("/")
+@app.get("/dashboard")
+def get_dashboard():
+    """Serve the real-time HTML/CSS/JS dashboard interface."""
+    index_file = static_path / "index.html"
+    return FileResponse(str(index_file))

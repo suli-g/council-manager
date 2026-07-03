@@ -2,7 +2,7 @@ import pytest
 import tempfile
 import argparse
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch, ANY
 from council_manager.db import db_manager, Proposal, BackgroundTask, Project, Team
 from council_manager.cli import (
     cmd_deliberate,
@@ -93,7 +93,7 @@ def test_task_worker_execution():
             )
             cmd_run_task_worker(args)
             
-            mock_delib.assert_called_once_with(workspace, "DEC-100")
+            mock_delib.assert_called_once_with(workspace, "DEC-100", on_progress=ANY)
             mock_export.assert_called_once_with(workspace, "council_manager")
             
             # Verify task is completed
