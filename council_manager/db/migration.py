@@ -420,17 +420,15 @@ description: Follows the multi-team, multi-tier governance model for this projec
 
 You are operating in a workspace governed by the `council_manager` system. You must strictly adhere to the following rules:
 
-## 1. Dynamic Source-of-Truth
-Never assume the state of the project or its team structure. Always consult these live CSV indices before proposing or executing changes:
-*   **Teams & Roles (`.agents/teams.csv`):** Defines the current team makeup, paradigm specialties, and voting weights.
-*   **Ratified Decisions (`.agents/decisions.csv`):** The immutable log of all technical and architectural choices made by the project teams.
-*   **Voting Records (`.agents/votes_manifest.csv`):** The central index of all formal paradigm-weighted votes, pointing to detailed records in `.agents/votes/`.
-*   **Alternatives Evaluated (`.agents/alternatives.csv`):** Context on why certain paths were rejected, preserving the "design space" for future reference.
-*   **Development Roadmap (`.agents/roadmap.csv`):** The authoritative list of tasks, their priorities, and current implementation status.
-*   **Audit Logs (`.agents/audits.csv`):** Historical record of project alignment and quality assessments.
-*   **Audit Resolutions (`.agents/audit_decisions.csv`):** Relational mapping between audit findings and the architectural decisions that resolve them.
-
-All CSV files in this repository MUST use semi-colons (`;`) as delimiters.
+## 1. Dynamic Source-of-Truth (Strict Encapsulation)
+The data structures for governance are stored inside the `.agents/` folder.
+*CRITICAL WORKFLOW RULE*: You are FORBIDDEN from manually listing `.agents/` directory contents (e.g., via `ListDir`), and you MUST NOT manually read/parse the CSV files directly (such as `roadmap.csv` or `teams.csv`) to answer questions about the roadmap, registered teams, or current status.
+Instead, you MUST run the official CLI tools:
+*   To check the roadmap status: Run `uv run council-manager show-roadmap` (or `council-manager show-roadmap`).
+*   To check registered teams: Run `uv run council-manager show-teams` (or `council-manager show-teams`).
+*   To submit/incept proposals: Run `uv run council-manager create-proposal` (or `council-manager create-proposal`).
+Manual file navigation bypasses SQLite database cache synchronization and ORM schema boundaries, leading to out-of-sync states.
+All CSV files in this repository use semi-colons (`;`) as delimiters.
 
 ## 2. Multi-Team, Multi-Tier Governance
 The project operates under a decentralized, paradigm-weighted governance model.
@@ -603,7 +601,9 @@ Here are the active teams for this project:
 
 ## Instructions for Collaborating Agents
 
-1. **Official Tool Delegation (Critical)**: Do NOT write or simulate deliberations or voting results yourself within your model context. You MUST delegate all deliberations and voting loops to the `council-manager` CLI tools (e.g., `uv run council-manager deliberate` and `uv run council-manager vote`). This ensures they are processed through the official SQLite backend and using the project's configured council LLM provider (e.g., Ollama, local endpoints), even if you are operating on a different model (e.g. Gemini).
+1. **Official Tool Delegation (Critical)**:
+   * Do NOT write or simulate deliberations or voting results yourself within your model context. You MUST delegate all deliberations and voting loops to the `council-manager` CLI tools (e.g., `uv run council-manager deliberate` and `uv run council-manager vote`). This ensures they are processed through the official SQLite backend and using the project's configured council LLM provider (e.g., Ollama, local endpoints), even if you are operating on a different model (e.g. Gemini).
+   * Do NOT manually navigate, list, or read files inside `.agents/` (such as `roadmap.csv`, `teams.csv`, `decisions.csv`, or the `votes/` folder) to inspect the roadmap or status. You MUST execute the official CLI commands (e.g., `uv run council-manager show-roadmap` or `uv run council-manager show-teams`). Direct file reads bypass the database constraints and cache synchronization layer.
 2. **Deliberations**: When the official `council-manager` tool runs deliberations, the system will prompt the underlying LLM to adopt the specialties listed above.
 3. **Voting**: When the official `council-manager` tool runs voting, each team will evaluate proposals from the lens of their specific paradigm and domain.
 4. **Impersonation**: Respect the distinct perspectives of each team. Do not merge their identities or dilute their specialties.

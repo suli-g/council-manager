@@ -1,23 +1,21 @@
 ---
 name: council-manager
-description: "Follows the multi-team, multi-tier governance model for this project. Use when the user submits a PROPOSAL: or QUERY: or when performing any development work in this workspace."
+description: Follows the multi-team, multi-tier governance model for this project. Use when the user submits a PROPOSAL: or QUERY: or when performing any development work in this workspace.
 ---
 
 # Council Manager Governance Skill
 
 You are operating in a workspace governed by the `council_manager` system. You must strictly adhere to the following rules:
 
-## 1. Dynamic Source-of-Truth
-Never assume the state of the project or its team structure. Always consult these live CSV indices before proposing or executing changes:
-*   **Teams & Roles (`.agents/teams.csv`):** Defines the current team makeup, paradigm specialties, and voting weights.
-*   **Ratified Decisions (`.agents/decisions.csv`):** The immutable log of all technical and architectural choices made by the project teams.
-*   **Voting Records (`.agents/votes_manifest.csv`):** The central index of all formal paradigm-weighted votes, pointing to detailed records in `.agents/votes/`.
-*   **Alternatives Evaluated (`.agents/alternatives.csv`):** Context on why certain paths were rejected, preserving the "design space" for future reference.
-*   **Development Roadmap (`.agents/roadmap.csv`):** The authoritative list of tasks, their priorities, and current implementation status.
-*   **Audit Logs (`.agents/audits.csv`):** Historical record of project alignment and quality assessments.
-*   **Audit Resolutions (`.agents/audit_decisions.csv`):** Relational mapping between audit findings and the architectural decisions that resolve them.
-
-All CSV files in this repository MUST use semi-colons (`;`) as delimiters.
+## 1. Dynamic Source-of-Truth (Strict Encapsulation)
+The data structures for governance are stored inside the `.agents/` folder.
+*CRITICAL WORKFLOW RULE*: You are FORBIDDEN from manually listing `.agents/` directory contents (e.g., via `ListDir`), and you MUST NOT manually read/parse the CSV files directly (such as `roadmap.csv` or `teams.csv`) to answer questions about the roadmap, registered teams, or current status.
+Instead, you MUST run the official CLI tools:
+*   To check the roadmap status: Run `uv run council-manager show-roadmap` (or `council-manager show-roadmap`).
+*   To check registered teams: Run `uv run council-manager show-teams` (or `council-manager show-teams`).
+*   To submit/incept proposals: Run `uv run council-manager create-proposal` (or `council-manager create-proposal`).
+Manual file navigation bypasses SQLite database cache synchronization and ORM schema boundaries, leading to out-of-sync states.
+All CSV files in this repository use semi-colons (`;`) as delimiters.
 
 ## 2. Multi-Team, Multi-Tier Governance
 The project operates under a decentralized, paradigm-weighted governance model.

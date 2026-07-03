@@ -2,6 +2,9 @@
   "entries": [
     {
       "path": "B:/projects/council_manager/.agents/skills/council-manager"
+    },
+    {
+      "path": "B:/projects/council_manager/.agents/skills/project-council"
     }
   ]
 }
