@@ -443,7 +443,10 @@ class CouncilDashboardApp(App):
         self.refresh_all()
 
     def toggle_buttons(self, enabled: bool) -> None:
-        target = self.screen_stack[0] if self.screen_stack else self.screen
+        try:
+            target = self.screen_stack[0] if self.screen_stack else self.screen
+        except Exception:
+            return
         for btn_id in ["#btn-new-proposal", "#btn-deliberate", "#btn-vote", "#btn-refresh"]:
             try:
                 target.query_one(btn_id, Button).disabled = not enabled
