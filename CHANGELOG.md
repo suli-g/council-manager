@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.2] - 2026-07-04
+
+### Changed
+- **README.md**: Added `--fix-missing` flag documentation, new WebSocket/dashboard API endpoints, new Real-Time Web UI Dashboard section, Phase 6 roadmap entry, and updated CLI usage examples.
+- **CLI startup message**: `start-server` now prints the Web UI Dashboard URL and Swagger API docs URL on startup.
+- **Version header**: README.md updated to display current version `v0.8.2`.
+
 ## [0.8.1] - 2026-07-04
 
 ### Changed

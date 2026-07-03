@@ -120,6 +120,7 @@ DEC-122;2026-07-03;Suggestions for Future Council Enhancements (Phase 6);Option 
 DEC-123;2026-07-03;Scope of Phase 6 Roadmap Plotting and Documentation/UML Alignment Audit;Option G (Alternative 3);Do not plot Phase 6 tasks on the core roadmap yet; perform a thorough audit of current documentation, help text, and test-to-use-case coverage in the existing code before proposing Phase 6 additions.
 DEC-124;2026-07-03;Scope of Additional Testing for Project Use Cases;Option A (Alternative 1);Expand the test suite to verify CLI onboarding validation failures, custom template edge cases, and LLM inference fallbacks to ensure total use-case compliance.
 DEC-125;2026-07-04;Version Bump Strategy for Phase 6 Extensions;Option A (Alternative 1);Bump the minor version to 0.8.0 in pyproject.toml, synchronize uv.lock, and document the Web UI dashboard release notes in CHANGELOG.md.
+DEC-126;2026-07-04;Version Bump Strategy for Documentation & CLI Patch;Option A (Alternative 1);Bump the patch version to 0.8.2 in pyproject.toml, server/main.py, and CHANGELOG.md to reflect documentation and CLI startup message changes.
 
 
 

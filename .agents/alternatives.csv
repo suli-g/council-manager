@@ -157,6 +157,9 @@ ALT-155;DEC-124;Option G (Contrarian): Property-based testing;Introduce property
 ALT-156;DEC-125;Option A: Bump minor version to 0.8.0;Update version to 0.8.0 in pyproject.toml and describe the WebSocket dashboard release notes in CHANGELOG.md.;Follows SemVer rules since the new WebSocket routes introduce new API surface area.;Requires updating the version config and lockfiles.
 ALT-157;DEC-125;Option B: Defer version bump;Maintain the current 0.7.1 patch version.;Requires no lockfile or configuration edits right now.;Version doesn't reflect the new real-time Web UI features.
 ALT-158;DEC-125;Option G (Contrarian): Bump to 1.0.0-rc1;Bump version to 1.0.0-rc1 directly to prepare for full production release.;Signals full completion of all project phases.;Unnecessary version inflation for an ongoing Phase 6 branch.
+ALT-159;DEC-126;Option A: Bump patch to 0.8.2;Update version to 0.8.2 in pyproject.toml, server/main.py, and CHANGELOG.md.;Clearly signals a consumer-facing change to documentation and CLI output for downstream users.;Requires updating version config and lockfiles.
+ALT-160;DEC-126;Option B: Defer patch bump;Keep version at 0.8.1 since the documentation changes are non-functional.;Zero overhead.;Consumers cannot distinguish this documentation-only change from the prior release.
+ALT-161;DEC-126;Option G (Contrarian): Pre-bump to 0.9.0-dev;Signal that the Phase 6 branch is a pre-release development stream.;Communicates ongoing instability of the phase-6 branch to consumers.;Misleading version label for what is stable, committed work on a feature branch.
 
 
 
