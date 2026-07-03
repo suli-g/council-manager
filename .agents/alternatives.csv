@@ -148,6 +148,9 @@ ALT-146;DEC-121;Option G (Contrarian): Expose provider settings;Modify the skill
 ALT-147;DEC-122;Option A: Real-Time Dashboard & Web UI Extensions;Expand TUI to show real-time progress bars, develop a React/Vue web dashboard, and integrate OAuth2/JWT security.;Improves accessibility, UX, and provides visual proposal state tracking.;Requires setting up frontend web dependencies and packaging them.
 ALT-148;DEC-122;Option B: Enhanced AI Capabilities & Multi-Model Debates;Support hybrid-model debates across Ollama/Gemini and implement semantic search context indexing over decisions.csv.;Leverages model biases and prevents historical decision regression.;Increases token cost and local API key management complexity.
 ALT-149;DEC-122;Option G (Contrarian): Minimalist & CLI-First Optimization;Optimize memory, compile to single-binary (PyInstaller), and replace TUI/servers with git hooks/file watch scripts.;Extremely lightweight, zero network/server footprint, zero external dependencies.;Removes the FastAPI and graphical Textual TUI visualization completely.
+ALT-150;DEC-123;Option A: Plot Phase 6 tasks;Add Phase 6 to the roadmap and run a full audit immediately.;Updates the project plan roadmap to reflect upcoming work.;Adds new phase descriptions before the current codebase has been fully verified and aligned.
+ALT-151;DEC-123;Option B: Plot Phase 6 but postpone audit;Plot Phase 6 tasks on the roadmap but postpone UML and test coverage alignment checks.;Allows proceeding with planning immediately.;Risks documentation and UML alignment drift.
+ALT-152;DEC-123;Option G (Contrarian): Do not plot Phase 6;Postpone plotting Phase 6 on the roadmap. Run the full alignment audit on the existing documentation and tests before making new phase proposals.;Maintains complete architectural integrity and keeps documentation accurate before expanding scope.;Requires completing the alignment audit before plotting the roadmap tasks.
 
 
 

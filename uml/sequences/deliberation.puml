@@ -33,12 +33,14 @@ Registry --> Orchestrator : return Teams (A-G)
 deactivate Registry
 
 loop For each team in parallel (asyncio.gather)
+  Orchestrator -> Orchestrator : invoke on_progress("STARTED")
   Orchestrator -> Prompter : generate_deliberation_async(...)
   activate Prompter
   Prompter -> LLM : API call (system prompt for Team Specialty)
   LLM --> Prompter : Deliberation Response (stance, motivation, suggestion)
   Prompter --> Orchestrator : return dict
   deactivate Prompter
+  Orchestrator -> Orchestrator : invoke on_progress("COMPLETED", elapsed)
 end
 
 Orchestrator -> DB : get_session(workspace)

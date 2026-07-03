@@ -118,7 +118,7 @@ uv run pytest
 ## Manual Testing & Developer Usage
 
 ### 1. Database Session Management
-The database layer isolates data per project by creating a dedicated `governance.db` SQLite file under the project's `.agents/` folder.
+The database layer isolates data per workspace by creating a dedicated SQLite file inside the user's home directory (specifically `~/.gemini/council_manager/governance_<slug>.db`), keeping the git repository clean of binary database files. This default path can be overridden by setting the `COUNCIL_DATABASE_DIR` environment variable.
 
 To retrieve a database session for a specific project directory:
 ```python
