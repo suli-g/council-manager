@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-07-04
+
+### Added
+- **Real-Time WebSocket Web UI**: Introduced a fully functional real-time HTML/CSS/JS frontend dashboard served directly at `/` and `/dashboard`.
+- **WebSocket Connection Manager**: Implemented workspace-isolated WebSocket communication in `server/main.py` enabling real-time streaming of events.
+- **Worker Progress Broadcasting**: Extended `run_voting` with cycle complete callbacks and updated background task workers to post progress updates to the server via urllib.
+- **WebSocket Test Coverage**: Added comprehensive WebSocket and HTTP mock tests in `test_server.py`.
+
 ## [0.7.1] - 2026-07-01
 
 ### Added

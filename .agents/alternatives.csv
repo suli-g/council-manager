@@ -154,6 +154,9 @@ ALT-152;DEC-123;Option G (Contrarian): Do not plot Phase 6;Postpone plotting Pha
 ALT-153;DEC-124;Option A: Expand test coverage;Add new test cases in tests/ verifying validation limits, CLI Wizard prompt parsing, offline inference fallbacks, and task worker error flows.;Ensures 100% compliance with new project onboarding and template use cases.;Slightly increases codebase test file size and test suite execution time.
 ALT-154;DEC-124;Option B: Keep existing test suite;Maintain the current 64 unit and integration tests.;Zero extra test maintenance code overhead.;Gaps remain in test coverage for CLI onboarding interactive prompts and fallback error handlers.
 ALT-155;DEC-124;Option G (Contrarian): Property-based testing;Introduce property-based testing (e.g. Hypothesis) to test the consensus and tally logic with wide ranges of random inputs.;Provides high structural security and finds rare consensus edge cases.;High complexity and setup overhead compared to standard unit tests.
+ALT-156;DEC-125;Option A: Bump minor version to 0.8.0;Update version to 0.8.0 in pyproject.toml and describe the WebSocket dashboard release notes in CHANGELOG.md.;Follows SemVer rules since the new WebSocket routes introduce new API surface area.;Requires updating the version config and lockfiles.
+ALT-157;DEC-125;Option B: Defer version bump;Maintain the current 0.7.1 patch version.;Requires no lockfile or configuration edits right now.;Version doesn't reflect the new real-time Web UI features.
+ALT-158;DEC-125;Option G (Contrarian): Bump to 1.0.0-rc1;Bump version to 1.0.0-rc1 directly to prepare for full production release.;Signals full completion of all project phases.;Unnecessary version inflation for an ongoing Phase 6 branch.
 
 
 
