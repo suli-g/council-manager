@@ -1,6 +1,6 @@
 # Council Manager
 
-A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, and structured project audits across multiple isolated workspaces.
+**v0.8.1** — A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, structured project audits, and real-time monitoring across multiple isolated workspaces.
 
 See the [CHANGELOG.md](./CHANGELOG.md) for version release details.
 
@@ -248,10 +248,13 @@ uv run council-manager --help
 
     # Initialize and let the LLM infer the optimal team structures and member count from the description
     uv run council-manager init-project --path <dir-path> --project-id <proj-id> --description "A curriculum review pipeline for pedagogy."
+
+    # Repair missing governance skill files in an already initialized project (without re-onboarding)
+    uv run council-manager init-project --fix-missing --path <dir-path>
     ```
     *Onboarding generates:*
     *   `.agents/teams.csv` populated with the custom specialist teams.
-    *   `.agents/skills/council-manager/SKILL.md` (the general tool compliance skill).
+    *   `.agents/skills/council-manager/SKILL.md` (the general tool compliance skill — enforces CLI-only encapsulation).
     *   `.agents/skills/project-council/SKILL.md` (the custom, project-specific agent persona instructions).
     *   `.agents/skills.json` (auto-registered paths mapping both skills).
 
@@ -316,11 +319,14 @@ uv run council-manager --help
     uv run council-manager team-vote -w <workspace-dir> --team-id <team-id> --proposal-id <id>
     uv run council-manager team-vote -w <workspace-dir> --team-id <team-id>  # Targets latest proposal
     ```
-8.  **Starting the API Server**:
+8.  **Starting the API Server** (serves REST API, WebSocket events, and Web UI dashboard):
     ```bash
     uv run council-manager start-server --host 127.0.0.1 --port 8000 --reload
+    # On startup, the CLI will print the dashboard URL:
+    # Web UI Dashboard: http://127.0.0.1:8000/dashboard
+    # API Docs (Swagger): http://127.0.0.1:8000/docs
     ```
-9.  **Interactive Terminal UI Dashboard**:
+9.  **Interactive Terminal UI Dashboard** (local TUI — no server required):
     ```bash
     uv run council-manager dashboard [-w <workspace-dir>]
     ```
@@ -350,6 +356,7 @@ Logical project-to-workspace path mappings can be registered via the `workspace_
 
 ### Key Endpoints
 *   `GET /health`: Health check verification (does not require auth or workspace headers).
+*   `GET /` or `GET /dashboard`: Serve the real-time Web UI dashboard (HTML/CSS/JS single-page application).
 *   `GET /proposals`: Retrieve a list of all proposals.
 *   `GET /proposals/{proposal_id}`: Retrieve details for a specific proposal.
 *   `POST /proposals`: Create a new proposal.
@@ -357,22 +364,44 @@ Logical project-to-workspace path mappings can be registered via the `workspace_
 *   `POST /proposals/{proposal_id}/vote`: Queue Phase 2 Consensus Voting loop in the background (default `async_mode=true`) or run synchronously.
 *   `GET /tasks/{task_id}/status`: Query execution status of a background task.
 *   `GET /tasks/{task_id}/logs`: Retrieve log output content of a background task worker.
+*   `POST /tasks/{task_id}/events`: Ingest a progress event from a background task worker and broadcast it to all connected WebSocket clients.
 *   `GET /decisions`: Retrieve ratified decisions.
 *   `GET /roadmap`: Retrieve project roadmap task statuses.
 *   `GET /audits`: Retrieve history of quality alignment audits.
+
+### WebSocket Endpoint
+*   `WS /ws/workspace?path=<workspace-path>`: Establish a persistent WebSocket connection for a workspace. The server broadcasts real-time deliberation and voting progress events to all connected clients scoped to the same workspace path.
+
+---
+
+## Real-Time Web UI Dashboard
+
+The server (`start-server`) now serves a fully integrated browser-based real-time dashboard at `http://localhost:8000/dashboard`. No external SPA framework is required — the dashboard is a self-contained HTML/CSS/JS file served statically by FastAPI.
+
+To access the Web UI dashboard:
+1. Start the API server: `uv run council-manager start-server`
+2. Open your browser and navigate to: `http://127.0.0.1:8000/dashboard`
+3. Enter your workspace path in the connection field and click **Connect**.
+
+### Web Dashboard Features
+*   **Live Workspace Connection**: Connect to any initialized workspace by its absolute path. The dashboard opens a persistent WebSocket connection (`/ws/workspace`) to receive server-pushed events.
+*   **Specialist Council Grid**: Animated cards display all active Teams (A–G) with real-time status indicators showing which team is currently deliberating.
+*   **Voting Tally Gauges**: Visual consensus gauges update in real-time after each voting cycle, showing weighted vote distributions per option.
+*   **Server Console Log**: A scrolling console panel streams all deliberation and voting progress events from background worker tasks.
+*   **Action Buttons**: Trigger Deliberate and Vote cycles directly from the browser client.
 
 ---
 
 ## Terminal User Interface (TUI) Dashboard
 
-Rather than a browser-based web application, the orchestrator includes a beautiful terminal-based dashboard UI (`P3-02a` and `P3-02b`) built with [Textual](https://github.com/Textualize/textual) and [Rich](https://github.com/Textualize/rich).
+For local terminal-first workflows (no server required), the orchestrator includes a terminal-based dashboard UI built with [Textual](https://github.com/Textualize/textual) and [Rich](https://github.com/Textualize/rich).
 
 To launch the interactive TUI dashboard:
 ```bash
 uv run council-manager dashboard
 ```
 
-### Dashboard Features
+### TUI Dashboard Features
 *   **Proposals Tab**: Inspect proposals in real-time, view detailed agent deliberation justifications, see voting tallies, and run deliberations or voting loops directly via async worker threads in the terminal with live status toasts.
 *   **Ratified Decisions Tab**: Browse immutable ratified architectural decisions and review alternatives compared (with Pros and Cons comparison blocks).
 *   **Roadmap Tasks Tab**: View project roadmap milestones, notes, and task completion percentages via a visual progress bar.
@@ -418,3 +447,9 @@ The development progress is tracked dynamically inside [roadmap.csv](file:///B:/
 ### Phase 5: Local Agent Skills Adapter (Completed)
 *   **`P5-01`**: Create and Publish Local Agent Skill Integration Adapter (Register `council-manager` skill adapter)
 *   **`P5-02`**: Implement Project-Specific Council Generation and Skill Customization (Generate custom `teams.csv` and bespoke agent skill based on project domain/description)
+
+### Phase 6: Real-Time Extensions (In Progress — `feature/phase-6-extensions`)
+*   **`P6-01`**: Real-Time WebSocket Web UI Dashboard (Browser-based SPA served by FastAPI with workspace-isolated WebSocket events) ✅
+*   **`P6-02`**: Automated Commit Compliance Checks (Planned)
+*   **`P6-03`**: JWT Authentication Layer (Planned)
+*   **`P6-04`**: Multi-Tenant Server Enhancements (Planned)

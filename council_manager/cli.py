@@ -860,6 +860,8 @@ def cmd_task_logs(args):
 def cmd_server(args):
     import uvicorn
     log_info(f"Starting Council Manager API server on {args.host}:{args.port}...")
+    log_info(f"Web UI Dashboard: http://{args.host}:{args.port}/dashboard")
+    log_info(f"API Docs (Swagger): http://{args.host}:{args.port}/docs")
     if settings.council_api_key:
         log_warn("API security is enabled. Set COUNCIL_API_KEY environment variable or pass X-API-Key header to authorize requests.")
     else:
