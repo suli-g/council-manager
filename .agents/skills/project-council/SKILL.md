@@ -24,3 +24,37 @@ Here are the active teams for this project:
 2. **Deliberations**: When the official `council-manager` tool runs deliberations, the system will prompt the underlying LLM to adopt the specialties listed above.
 3. **Voting**: When the official `council-manager` tool runs voting, each team will evaluate proposals from the lens of their specific paradigm and domain.
 4. **Impersonation**: Respect the distinct perspectives of each team. Do not merge their identities or dilute their specialties.
+
+## Objective Decomposition Checklist (DEC-133)
+
+Before executing a multi-step objective, agents are encouraged (not mandated) to decompose it into versioned roadmap tasks using the checklist below. This promotes traceability and auditability without imposing rigid constraints.
+
+- [ ] **Identify the phase**: Which roadmap phase does this work belong to?
+- [ ] **Break into atomic tasks**: Can the objective be split into independently deliverable steps?
+- [ ] **Assign a version**: What version of the project will this task land in? (e.g., `0.9.0`)
+- [ ] **Check for existing tasks**: Run `uv run council-manager show-roadmap` to avoid duplication.
+- [ ] **Register new tasks**: Use `uv run council-manager roadmap-update --add` to add tasks before starting work.
+- [ ] **Update status as you go**: Mark tasks `IN_PROGRESS` when you begin, `DONE` when complete.
+
+### Roadmap Update CLI Reference
+
+The `roadmap-update` command manages roadmap tasks directly (ratified under DEC-133):
+
+```bash
+# Update an existing task's status with a version tag
+uv run council-manager roadmap-update -w . --task-id P6-01 --status IN_PROGRESS --version 0.9.0
+
+# Mark a task as done
+uv run council-manager roadmap-update -w . --task-id P6-01 --status DONE
+
+# Add a new versioned task to the roadmap
+uv run council-manager roadmap-update -w . --add --phase 6 --task-name "Implement feature X" --version 0.9.0 --status TODO
+
+# Add a note to an existing task
+uv run council-manager roadmap-update -w . --task-id P6-01 --notes "Blocked on upstream API change"
+```
+
+**Valid statuses**: `TODO`, `IN_PROGRESS`, `DONE`, `BLOCKED`, `DEFERRED`
+
+> The command writes to the SQLite database (canonical source of truth) and automatically syncs `roadmap.csv` (append-only log).
+

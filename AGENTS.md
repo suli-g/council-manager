@@ -13,6 +13,7 @@ This file provides the meta-framework for how AI agents and LLMs must operate wi
 *   **To create a proposal:** `uv run council-manager proposal-create "..." -w <workspace>`
 *   **To run deliberation:** `uv run council-manager deliberate -w <workspace>`
 *   **To run voting:** `uv run council-manager vote -w <workspace>`
+*   **To update roadmap tasks:** `uv run council-manager roadmap-update -w <workspace>` (add/update versioned tasks)
 
 Direct file reads bypass the SQLite database cache and ORM schema boundaries, leading to stale or out-of-sync state.
 
@@ -44,7 +45,7 @@ Any AI agent (including yourself) must follow these procedural mandates:
 
 ### 2. Execution & Documentation
 *   **Ratification:** After a strategy is agreed upon, update `decisions.csv` and `alternatives.csv` to reflect the new state (these CSVs are the append-only log; the SQLite DB is the canonical live state).
-*   **Roadmap Maintenance:** Update the status of tasks in `roadmap.csv` (and `README.md` if applicable) as you progress.
+*   **Roadmap Maintenance:** Use `uv run council-manager roadmap-update` to add or update versioned roadmap tasks. Do NOT edit `roadmap.csv` directly — the command syncs both SQLite and CSV automatically.
 *   **Scalability:** Do not hard-code team counts, tier counts, or specific paradigm names. Use `uv run council-manager show-teams` to read team structure dynamically.
 
 ### 3. Sub-Agent/Teammate Integration
