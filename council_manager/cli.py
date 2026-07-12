@@ -939,6 +939,121 @@ def cmd_show_roadmap(args):
         session.close()
         db_manager.close_all()
 
+def cmd_roadmap_update(args):
+    """Update an existing roadmap task's status/notes, or add a new versioned task.
+
+    Ratified under DEC-133 (Option A + F Refinement):
+      - --task-id / --status / --version for updates
+      - --add / --phase / --task-name for new tasks
+      - Writes to SQLite (canonical) and exports to roadmap.csv (append-only log)
+    """
+    workspace = get_workspace_path(args.workspace)
+    session = db_manager.get_session(workspace)
+    try:
+        # Resolve project
+        from council_manager.db.models import Project
+        project = session.query(Project).first()
+        if not project:
+            log_error("No project found in this workspace. Run 'init-project' first.")
+            sys.exit(1)
+        project_id = project.id
+
+        if args.add:
+            # --- ADD a new task ---
+            if not args.phase or not args.task_name:
+                log_error("--add requires --phase <int> and --task-name <str>.")
+                sys.exit(1)
+
+            # Auto-generate task ID: P<phase>-<nn> with version suffix if provided
+            existing = (
+                session.query(RoadmapTask)
+                .filter_by(project_id=project_id)
+                .filter(RoadmapTask.id.like(f"P{args.phase}-%"))
+                .all()
+            )
+            next_num = len(existing) + 1
+            base_id = f"P{args.phase}-{next_num:02d}"
+            task_id = f"{base_id}v{args.version}" if args.version else base_id
+
+            # Prevent duplicate IDs
+            if session.query(RoadmapTask).filter_by(id=task_id, project_id=project_id).first():
+                log_error(f"Task ID '{task_id}' already exists. Use a different --version or --task-id.")
+                sys.exit(1)
+
+            new_task = RoadmapTask(
+                id=task_id,
+                project_id=project_id,
+                phase=args.phase,
+                task=args.task_name,
+                status=args.status or "TODO",
+                notes=args.notes or (f"v{args.version}" if args.version else ""),
+            )
+            session.add(new_task)
+            session.commit()
+            log_success(f"Added new task '{task_id}': {args.task_name} [Phase {args.phase}, status={new_task.status}]")
+
+        else:
+            # --- UPDATE an existing task ---
+            if not args.task_id:
+                log_error("Specify --task-id to update an existing task, or use --add to create a new one.")
+                sys.exit(1)
+
+            task_id = args.task_id
+            if args.version:
+                # If a version is supplied, treat it as an alias: look for task_id+version suffix first
+                versioned_id = f"{task_id}v{args.version}"
+                task = session.query(RoadmapTask).filter_by(id=versioned_id, project_id=project_id).first()
+                if not task:
+                    task = session.query(RoadmapTask).filter_by(id=task_id, project_id=project_id).first()
+            else:
+                task = session.query(RoadmapTask).filter_by(id=task_id, project_id=project_id).first()
+
+            if not task:
+                log_error(f"Task '{task_id}' not found in project '{project_id}'.")
+                sys.exit(1)
+
+            changed = []
+            if args.status:
+                valid_statuses = {"TODO", "IN_PROGRESS", "DONE", "BLOCKED", "DEFERRED"}
+                if args.status.upper() not in valid_statuses:
+                    log_error(f"Invalid status '{args.status}'. Valid values: {', '.join(sorted(valid_statuses))}")
+                    sys.exit(1)
+                task.status = args.status.upper()
+                changed.append(f"status={task.status}")
+            if args.task_name:
+                task.task = args.task_name
+                changed.append(f"task='{args.task_name}'")
+            if args.notes:
+                task.notes = args.notes
+                changed.append(f"notes='{args.notes}'")
+            if args.version and task.notes is not None:
+                version_tag = f"v{args.version}"
+                if version_tag not in (task.notes or ""):
+                    task.notes = f"{task.notes} [{version_tag}]".strip()
+                    changed.append(f"notes tagged with {version_tag}")
+
+            if not changed:
+                log_warn("No changes specified. Provide --status, --task-name, --notes, or --version.")
+                return
+
+            session.commit()
+            log_success(f"Updated task '{task.id}': {', '.join(changed)}")
+
+        # Sync canonical DB -> roadmap.csv (append-only log)
+        from council_manager.db import export_db_to_csv
+        export_db_to_csv(workspace, project_id)
+        log_info("roadmap.csv synced.")
+
+    except SystemExit:
+        raise
+    except Exception as e:
+        log_error(f"roadmap-update failed: {e}")
+        sys.exit(1)
+    finally:
+        session.close()
+        db_manager.close_all()
+
+
 def cmd_show_audits(args):
     workspace = get_workspace_path(args.workspace)
     log_info("Querying quality audits log...")
@@ -1297,6 +1412,20 @@ def main():
     p_road = subparsers.add_parser("show-roadmap", help="Show all tasks listed in the database roadmap.")
     p_road.add_argument("-w", "--workspace", help="Path to the workspace folder.")
 
+    # Command: roadmap-update  (DEC-133)
+    p_rupdate = subparsers.add_parser(
+        "roadmap-update",
+        help="Update an existing roadmap task or add a new versioned task (DEC-133)."
+    )
+    p_rupdate.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+    p_rupdate.add_argument("--task-id", help="ID of the task to update (e.g. P1-01). Omit when using --add.")
+    p_rupdate.add_argument("--status", help="New status for the task (TODO, IN_PROGRESS, DONE, BLOCKED, DEFERRED).")
+    p_rupdate.add_argument("--version", help="Version string to tag this update (e.g. '0.9.0').")
+    p_rupdate.add_argument("--notes", help="Notes or comment to attach to the task.")
+    p_rupdate.add_argument("--add", action="store_true", help="Add a new task instead of updating an existing one.")
+    p_rupdate.add_argument("--phase", type=int, help="Phase number for the new task (required with --add).")
+    p_rupdate.add_argument("--task-name", help="Display name for the new task (required with --add).")
+
     # Command: show-audits
     p_auds = subparsers.add_parser("show-audits", help="Show quality and compliance audit logs.")
     p_auds.add_argument("-w", "--workspace", help="Path to the workspace folder.")
@@ -1400,6 +1529,8 @@ def main():
         cmd_dashboard(args)
     elif args.command == "register-skill":
         cmd_register_skill(args)
+    elif args.command == "roadmap-update":
+        cmd_roadmap_update(args)
 
 if __name__ == "__main__":
     main()
