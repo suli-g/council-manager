@@ -52,54 +52,45 @@ DEC-082;Data Architecture;docs/.agents/votes/DEC-082.csv;2026-06-18T20:00:55
 DEC-083;Voting Subsystem;docs/.agents/votes/DEC-083.csv;2026-06-18T20:00:55
 DEC-084;Data Architecture;docs/.agents/votes/DEC-084.csv;2026-06-18T20:00:55
 DEC-085;Data Architecture;docs/.agents/votes/DEC-085.csv;2026-06-18T21:01:41
-DEC-086;API Architecture;docs/.agents/votes/DEC-086.csv;2026-06-19T10:42:00
-DEC-087;API Observability;docs/.agents/votes/DEC-087.csv;2026-06-19T11:42:00
-DEC-088;API Routing;docs/.agents/votes/DEC-088.csv;2026-06-19T11:46:00
-DEC-089;UI Architecture;docs/.agents/votes/DEC-089.csv;2026-06-19T11:58:00
-DEC-090;AI Strategy;docs/.agents/votes/DEC-090.csv;2026-06-19T12:35:00
-DEC-091;UI Architecture;docs/.agents/votes/DEC-091.csv;2026-06-19T15:08:00
-DEC-092;Project Release Configuration;docs/.agents/votes/DEC-092.csv;2026-06-19T19:36:00
-DEC-093;UI Architecture;docs/.agents/votes/DEC-093.csv;2026-06-19T22:10:00
-DEC-094;Project Release Configuration;docs/.agents/votes/DEC-094.csv;2026-06-20T00:22:00
-DEC-096;Structured Deliberation Reports Schema;docs/.agents/votes/DEC-096.csv;2026-06-20T12:00:00
-DEC-097;Reject Deliberation Thinking Stream on Roadmap;docs/.agents/votes/DEC-097.csv;2026-06-20T12:10:00
-DEC-098;Add Deliberation Progress Feedback to Roadmap;docs/.agents/votes/DEC-098.csv;2026-06-20T13:16:00
-DEC-099;Bump version to 0.6.4;docs/.agents/votes/DEC-099.csv;2026-06-20T18:05:00
-DEC-100;Bump version to 0.6.5;docs/.agents/votes/DEC-100.csv;2026-06-20T21:40:00
-DEC-101;Roadmap Update for Onboarding & CLI;docs/.agents/votes/DEC-101.csv;2026-06-21T10:05:00
-DEC-102;Database Reset Option;docs/.agents/votes/DEC-102.csv;2026-06-21T12:06:00
-DEC-103;UML Documentation Overhaul Scope;docs/.agents/votes/DEC-103.csv;2026-06-21T12:59:00
-DEC-104;UML Drafts Ratification;docs/.agents/votes/DEC-104.csv;2026-06-21T13:18:00
-DEC-105;UML Overhaul Final Ratification & Release;docs/.agents/votes/DEC-105.csv;2026-06-21T13:21:00
-DEC-106;Skill Packaging Strategy;docs/.agents/votes/DEC-106.csv;2026-06-22T18:04:36
-DEC-107;Documentation Standards;docs/.agents/votes/DEC-107.csv;2026-06-22T18:50:33
-DEC-108;QUERY: prefix rule;docs/.agents/votes/DEC-108.csv;2026-06-24T07:50:00
-DEC-109;Project Onboarding & Team Weight Configuration;docs/.agents/votes/DEC-109.csv;2026-06-24T09:00:00
-DEC-110;Workspace Governance Agent Onboarding;docs/.agents/votes/DEC-110.csv;2026-06-28T07:39:00
-DEC-111;CLI Command Documentation in SKILL.md;docs/.agents/votes/DEC-111.csv;2026-06-28T09:00:00
-DEC-112;Global Skill Installation Policy & Version Bump;docs/.agents/votes/DEC-112.csv;2026-06-28T09:23:00
-DEC-113;Safety Constraints and Fix Mechanism for Project Initialization;docs/.agents/votes/DEC-113.csv;2026-06-28T12:45:00
-DEC-114;Resolve Workspace Skill Discovery Mismatch;docs/.agents/votes/DEC-114.csv;2026-06-30T14:15:00
-DEC-115;Skill Registration CLI Functionality;docs/.agents/votes/DEC-115.csv;2026-06-30T16:06:00
-DEC-116;Skill Naming Convention Alignment;docs/.agents/votes/DEC-116.csv;2026-06-30T19:10:00
-DEC-117;Project-Specific Council Generation & Skill Customization;docs/.agents/votes/DEC-117.csv;2026-06-30T21:35:00
-DEC-118;Roadmap Update for Skills Implementation;docs/.agents/votes/DEC-118.csv;2026-07-01T07:22:50
-DEC-119;Version Bump Strategy for Phase 5;docs/.agents/votes/DEC-119.csv;2026-07-01T07:27:40
-DEC-120;Patch Release 0.7.1 & Onboarding Documentation;docs/.agents/votes/DEC-120.csv;2026-07-01T07:30:10
-DEC-121;Tool Delegation in Council Skills;docs/.agents/votes/DEC-121.csv;2026-07-03T10:30:00
-DEC-122;Suggestions for Future Council Enhancements (Phase 6);docs/.agents/votes/DEC-122.csv;2026-07-03T16:48:00
-DEC-123;Scope of Phase 6 Roadmap Plotting and Documentation/UML Alignment Audit;docs/.agents/votes/DEC-123.csv;2026-07-03T21:19:00
-DEC-124;Scope of Additional Testing for Project Use Cases;docs/.agents/votes/DEC-124.csv;2026-07-03T21:59:00
-DEC-125;Version Bump Strategy for Phase 6 Extensions;docs/.agents/votes/DEC-125.csv;2026-07-04T00:28:00
-DEC-126;Version Bump Strategy for Documentation & CLI Patch;docs/.agents/votes/DEC-126.csv;2026-07-04T01:02:00
-DEC-127;AGENTS.md CLI Encapsulation Fix & Version 0.8.3;docs/.agents/votes/DEC-127.csv;2026-07-04T01:10:00
-
-
-
-
-
-
-
-
-
-
+DEC-086;API Architecture;docs/.agents/votes/DEC-086.csv;2026-06-19T09:20:33
+DEC-087;API Observability;docs/.agents/votes/DEC-087.csv;2026-06-19T09:42:17
+DEC-088;API Routing;docs/.agents/votes/DEC-088.csv;2026-06-19T10:00:49
+DEC-089;UI Architecture;docs/.agents/votes/DEC-089.csv;2026-06-19T10:00:49
+DEC-090;AI Strategy;docs/.agents/votes/DEC-090.csv;2026-06-19T12:42:49
+DEC-091;UI Architecture;docs/.agents/votes/DEC-091.csv;2026-06-19T13:09:31
+DEC-092;Project Release Configuration;docs/.agents/votes/DEC-092.csv;2026-06-19T19:00:24
+DEC-093;UI Architecture;docs/.agents/votes/DEC-093.csv;2026-06-19T21:24:12
+DEC-094;Project Release Configuration;docs/.agents/votes/DEC-094.csv;2026-06-19T22:24:45
+DEC-096;AI Strategy;docs/.agents/votes/DEC-096.csv;2026-06-20T12:21:03
+DEC-097;Project Management;docs/.agents/votes/DEC-097.csv;2026-06-20T12:21:03
+DEC-098;Project Management;docs/.agents/votes/DEC-098.csv;2026-06-20T12:34:52
+DEC-099;Project Release Configuration;docs/.agents/votes/DEC-099.csv;2026-06-20T17:06:02
+DEC-100;Project Release Configuration;docs/.agents/votes/DEC-100.csv;2026-06-20T20:15:04
+DEC-101;Roadmap Update for Onboarding & CLI;docs/.agents/votes/DEC-101.csv;2026-06-21T11:06:54
+DEC-102;Database Reset Option;docs/.agents/votes/DEC-102.csv;2026-06-21T12:06:41
+DEC-103;UML Documentation Overhaul Scope;docs/.agents/votes/DEC-103.csv;2026-06-21T12:59:25
+DEC-104;UML Drafts Ratification;docs/.agents/votes/DEC-104.csv;2026-06-21T13:18:43
+DEC-105;UML Overhaul Final Ratification & Release;docs/.agents/votes/DEC-105.csv;2026-06-22T17:47:43
+DEC-106;Skill Packaging Strategy;docs/.agents/votes/DEC-106.csv;2026-06-22T17:47:43
+DEC-107;Documentation Standards;docs/.agents/votes/DEC-107.csv;2026-06-22T18:54:03
+DEC-108;Governance Rules;docs/.agents/votes/DEC-108.csv;2026-06-24T07:54:04
+DEC-109;Project Onboarding & Team Weight Configuration;docs/.agents/votes/DEC-109.csv;2026-06-24T09:21:27
+DEC-110;Workspace Governance Agent Onboarding;docs/.agents/votes/DEC-110.csv;2026-06-28T05:42:13
+DEC-111;CLI Command Documentation in SKILL.md;docs/.agents/votes/DEC-111.csv;2026-06-28T07:17:15
+DEC-112;Global Skill Installation Policy & Version Bump;docs/.agents/votes/DEC-112.csv;2026-06-28T07:29:07
+DEC-113;Safety Constraints and Fix Mechanism for Project Initialization;docs/.agents/votes/DEC-113.csv;2026-06-28T10:51:22
+DEC-114;Workspace Skill Discovery;docs/.agents/votes/DEC-114.csv;2026-06-30T12:19:51
+DEC-115;Skill Registration CLI Functionality;docs/.agents/votes/DEC-115.csv;2026-06-30T17:20:50
+DEC-116;Skill Naming Convention Alignment;docs/.agents/votes/DEC-116.csv;2026-06-30T17:20:50
+DEC-117;Project-Specific Council Generation & Skill Customization;docs/.agents/votes/DEC-117.csv;2026-07-01T05:25:09
+DEC-118;Roadmap Update for Skills Implementation;docs/.agents/votes/DEC-118.csv;2026-07-01T05:25:09
+DEC-119;Version Bump Strategy for Phase 5;docs/.agents/votes/DEC-119.csv;2026-07-01T05:28:09
+DEC-120;Patch Release 0.7.1 & Onboarding Documentation;docs/.agents/votes/DEC-120.csv;2026-07-01T06:50:01
+DEC-121;Tool Delegation in Council Skills;docs/.agents/votes/DEC-121.csv;2026-07-03T08:31:10
+DEC-122;Suggestions for Future Council Enhancements (Phase 6);docs/.agents/votes/DEC-122.csv;2026-07-03T14:50:53
+DEC-123;Scope of Phase 6 Roadmap Plotting and Documentation/UML Alignment Audit;docs/.agents/votes/DEC-123.csv;2026-07-03T19:20:16
+DEC-124;Scope of Additional Testing for Project Use Cases;docs/.agents/votes/DEC-124.csv;2026-07-03T20:33:05
+DEC-125;Version Bump Strategy for Phase 6 Extensions;docs/.agents/votes/DEC-125.csv;2026-07-03T22:29:02
+DEC-126;Version Bump Strategy for Documentation & CLI Patch;docs/.agents/votes/DEC-126.csv;2026-07-03T23:42:41
+DEC-127;AGENTS.md CLI Encapsulation Fix & Version 0.8.3;docs/.agents/votes/DEC-127.csv;2026-07-03T23:42:41
+DEC-133;Option A + F Refinement: Add '...;docs/.agents/votes/DEC-133.csv;2026-07-11T19:16:32
