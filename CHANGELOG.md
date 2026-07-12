@@ -5,7 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-07-11
+
+### Added
+- **`roadmap-update` CLI Subcommand (DEC-133)**: New command for directly updating roadmap task statuses and adding versioned tasks without requiring a full proposal cycle. Supports `--task-id`, `--status` (`TODO`, `IN_PROGRESS`, `DONE`, `BLOCKED`, `DEFERRED`), `--version` (version tag appended to task ID and notes), `--notes`, and `--add` mode with `--phase` + `--task-name`. Both SQLite (canonical source of truth) and `roadmap.csv` (append-only log) are automatically kept in sync.
+- **SKILL.md Objective Decomposition Checklist (DEC-133)**: Updated the project-council skill file to include an encouraged (non-mandatory) pre-execution checklist guiding agents to decompose high-level objectives into versioned, atomic roadmap tasks before starting work. Includes full CLI reference for `roadmap-update`.
+- **Phase 6 Roadmap Tracking**: Task `P6-01v0.9.0` registered under Phase 6 for the `roadmap-update` implementation.
+- **Ollama Provider Tip**: README updated with `qwen3:8b` as the recommended local model for council deliberations, with a note that it fully bypasses Gemini free-tier quota limits.
+
+### Changed
+- **`pyproject.toml`**: Version bumped from `0.8.3` to `0.9.0`.
+
 ## [0.8.3] - 2026-07-04
+
 
 ### Fixed
 - **AGENTS.md CLI Encapsulation (DEC-127)**: Rewrote the `DEFAULT_AGENTS_MD` template and regenerated the live `AGENTS.md` to mandate CLI commands (`show-roadmap`, `show-teams`, `show-decisions`, etc.) instead of instructing agents to read `.agents/` CSV files directly. Eliminates the root conflict where Antigravity auto-injects `AGENTS.md` as hard system rules that override the skill encapsulation instructions.

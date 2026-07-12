@@ -1,6 +1,6 @@
 # Council Manager
 
-**v0.8.3** — A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, structured project audits, and real-time monitoring across multiple isolated workspaces.
+**v0.9.0** — A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, structured project audits, and real-time monitoring across multiple isolated workspaces.
 
 See the [CHANGELOG.md](./CHANGELOG.md) for version release details.
 
@@ -100,8 +100,9 @@ Ensure you have [uv](https://github.com/astral-sh/uv) installed in your environm
     # Default URL is http://localhost:11434/v1
     LLM_API_BASE=http://localhost:11434/v1
     # Swapped model name matching your local library (LLM_MODEL or OLLAMA_MODEL)
-    LLM_MODEL=llama3
+    LLM_MODEL=qwen3:8b
     ```
+    > **Tip**: Running council deliberations with a local Ollama model (e.g. `qwen3:8b`) fully bypasses Gemini free-tier quota limits and works offline.
 
 ---
 
@@ -330,6 +331,18 @@ uv run council-manager --help
     ```bash
     uv run council-manager dashboard [-w <workspace-dir>]
     ```
+10. **Roadmap Update** (add or update versioned roadmap tasks — DEC-133):
+    ```bash
+    # Update an existing task's status and tag it with a version
+    uv run council-manager roadmap-update -w <workspace-dir> --task-id P6-01 --status DONE --version 0.9.0
+
+    # Add a new versioned task to the roadmap
+    uv run council-manager roadmap-update -w <workspace-dir> --add --phase 6 --task-name "My feature" --version 0.9.0 --status TODO
+
+    # Mark a task blocked with a note
+    uv run council-manager roadmap-update -w <workspace-dir> --task-id P6-02 --status BLOCKED --notes "Waiting on upstream API"
+    ```
+    *Valid statuses*: `TODO`, `IN_PROGRESS`, `DONE`, `BLOCKED`, `DEFERRED`. Both SQLite (canonical) and `roadmap.csv` (append-only log) are kept in sync automatically.
 
 ---
 
@@ -448,8 +461,8 @@ The development progress is tracked dynamically inside [roadmap.csv](file:///B:/
 *   **`P5-01`**: Create and Publish Local Agent Skill Integration Adapter (Register `council-manager` skill adapter)
 *   **`P5-02`**: Implement Project-Specific Council Generation and Skill Customization (Generate custom `teams.csv` and bespoke agent skill based on project domain/description)
 
-### Phase 6: Real-Time Extensions (In Progress — `feature/phase-6-extensions`)
-*   **`P6-01`**: Real-Time WebSocket Web UI Dashboard (Browser-based SPA served by FastAPI with workspace-isolated WebSocket events) ✅
+### Phase 6: Roadmap Governance & Extensions (In Progress — `v0.9.x`)
+*   **`P6-01v0.9.0`**: `roadmap-update` CLI Command Implementation — New subcommand to update task statuses, add versioned tasks, and sync `roadmap.csv` from SQLite. Ratified under DEC-133. ✅
 *   **`P6-02`**: Automated Commit Compliance Checks (Planned)
 *   **`P6-03`**: JWT Authentication Layer (Planned)
 *   **`P6-04`**: Multi-Tenant Server Enhancements (Planned)
