@@ -14,6 +14,7 @@ This file provides the meta-framework for how AI agents and LLMs must operate wi
 *   **To run deliberation:** `uv run council-manager deliberate -w <workspace>`
 *   **To run voting:** `uv run council-manager vote -w <workspace>`
 *   **To update roadmap tasks:** `uv run council-manager roadmap-update -w <workspace>` (add/update versioned tasks)
+*   **To gather token-optimized context:** `uv run council-manager get-context -w <workspace>` (get compacted workspace context)
 
 Direct file reads bypass the SQLite database cache and ORM schema boundaries, leading to stale or out-of-sync state.
 
@@ -39,8 +40,7 @@ Any AI agent (including yourself) must follow these procedural mandates:
 *   **Tool Delegation (Critical):** Do NOT simulate deliberations or voting outcomes yourself. You MUST run all deliberations and votes via `uv run council-manager deliberate` and `uv run council-manager vote`.
 
 ### 1. Research & Alignment
-*   Run `uv run council-manager show-decisions` to check existing rulings that constrain your task.
-*   Run `uv run council-manager show-roadmap` to verify your work aligns with the current phase's priorities.
+*   Run `uv run council-manager get-context` (or individual queries like `show-decisions` and `show-roadmap`) to check project state and existing constraints. Use `get-context` to retrieve token-optimized context blocks instead of loading raw tables.
 *   Do NOT read `decisions.csv`, `roadmap.csv`, or any other `.agents/` file directly.
 
 ### 2. Execution & Documentation

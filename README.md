@@ -1,6 +1,6 @@
 # Council Manager
 
-**v0.9.0** — A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, structured project audits, and real-time monitoring across multiple isolated workspaces.
+**v0.9.1** — A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, structured project audits, and real-time monitoring across multiple isolated workspaces.
 
 See the [CHANGELOG.md](./CHANGELOG.md) for version release details.
 
@@ -344,6 +344,19 @@ uv run council-manager --help
     ```
     *Valid statuses*: `TODO`, `IN_PROGRESS`, `DONE`, `BLOCKED`, `DEFERRED`. Both SQLite (canonical) and `roadmap.csv` (append-only log) are kept in sync automatically.
 
+11. **Context Retrieval & Compaction** (DEC-135):
+    Retrieve compacted, token-optimized context blocks dynamically using a modular Pipe-and-Filter architecture.
+    ```bash
+    # Get combined compacted context of all elements (default)
+    uv run council-manager get-context -w <workspace-dir>
+
+    # Get only active team personas and 3 recent decisions
+    uv run council-manager get-context -w <workspace-dir> --teams --decisions --decisions-limit 3
+
+    # Get only current roadmap task summary
+    uv run council-manager get-context -w <workspace-dir> --roadmap
+    ```
+
 ---
 
 ## FastAPI API Backend Server
@@ -463,6 +476,7 @@ The development progress is tracked dynamically inside [roadmap.csv](file:///B:/
 
 ### Phase 6: Roadmap Governance & Extensions (In Progress — `v0.9.x`)
 *   **`P6-01v0.9.0`**: `roadmap-update` CLI Command Implementation — New subcommand to update task statuses, add versioned tasks, and sync `roadmap.csv` from SQLite. Ratified under DEC-133. ✅
-*   **`P6-02`**: Automated Commit Compliance Checks (Planned)
-*   **`P6-03`**: JWT Authentication Layer (Planned)
-*   **`P6-04`**: Multi-Tenant Server Enhancements (Planned)
+*   **`P6-02v0.9.1`**: `get-context` Subcommand & Pluggable Context Compaction Filters — Pipe-and-Filter engine to extract and compact workspace states (Teams, Decisions, Roadmap) dynamically to optimize agent tokens. Ratified under DEC-135. ✅
+*   **`P6-03`**: Automated Commit Compliance Checks (Planned)
+*   **`P6-04`**: JWT Authentication Layer (Planned)
+*   **`P6-05`**: Multi-Tenant Server Enhancements (Planned)

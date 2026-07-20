@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2026-07-14
+
+### Added
+- **`get-context` CLI Subcommand (DEC-135)**: Pluggable Pipe-and-Filter architecture to gather and format compacted, token-optimized context blocks for active teams, ratified decisions, and roadmap status. Avoids monolithic SQL blocks and reduces agent context window bloat during deliberations.
+- **Pluggable Context Filters**: Implemented `BaseContextFilter`, `TeamsFilter`, `DecisionsFilter`, and `RoadmapFilter` classes in `council_manager/core/context_pipeline.py`.
+- **Context Pipeline Tests**: Added comprehensive test coverage in `tests/core/test_context_pipeline.py`.
+- **Dynamic Context Guidelines**: Updated `AGENTS.md` and `migration.py` templates instructing collaborating agents to query `get-context` to retrieve token-optimized environment state.
+
+### Changed
+- **`pyproject.toml`**: Version bumped from `0.9.0` to `0.9.1`.
+
 ## [0.9.0] - 2026-07-11
 
 ### Added
