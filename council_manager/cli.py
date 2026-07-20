@@ -1054,6 +1054,36 @@ def cmd_roadmap_update(args):
         db_manager.close_all()
 
 
+def cmd_get_context(args):
+    """Retrieve compacted, token-optimized context blocks using Pipe-and-Filter filters (DEC-135)."""
+    workspace = get_workspace_path(args.workspace)
+    
+    from council_manager.core.context_pipeline import ContextPipeline, TeamsFilter, DecisionsFilter, RoadmapFilter
+    
+    pipeline = ContextPipeline()
+    
+    # Configure and plug filters based on CLI flags
+    all_filters = not args.teams and not args.decisions and not args.roadmap
+    
+    if args.teams or all_filters:
+        pipeline.add_filter(TeamsFilter())
+    if args.decisions or all_filters:
+        pipeline.add_filter(DecisionsFilter(limit=args.decisions_limit))
+    if args.roadmap or all_filters:
+        pipeline.add_filter(RoadmapFilter())
+        
+    try:
+        context_output = pipeline.execute(workspace)
+        if not context_output.strip():
+            log_warn("No context extracted by the active filters.")
+        else:
+            print(context_output)
+    except Exception as e:
+        log_error(f"get-context execution failed: {e}")
+        sys.exit(1)
+
+
+
 def cmd_show_audits(args):
     workspace = get_workspace_path(args.workspace)
     log_info("Querying quality audits log...")
@@ -1412,6 +1442,14 @@ def main():
     p_road = subparsers.add_parser("show-roadmap", help="Show all tasks listed in the database roadmap.")
     p_road.add_argument("-w", "--workspace", help="Path to the workspace folder.")
 
+    # Command: get-context (DEC-135)
+    p_ctx = subparsers.add_parser("get-context", help="Get dynamic compacted token-optimized context blocks (DEC-135).")
+    p_ctx.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+    p_ctx.add_argument("--teams", action="store_true", help="Include active team personas.")
+    p_ctx.add_argument("--decisions", action="store_true", help="Include recent ratified decisions.")
+    p_ctx.add_argument("--decisions-limit", type=int, default=5, help="Number of recent decisions to list.")
+    p_ctx.add_argument("--roadmap", action="store_true", help="Include roadmap task summary.")
+
     # Command: roadmap-update  (DEC-133)
     p_rupdate = subparsers.add_parser(
         "roadmap-update",
@@ -1531,6 +1569,8 @@ def main():
         cmd_register_skill(args)
     elif args.command == "roadmap-update":
         cmd_roadmap_update(args)
+    elif args.command == "get-context":
+        cmd_get_context(args)
 
 if __name__ == "__main__":
     main()
