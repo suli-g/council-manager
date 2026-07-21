@@ -1,6 +1,6 @@
 # Council Manager
 
-**v0.9.1** — A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, structured project audits, and real-time monitoring across multiple isolated workspaces.
+**v0.9.2** — A Python-based, multi-team AI project governance orchestrator. Council Manager enables collaborative decision-making, blind voting, structured project audits, and real-time monitoring across multiple isolated workspaces.
 
 See [CHANGELOG.md](./CHANGELOG.md) for version release details.
 

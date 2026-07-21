@@ -355,9 +355,18 @@ class CouncilOrchestrator:
         workspace_dir: str | Path,
         proposal_id: str,
         decision_option: str,
-        roadmap_task_id: Optional[str] = None
+        roadmap_task_id: Optional[str] = None,
+        human_ratified: bool = False,
+        verification_token: Optional[str] = None
     ) -> None:
         """Ratify a proposal, record decision and alternatives, update roadmap, and export to CSV."""
+        from council_manager.core.gatekeeper import gatekeeper
+        gatekeeper.verify_ratification_authority(
+            proposal_id=proposal_id,
+            human_ratified=human_ratified,
+            verification_token=verification_token
+        )
+
         workspace_path = Path(workspace_dir).resolve()
         session = db_manager.get_session(workspace_path)
         try:

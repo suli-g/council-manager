@@ -1311,7 +1311,8 @@ async def run_proposal_ratify_async(args):
             workspace_dir=workspace,
             proposal_id=p.id,
             decision_option=selected_option,
-            roadmap_task_id=task_id if task_id else None
+            roadmap_task_id=task_id if task_id else None,
+            human_ratified=True
         )
         
         log_success(f"Proposal '{p.id}' successfully ratified!")
