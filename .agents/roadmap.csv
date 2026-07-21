@@ -38,3 +38,5 @@ phase;id;task;status;notes
 6;P6-07b;Governance Versioning Policy: Formally Ratify v0.9.10+ Patch Progression;TODO;v0.9.11
 6;P6-08a;README.md: Add Git Clone Repository Step to Quick Start;TODO;v0.9.12
 6;P6-08b;README.md: Add Workspace Navigation & Verification Instructions;TODO;v0.9.13
+6;P6-09a;README.md: Add External Project Installation via Git (pip install git+https://...);TODO;v0.9.14
+6;P6-09b;README.md: Document Multi-Workspace Target CLI Execution (-w /path/to/target);TODO;v0.9.15

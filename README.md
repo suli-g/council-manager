@@ -8,21 +8,53 @@ See [CHANGELOG.md](./CHANGELOG.md) for version release details.
 
 ## 🚀 Quick Start: Installation & Setup
 
-### 1. Clone the Repository
+You can use Council Manager either as a **standalone tool** (cloned locally) or **installed directly into any external Python project**.
+
+---
+
+### Method 1: Installing into External Projects (Direct via Git)
+
+To add governance tools directly into any external project workspace:
+
+#### Using `pip` directly from Git:
+```bash
+pip install git+https://github.com/suli-g/council-manager.git
+```
+
+#### Using `uv` in an external project:
+```bash
+uv add git+https://github.com/suli-g/council-manager.git
+```
+
+#### Global CLI Installation via `uv tool`:
+```bash
+uv tool install git+https://github.com/suli-g/council-manager.git
+```
+
+Once installed externally, run governance commands in **any target project directory** using the `-w` (workspace) parameter:
+```bash
+# Initialize governance in your target project directory
+council-manager get-context -w /path/to/target/project
+```
+
+---
+
+### Method 2: Standalone Local Clone
+
+#### 1. Clone the Repository
 ```bash
 git clone https://github.com/suli-g/council-manager.git
 cd council_manager
 ```
 
-### 2. Install Dependencies
+#### 2. Install Dependencies
 
-#### Option A: Using `uv` (Recommended)
+##### Option A: Using `uv` (Recommended)
 ```bash
 uv sync
 ```
 
-#### Option B: Using standard `pip`
-If you do not have `uv` installed, use standard Python virtual environment tools:
+##### Option B: Using standard `pip`
 ```bash
 # Create and activate a virtual environment
 python -m venv .venv
@@ -32,7 +64,9 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
-### 3. Configure Environment Variables
+---
+
+### Environment Configuration
 Copy `.env.example` to `.env` and set your API key:
 ```bash
 cp .env.example .env
@@ -49,10 +83,12 @@ LLM_API_BASE=http://localhost:11434/v1
 LLM_MODEL=qwen3:8b
 ```
 
-### 4. Verify Installation
+---
+
+### Verification
 Check that the governance CLI is active and ready:
 ```bash
-# Run token-compacted context check for current workspace
+# Run token-compacted context check for target workspace
 uv run council-manager get-context -w .
 ```
 
