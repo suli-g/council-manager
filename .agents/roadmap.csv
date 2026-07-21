@@ -34,3 +34,5 @@ phase;id;task;status;notes
 6;P6-05b;Graph Query Abstraction & Decision Lineage Visualization;TODO;v0.9.7
 6;P6-06a;README.md Overhaul: Streamlined Installation & Agent Quickstart at Top;TODO;v0.9.8
 6;P6-06b;README.md Architecture & Governance Reference Section Refactoring;TODO;v0.9.9
+6;P6-07a;README.md: Add Pip / Virtualenv Installation Alternatives;TODO;v0.9.10
+6;P6-07b;Governance Versioning Policy: Formally Ratify v0.9.10+ Patch Progression;TODO;v0.9.11

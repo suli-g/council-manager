@@ -8,29 +8,38 @@ See [CHANGELOG.md](./CHANGELOG.md) for version release details.
 
 ## 🚀 Quick Start: Installation & Setup
 
-Ensure you have [uv](https://github.com/astral-sh/uv) installed in your environment.
+### Option A: Using `uv` (Recommended)
+```bash
+uv sync
+```
 
-1. **Install dependencies**:
-   ```bash
-   uv sync
-   ```
+### Option B: Using standard `pip`
+If you do not have `uv` installed, use standard Python virtual environment tools:
+```bash
+# 1. Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-2. **Configure Environment Variables**:
-   Copy `.env.example` to `.env` and set your API key:
-   ```bash
-   cp .env.example .env
-   ```
-   In `.env`:
-   ```env
-   GEMINI_API_KEY=your-api-key-here
-   ```
+# 2. Install dependencies
+pip install -e .
+```
 
-   *(Optional)* To use a local Ollama model (working offline without API quotas):
-   ```env
-   LLM_PROVIDER=ollama
-   LLM_API_BASE=http://localhost:11434/v1
-   LLM_MODEL=qwen3:8b
-   ```
+### Environment Configuration
+Copy `.env.example` to `.env` and set your API key:
+```bash
+cp .env.example .env
+```
+In `.env`:
+```env
+GEMINI_API_KEY=your-api-key-here
+```
+
+*(Optional)* To use a local Ollama model (working offline without API quotas):
+```env
+LLM_PROVIDER=ollama
+LLM_API_BASE=http://localhost:11434/v1
+LLM_MODEL=qwen3:8b
+```
 
 ---
 
