@@ -32,15 +32,15 @@ phase;id;task;status;notes
 6;P6-04v2.0.0;Implement decision_commits SQLite table for commit hash linkage;DEFERRED;v2.0.0
 6;P6-05a;Graph-Relational Schema & Adjacency Storage Engine;TODO;v0.9.6
 6;P6-05b;Graph Query Abstraction & Decision Lineage Visualization;TODO;v0.9.7
-6;P6-06a;README.md Overhaul: Streamlined Installation & Agent Quickstart at Top;TODO;v0.9.8
-6;P6-06b;README.md Architecture & Governance Reference Section Refactoring;TODO;v0.9.9
-6;P6-07a;README.md: Add Pip / Virtualenv Installation Alternatives;TODO;v0.9.10
-6;P6-07b;Governance Versioning Policy: Formally Ratify v0.9.10+ Patch Progression;TODO;v0.9.11
-6;P6-08a;README.md: Add Git Clone Repository Step to Quick Start;TODO;v0.9.12
-6;P6-08b;README.md: Add Workspace Navigation & Verification Instructions;TODO;v0.9.13
-6;P6-09a;README.md: Add External Project Installation via Git (pip install git+https://...);TODO;v0.9.14
-6;P6-09b;README.md: Document Multi-Workspace Target CLI Execution (-w /path/to/target);TODO;v0.9.15
-6;P6-10a;Documentation Audit: Verify CLI Command Syntax across README, AGENTS, and SKILL.md;TODO;v0.9.16
-6;P6-10b;README.md: Add Comprehensive CLI Subcommand Reference Table;TODO;v0.9.17
-6;P6-11a;README.md Audit: Scan for Absolute Machine File Paths;TODO;v0.9.18
-6;P6-11b;README.md Refactoring: Replace Absolute Paths with Portable Relative Links;TODO;v0.9.19
+6;P6-06a;README.md Overhaul: Streamlined Installation & Agent Quickstart at Top;DONE;v0.9.8
+6;P6-06b;README.md Architecture & Governance Reference Section Refactoring;DONE;v0.9.9
+6;P6-07a;README.md: Add Pip / Virtualenv Installation Alternatives;DONE;v0.9.10
+6;P6-07b;Governance Versioning Policy: Formally Ratify v0.9.10+ Patch Progression;DONE;v0.9.11
+6;P6-08a;README.md: Add Git Clone Repository Step to Quick Start;DONE;v0.9.12
+6;P6-08b;README.md: Add Workspace Navigation & Verification Instructions;DONE;v0.9.13
+6;P6-09a;README.md: Add External Project Installation via Git (pip install git+https://...);DONE;v0.9.14
+6;P6-09b;README.md: Document Multi-Workspace Target CLI Execution (-w /path/to/target);DONE;v0.9.15
+6;P6-10a;Documentation Audit: Verify CLI Command Syntax across README, AGENTS, and SKILL.md;DONE;v0.9.16
+6;P6-10b;README.md: Add Comprehensive CLI Subcommand Reference Table;DONE;v0.9.17
+6;P6-11a;README.md Audit: Scan for Absolute Machine File Paths;DONE;v0.9.18
+6;P6-11b;README.md Refactoring: Replace Absolute Paths with Portable Relative Links;DONE;v0.9.19
