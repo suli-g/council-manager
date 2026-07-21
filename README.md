@@ -173,9 +173,9 @@ uv run council-manager start-server --port 8000
 
 The system is built around a decoupled **Ports & Adapters (Hexagonal)** architecture, keeping configuration, database engines, orchestration, and user interfaces separated by explicit input/output boundaries.
 
-*   **Subsystem & Component Boundaries**: Detailed in [use_case_planning.md](file:///C:/Users/sulig/.gemini/antigravity-cli/brain/3ee7a652-e3b9-4285-aa73-cc8ce7ebaa96/use_case_planning.md).
-*   **Use Cases Diagram**: [use_cases.puml](file:///B:/projects/council_manager/uml/use_cases.puml).
-*   **Component Diagram**: [components.puml](file:///B:/projects/council_manager/uml/components.puml).
+*   **Auditing Procedure**: Detailed in [.agents/auditing_procedure.md](./.agents/auditing_procedure.md).
+*   **Use Cases Diagram**: [use_cases.puml](./uml/use-cases/use_cases.puml).
+*   **Component Diagram**: [components.puml](./uml/components/components.puml).
 
 ### Governance Orchestration Lifecycle
 
@@ -239,7 +239,7 @@ The database layer isolates data per workspace by creating a dedicated SQLite fi
 from pathlib import Path
 from council_manager.db import db_manager, Project
 
-workspace_path = Path("B:/projects/council_manager")
+workspace_path = Path(".")
 session = db_manager.get_session(workspace_path)
 try:
     project = session.query(Project).filter_by(id="council_manager").first()
@@ -254,7 +254,7 @@ finally:
 from pathlib import Path
 from council_manager.db import import_csv_to_db, export_db_to_csv
 
-workspace_path = Path("B:/projects/council_manager")
+workspace_path = Path(".")
 import_csv_to_db(workspace_path, "council_manager")
 export_db_to_csv(workspace_path, "council_manager")
 ```
@@ -275,7 +275,7 @@ The orchestrator includes a FastAPI backend server supporting multi-tenant datab
 
 ### Project Milestones & Development Roadmap
 
-See [.agents/roadmap.csv](file:///B:/projects/council_manager/.agents/roadmap.csv) for the full versioned task log.
+See [.agents/roadmap.csv](./.agents/roadmap.csv) for the full versioned task log.
 
 *   **Phase 1: Database & Persistence Layer** ✅ (SQLite, Project Isolation, CSV Import/Export)
 *   **Phase 2: Deliberation & Voting Core** ✅ (Multi-Team Prompter, Consensus Loop, Task Queue)

@@ -42,3 +42,5 @@ phase;id;task;status;notes
 6;P6-09b;README.md: Document Multi-Workspace Target CLI Execution (-w /path/to/target);TODO;v0.9.15
 6;P6-10a;Documentation Audit: Verify CLI Command Syntax across README, AGENTS, and SKILL.md;TODO;v0.9.16
 6;P6-10b;README.md: Add Comprehensive CLI Subcommand Reference Table;TODO;v0.9.17
+6;P6-11a;README.md Audit: Scan for Absolute Machine File Paths;TODO;v0.9.18
+6;P6-11b;README.md Refactoring: Replace Absolute Paths with Portable Relative Links;TODO;v0.9.19
