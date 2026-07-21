@@ -25,3 +25,4 @@ phase;id;task;status;notes
 5;P5-01;Create and publish local agent skill integration adapter;DONE;Create a .agents/skills/council-manager/ folder with SKILL.md to expose the CLI tools to workspace agents.
 5;P5-02;Implement project-specific council generation and skill customization;DONE;Generate custom teams.csv and bespoke agent skill based on project domain/description (Implemented via hybrid template/inference flow).
 6;P6-01v0.9.0;roadmap-update CLI command implementation;DONE;Ratified under DEC-133
+6;P6-02v0.9.0;Implement human oversight enforcement & runtime validation gates;TODO;v0.9.0
