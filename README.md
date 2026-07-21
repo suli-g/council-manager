@@ -8,23 +8,31 @@ See [CHANGELOG.md](./CHANGELOG.md) for version release details.
 
 ## 🚀 Quick Start: Installation & Setup
 
-### Option A: Using `uv` (Recommended)
+### 1. Clone the Repository
+```bash
+git clone https://github.com/suli-g/council-manager.git
+cd council_manager
+```
+
+### 2. Install Dependencies
+
+#### Option A: Using `uv` (Recommended)
 ```bash
 uv sync
 ```
 
-### Option B: Using standard `pip`
+#### Option B: Using standard `pip`
 If you do not have `uv` installed, use standard Python virtual environment tools:
 ```bash
-# 1. Create and activate a virtual environment
+# Create and activate a virtual environment
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# 2. Install dependencies
+# Install dependencies in editable mode
 pip install -e .
 ```
 
-### Environment Configuration
+### 3. Configure Environment Variables
 Copy `.env.example` to `.env` and set your API key:
 ```bash
 cp .env.example .env
@@ -39,6 +47,13 @@ GEMINI_API_KEY=your-api-key-here
 LLM_PROVIDER=ollama
 LLM_API_BASE=http://localhost:11434/v1
 LLM_MODEL=qwen3:8b
+```
+
+### 4. Verify Installation
+Check that the governance CLI is active and ready:
+```bash
+# Run token-compacted context check for current workspace
+uv run council-manager get-context -w .
 ```
 
 ---
