@@ -120,29 +120,49 @@ uv run council-manager roadmap-update -w . --add --phase 6 --task-name "New Feat
 
 ---
 
-## 🛠️ Developer Commands & Quick Reference
+## 🛠️ Developer Commands & CLI Reference
 
-### Running Tests
+### Complete CLI Subcommand Reference
+
+| Subcommand | Description | Key Options & Parameters | Example Usage |
+| :--- | :--- | :--- | :--- |
+| `get-context` | Gather token-optimized markdown context block | `-w, --workspace` | `uv run council-manager get-context -w .` |
+| `proposal-create` | Create a new proposal & optional Phase 1 deliberation | `TOPIC`, `--deliberate`, `-w` | `uv run council-manager proposal-create "PROPOSAL: ..." -w . --deliberate` |
+| `deliberate` | Run Phase 1 engineering deliberation across teams | `--proposal-id`, `-w` | `uv run council-manager deliberate --proposal-id DEC-150 -w .` |
+| `vote` | Run Phase 2 consensus voting loop across teams | `--proposal-id`, `-w` | `uv run council-manager vote --proposal-id DEC-150 -w .` |
+| `proposal-ratify` | Interactively review team rationales and ratify | `--proposal-id`, `-w` | `uv run council-manager proposal-ratify -w .` |
+| `roadmap-update` | Add or update versioned roadmap tasks (syncs SQLite & CSV) | `--add`, `--task-id`, `--status`, `--version`, `--phase` | `uv run council-manager roadmap-update -w . --add --phase 6 --task-name "..." --version 0.9.16 --status TODO` |
+| `show-roadmap` | List all tasks listed in the project roadmap | `-w, --workspace` | `uv run council-manager show-roadmap -w .` |
+| `show-teams` | List all registered council teams & specialties | `-w, --workspace` | `uv run council-manager show-teams -w .` |
+| `show-decisions` | List all ratified decisions in the database | `-w, --workspace` | `uv run council-manager show-decisions -w .` |
+| `show-audits` | View quality & compliance audit logs | `-w, --workspace` | `uv run council-manager show-audits -w .` |
+| `list` | List all proposals in the workspace database | `-w, --workspace` | `uv run council-manager list -w .` |
+| `show` | View full detail log and stances for a proposal | `--proposal-id`, `-w` | `uv run council-manager show --proposal-id DEC-150 -w .` |
+| `team-deliberate` | Instruct a single team to deliberate individually | `--proposal-id`, `--team-id`, `-w` | `uv run council-manager team-deliberate --proposal-id DEC-150 --team-id A -w .` |
+| `team-vote` | Instruct a single team to vote individually | `--proposal-id`, `--team-id`, `-w` | `uv run council-manager team-vote --proposal-id DEC-150 --team-id A -w .` |
+| `init-project` | Initialize new project workspace with templates & DB | `--project-name` | `uv run council-manager init-project` |
+| `import` | Import CSV data files into SQLite database | `-w, --workspace` | `uv run council-manager import -w .` |
+| `export` | Export SQLite database state back to CSV files | `-w, --workspace` | `uv run council-manager export -w .` |
+| `dashboard` | Launch the interactive Terminal UI (TUI) dashboard | `-w, --workspace` | `uv run council-manager dashboard` |
+| `start-server` | Start the FastAPI REST API backend server | `--host`, `--port` | `uv run council-manager start-server --port 8000` |
+| `register-skill` | Explicitly register workspace skills in `skills.json` | `-w, --workspace` | `uv run council-manager register-skill -w .` |
+
+### Testing & Web Server
+
+#### Running Tests
 ```bash
 uv run pytest
 ```
 
-### Terminal Dashboard (TUI)
+#### Terminal Dashboard (TUI)
 ```bash
 uv run council-manager dashboard
 ```
 
-### Web UI Dashboard & API Server
+#### Web UI Dashboard & API Server
 ```bash
 uv run council-manager start-server --port 8000
 # Open browser: http://127.0.0.1:8000/dashboard
-```
-
-### Inspection Commands
-```bash
-uv run council-manager show-roadmap -w .
-uv run council-manager show-decisions -w .
-uv run council-manager show-audits -w .
 ```
 
 ---

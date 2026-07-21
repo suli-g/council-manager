@@ -1,0 +1,8 @@
+voter_id;team_id;vote
+V-A;A;Full Audit with Automated CLI Checks
+V-B;B;Full Audit with Automated CLI Checks
+V-C;C;Full Audit with Automated CLI Checks
+V-D;D;Audit with Static CLI Analysis
+V-E;E;Full Audit with Automated CLI Checks
+V-F;F;Full Audit with Automated CLI Checks
+V-G;G;Audit with Static CLI Analysis
