@@ -1,8 +1,8 @@
 voter_id;team_id;vote
-V-A;A;Keep Status Quo
-V-B;B;Adopt Proposal
-V-C;C;Adopt Proposal
-V-D;D;Keep Status Quo
-V-E;E;Keep Status Quo
-V-F;F;Adopt Proposal
-V-G;G;Adopt Proposal
+V-A;A;A
+V-B;B;A
+V-C;C;A
+V-D;D;A
+V-E;E;A
+V-F;F;A
+V-G;G;B
