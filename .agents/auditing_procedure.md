@@ -5,7 +5,7 @@ This document defines the formal quality assurance and alignment verification pr
 ---
 
 ## 1. Immutable Audit Ledger
-*   All audit entries logged in [audits.csv](file:///B:/projects/council_manager/.agents/audits.csv) are **immutable and append-only**.
+*   All audit entries logged in [audits.csv](./audits.csv) are **immutable and append-only**.
 *   Logged audits must **never** be edited, deleted, or retroactively modified in the CSV file once they have been committed to git.
 
 ---
