@@ -136,6 +136,8 @@ uv run council-manager roadmap-update -w . --add --phase 6 --task-name "New Feat
 | `show-teams` | List all registered council teams & specialties | `-w, --workspace` | `uv run council-manager show-teams -w .` |
 | `show-decisions` | List all ratified decisions in the database | `-w, --workspace` | `uv run council-manager show-decisions -w .` |
 | `show-audits` | View quality & compliance audit logs | `-w, --workspace` | `uv run council-manager show-audits -w .` |
+| `audit-request` | Generate offline audit request diff & prompts | `-w, --workspace` | `uv run council-manager audit-request -w .` |
+| `audit-report-import` | Parse and import offline audit report findings | `--report-path`, `-w` | `uv run council-manager audit-report-import -w .` |
 | `list` | List all proposals in the workspace database | `-w, --workspace` | `uv run council-manager list -w .` |
 | `show` | View full detail log and stances for a proposal | `--proposal-id`, `-w` | `uv run council-manager show --proposal-id DEC-150 -w .` |
 | `team-deliberate` | Instruct a single team to deliberate individually | `--proposal-id`, `--team-id`, `-w` | `uv run council-manager team-deliberate --proposal-id DEC-150 --team-id A -w .` |
@@ -282,4 +284,4 @@ See [.agents/roadmap.csv](./.agents/roadmap.csv) for the full versioned task log
 *   **Phase 3: APIs & User Interface** ✅ (FastAPI Backend, Terminal UI TUI, Real-time Web Dashboard)
 *   **Phase 4: Onboarding & Audits** ✅ (Automated Project Inception, Decision Ratification)
 *   **Phase 5: Agent Skills Adapter** ✅ (Local Skill Generators & Workspace Integration)
-*   **Phase 6: Roadmap Governance & Enforcement** 🚧 (`roadmap-update`, `get-context`, Runtime Oversight Gates)
+*   **Phase 6: Roadmap Governance & Oversight** 🚧 (`roadmap-update`, `audit-request`, `audit-report-import`)

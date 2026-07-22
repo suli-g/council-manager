@@ -372,6 +372,8 @@ This file provides the meta-framework for how AI agents and LLMs must operate wi
 *   **To run voting:** `uv run council-manager vote -w <workspace>`
 *   **To update roadmap tasks:** `uv run council-manager roadmap-update -w <workspace>` (add/update versioned tasks)
 *   **To gather token-optimized context:** `uv run council-manager get-context -w <workspace>` (get compacted workspace context)
+*   **To request an external audit:** `uv run council-manager audit-request -w <workspace>` (creates audit_request.md)
+*   **To import external audit findings:** `uv run council-manager audit-report-import -w <workspace>` (imports audit_report.md)
 
 Direct file reads bypass the SQLite database cache and ORM schema boundaries, leading to stale or out-of-sync state.
 

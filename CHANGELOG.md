@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2026-07-22
+
+### Added
+- **`audit-request` CLI Subcommand (DEC-137)**: Generate a local markdown file `.agents/audit_request.md` containing prompt instructions and raw diffs of uncommitted changes (or the last commit) for submission to external browser-based LLM auditors.
+- **`audit-report-import` CLI Subcommand (DEC-137)**: Parse and import external markdown audit report findings into the SQLite database and sync with `.agents/audits.csv`. Supports parsing formatted markdown markers seamlessly via flexible regular expressions.
+- **Offline Auditor Integration Tests**: Added comprehensive test coverage in `tests/core/test_auditor_workflow.py`.
+
+### Changed
+- **`pyproject.toml`**: Version bumped from `0.9.1` to `0.9.2`.
+
 ## [0.9.1] - 2026-07-14
 
 ### Added
