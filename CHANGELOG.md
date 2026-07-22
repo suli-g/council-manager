@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **`audit-request` CLI Subcommand (DEC-137)**: Generate a local markdown file `.agents/audit_request.md` containing prompt instructions and raw diffs of uncommitted changes (or the last commit) for submission to external browser-based LLM auditors.
 - **`audit-report-import` CLI Subcommand (DEC-137)**: Parse and import external markdown audit report findings into the SQLite database and sync with `.agents/audits.csv`. Supports parsing formatted markdown markers seamlessly via flexible regular expressions.
-- **Offline Auditor Integration Tests**: Added comprehensive test coverage in `tests/core/test_auditor_workflow.py`.
+- **`register-hook` CLI Subcommand & git pre-commit Hook Checks (DEC-138)**: Introduced Automated Commit Compliance Checks (`council_manager/core/git_compliance.py`) to verify uncommitted/staged code modifications and CLI guidelines. Added a `register-hook` CLI subcommand to write and install the git pre-commit hook seamlessly.
+- **Auditor & Compliance Integration Tests**: Added comprehensive test coverage in `tests/core/test_auditor_workflow.py` and `tests/core/test_git_compliance.py`.
 
 ### Changed
 - **`pyproject.toml`**: Version bumped from `0.9.1` to `0.9.2`.

@@ -17,6 +17,7 @@ This file provides the meta-framework for how AI agents and LLMs must operate wi
 *   **To gather token-optimized context:** `uv run council-manager get-context -w <workspace>` (get compacted workspace context)
 *   **To request an external audit:** `uv run council-manager audit-request -w <workspace>` (creates audit_request.md)
 *   **To import external audit findings:** `uv run council-manager audit-report-import -w <workspace>` (imports audit_report.md)
+*   **To register pre-commit hooks:** `uv run council-manager register-hook -w <workspace>` (registers pre-commit hook checks)
 
 Direct file reads bypass the SQLite database cache and ORM schema boundaries, leading to stale or out-of-sync state.
 

@@ -148,6 +148,7 @@ uv run council-manager roadmap-update -w . --add --phase 6 --task-name "New Feat
 | `dashboard` | Launch the interactive Terminal UI (TUI) dashboard | `-w, --workspace` | `uv run council-manager dashboard` |
 | `start-server` | Start the FastAPI REST API backend server | `--host`, `--port` | `uv run council-manager start-server --port 8000` |
 | `register-skill` | Explicitly register workspace skills in `skills.json` | `-w, --workspace` | `uv run council-manager register-skill -w .` |
+| `register-hook` | Register client-side git pre-commit compliance hook | `-w, --workspace` | `uv run council-manager register-hook -w .` |
 
 ### Testing & Web Server
 
