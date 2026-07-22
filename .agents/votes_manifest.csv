@@ -99,6 +99,9 @@ DEC-135;PROPOSAL: Implement a get-cont...;docs/.agents/votes/DEC-135.csv;2026-07
 DEC-136;PROPOSAL: Defer LangChain/Lang...;docs/.agents/votes/DEC-136.csv;2026-07-20T14:44:27
 DEC-137;PROPOSAL: External Auditor Workflow;docs/.agents/votes/DEC-137.csv;2026-07-20T20:19:46
 DEC-138;PROPOSAL: Automated Commit Compliance Checks (P6-04);docs/.agents/votes/DEC-138.csv;2026-07-21T07:08:49
+DEC-139;PROPOSAL: Add Restrictive License with User Exemption Clause;docs/.agents/votes/DEC-139.csv;2026-07-21T07:10:03
+DEC-140;PROPOSAL: Clarify License Exemption for User Governance Data;docs/.agents/votes/DEC-140.csv;2026-07-21T07:49:13
+DEC-141;PROPOSAL: Configurable Multi-Dialect Database Routing (.env);docs/.agents/votes/DEC-141.csv;2026-07-21T08:12:45
 DEC-143;PROPOSAL: Implement Hybrid Con...;docs/.agents/votes/DEC-143.csv;2026-07-21T08:46:51
 DEC-144;PROPOSAL: Associate Git Commit...;docs/.agents/votes/DEC-144.csv;2026-07-21T10:11:47
 DEC-145;PROPOSAL: Create a dedicated S...;docs/.agents/votes/DEC-145.csv;2026-07-21T10:26:57

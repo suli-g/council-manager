@@ -1,0 +1,37 @@
+Proprietary License Agreement (All Rights Reserved)
+
+Copyright (c) 2026 suli-g. All rights reserved.
+
+================================================================================
+EXEMPTION NOTICE (USER GOVERNANCE DATA):
+This proprietary license restricts the modification and redistribution of the 
+Software's core execution source code (including but not limited to cli.py, 
+orchestrator.py, models.py, prompter.py, server, and TUI implementation logic).
+
+Exempt from this License:
+User-generated governance metadata, configurations, and deliberation files 
+residing inside project directories (specifically the `.agents/` folder structure, 
+including roadmap.csv, decisions.csv, alternatives.csv, votes_manifest.csv, 
+and local specialist rationales) do not contain the Software's execution source 
+code, in whole or in part, and are completely exempt from these license 
+restrictions. Users are fully authorized to generate, distribute, and execute 
+such data to govern their own separate repositories using Council Manager.
+================================================================================
+
+This software and all associated documentation files (the "Software") are the
+exclusive intellectual property of suli-g.
+
+Permission is hereby granted to view the source code of this Software for review
+and auditing purposes only. 
+
+Commercial use, modification, redistribution, sublicensing, or execution of the
+Software, in whole or in part, in source or binary forms, is strictly prohibited
+without prior written authorization from the copyright holder.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
