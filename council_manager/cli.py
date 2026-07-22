@@ -1607,10 +1607,6 @@ def main():
     p_vote.add_argument("--max-cycles", type=int, default=5, help="Maximum number of debate/voting cycles.")
     p_vote.add_argument("--async", action="store_true", dest="async_mode", help="Run voting in the background.")
 
-    # Command: register-skill
-    p_reg = subparsers.add_parser("register-skill", help="Expose local skills to agent workspace.")
-    p_reg.add_argument("-w", "--workspace", help="Path to the workspace folder.")
-
     # Command: register-hook (DEC-138)
     p_hook = subparsers.add_parser("register-hook", help="Register client-side git pre-commit hook (DEC-138).")
     p_hook.add_argument("-w", "--workspace", help="Path to the workspace folder.")
