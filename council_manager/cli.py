@@ -1083,6 +1083,158 @@ def cmd_get_context(args):
         sys.exit(1)
 
 
+def cmd_audit_request(args):
+    """Generate .agents/audit_request.md for offline external auditing (DEC-137)."""
+    workspace = get_workspace_path(args.workspace)
+    import subprocess
+    
+    # 1. Get git diff of uncommitted changes (or last commit if clean)
+    diff_content = ""
+    try:
+        # Check uncommitted diff first
+        diff_proc = subprocess.run(
+            ["git", "diff", "HEAD"],
+            cwd=str(workspace),
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        diff_content = diff_proc.stdout.strip()
+        
+        # If no uncommitted changes, grab the last commit diff
+        if not diff_content:
+            diff_proc = subprocess.run(
+                ["git", "diff", "HEAD~1", "HEAD"],
+                cwd=str(workspace),
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            diff_content = diff_proc.stdout.strip()
+    except Exception as e:
+        diff_content = f"Could not retrieve git diff automatically: {e}"
+
+    if not diff_content:
+        diff_content = "No changes detected in git workspace repository."
+
+    request_template = (
+        "# External Audit Request\n\n"
+        "Please review the following modifications in the workspace and generate an audit report.\n\n"
+        "## Recent Code Changes (Git Diff)\n"
+        "```diff\n"
+        f"{diff_content}\n"
+        "```\n\n"
+        "## Instructions for the Auditor LLM\n"
+        "1. Analyze the changes for architecture compliance, safety, and correctness.\n"
+        "2. Produce an audit report following strictly this markdown template structure:\n\n"
+        "```markdown\n"
+        "### Audit Report\n"
+        "- **Audit ID**: AUDIT-XXX\n"
+        "- **Auditor**: External\n"
+        "- **Alignment Score**: [Insert number between 0 and 100]%\n"
+        "- **Summary**: [Insert a 1-sentence summary of findings]\n\n"
+        "#### Detailed Findings\n"
+        "[Insert findings details here]\n"
+        "```\n"
+    )
+
+    agents_dir = workspace / ".agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+    request_file = agents_dir / "audit_request.md"
+    
+    try:
+        with open(request_file, "w", encoding="utf-8") as f:
+            f.write(request_template)
+        log_success(f"Audit request file generated successfully at: {request_file}")
+    except Exception as e:
+        log_error(f"Failed to generate audit request: {e}")
+        sys.exit(1)
+
+
+def cmd_audit_report_import(args):
+    """Import and register the external audit report (DEC-137)."""
+    workspace = get_workspace_path(args.workspace)
+    import re
+    from datetime import datetime
+    from council_manager.db.models import Project
+    
+    report_path = Path(args.report_path) if args.report_path else workspace / ".agents" / "audit_report.md"
+    if not report_path.exists():
+        log_error(f"Audit report file not found at: {report_path}")
+        sys.exit(1)
+        
+    try:
+        with open(report_path, "r", encoding="utf-8") as f:
+            content = f.read()
+    except Exception as e:
+        log_error(f"Failed to read report file: {e}")
+        sys.exit(1)
+        
+    # Extract details using regular expressions (handling bold/italic formatting)
+    score_match = re.search(r"Alignment\s+Score\s*\*?\*?\s*:\s*\*?\*?\s*(\d+)%", content, re.IGNORECASE)
+    auditor_match = re.search(r"Auditor\s*\*?\*?\s*:\s*\*?\*?\s*([a-zA-Z0-9_-]+)", content, re.IGNORECASE)
+    summary_match = re.search(r"Summary\s*\*?\*?\s*:\s*\*?\*?\s*(.+)", content, re.IGNORECASE)
+    audit_id_match = re.search(r"Audit\s+ID\s*\*?\*?\s*:\s*\*?\*?\s*(AUDIT-\w+)", content, re.IGNORECASE)
+    
+    if not score_match:
+        log_error("Could not parse 'Alignment Score' (e.g. Alignment Score: 95%) from the report.")
+        sys.exit(1)
+    if not summary_match:
+        log_error("Could not parse 'Summary' field from the report.")
+        sys.exit(1)
+        
+    alignment_score = float(score_match.group(1))
+    summary = summary_match.group(1).strip().strip("*").strip()
+    auditor = auditor_match.group(1).strip() if auditor_match else "External"
+    
+    session = db_manager.get_session(workspace)
+    try:
+        project = session.query(Project).first()
+        if not project:
+            log_error("No project found in this workspace. Run 'init-project' first.")
+            sys.exit(1)
+            
+        project_id = project.id
+        
+        # Resolve audit ID
+        if audit_id_match:
+            audit_id = audit_id_match.group(1).strip()
+        else:
+            # Auto-generate audit ID
+            existing = session.query(AuditLog).filter_by(project_id=project_id).all()
+            next_num = len(existing) + 1
+            audit_id = f"AUDIT-{next_num:03d}"
+            
+        # Check if audit log already exists
+        existing_audit = session.query(AuditLog).filter_by(id=audit_id, project_id=project_id).first()
+        if existing_audit:
+            session.delete(existing_audit)
+            
+        new_audit = AuditLog(
+            id=audit_id,
+            project_id=project_id,
+            timestamp=datetime.now(),
+            summary=summary,
+            alignment_score=alignment_score,
+            auditor_team=auditor
+        )
+        session.add(new_audit)
+        session.commit()
+        log_success(f"Successfully imported audit '{audit_id}' with score {int(alignment_score)}%.")
+        
+        # Sync canonical SQLite DB -> audits.csv
+        from council_manager.db.migration import export_db_to_csv
+        export_db_to_csv(workspace, project_id)
+        log_info("audits.csv synced.")
+        
+    except Exception as e:
+        log_error(f"Failed to import audit report: {e}")
+        sys.exit(1)
+    finally:
+        session.close()
+        db_manager.close_all()
+
+
 
 def cmd_show_audits(args):
     workspace = get_workspace_path(args.workspace)
@@ -1451,6 +1603,15 @@ def main():
     p_ctx.add_argument("--decisions-limit", type=int, default=5, help="Number of recent decisions to list.")
     p_ctx.add_argument("--roadmap", action="store_true", help="Include roadmap task summary.")
 
+    # Command: audit-request (DEC-137)
+    p_ar = subparsers.add_parser("audit-request", help="Generate audit_request.md for offline external audit (DEC-137).")
+    p_ar.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+
+    # Command: audit-report-import (DEC-137)
+    p_ari = subparsers.add_parser("audit-report-import", help="Import offline external audit report findings (DEC-137).")
+    p_ari.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+    p_ari.add_argument("--report-path", help="Path to the audit_report.md file (defaults to .agents/audit_report.md).")
+
     # Command: roadmap-update  (DEC-133)
     p_rupdate = subparsers.add_parser(
         "roadmap-update",
@@ -1572,6 +1733,10 @@ def main():
         cmd_roadmap_update(args)
     elif args.command == "get-context":
         cmd_get_context(args)
+    elif args.command == "audit-request":
+        cmd_audit_request(args)
+    elif args.command == "audit-report-import":
+        cmd_audit_report_import(args)
 
 if __name__ == "__main__":
     main()
