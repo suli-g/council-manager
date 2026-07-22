@@ -376,8 +376,9 @@ class AgentPrompter:
             print(f"  Payload: {json.dumps(payload, indent=2)}")
 
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(url, json=payload, headers=headers, timeout=settings.llm_timeout)
+            timeout_cfg = httpx.Timeout(settings.llm_timeout, connect=10.0, read=settings.llm_timeout)
+            async with httpx.AsyncClient(timeout=timeout_cfg) as client:
+                response = await client.post(url, json=payload, headers=headers)
             if settings.debug:
                 print(f"[DEBUG] Custom Provider HTTP Response Status: {response.status_code}")
                 print(f"[DEBUG] Custom Provider HTTP Response Content: {response.text}")
