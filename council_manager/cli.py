@@ -1257,6 +1257,39 @@ def cmd_show_audits(args):
         session.close()
         db_manager.close_all()
 
+
+def cmd_register_hook(args):
+    """Register client-side git pre-commit hook (DEC-138)."""
+    workspace = get_workspace_path(args.workspace)
+    git_dir = workspace / ".git"
+    if not git_dir.exists():
+        log_error("No .git repository found in workspace folder.")
+        sys.exit(1)
+        
+    hooks_dir = git_dir / "hooks"
+    hooks_dir.mkdir(exist_ok=True)
+    
+    hook_file = hooks_dir / "pre-commit"
+    hook_content = (
+        "#!/bin/sh\n"
+        "echo '[INFO] Running Automated Commit Compliance Checks...'\n"
+        "uv run python -m council_manager.core.git_compliance\n"
+    )
+    
+    try:
+        hook_file.write_text(hook_content, encoding="utf-8")
+        try:
+            import os
+            import stat
+            st = os.stat(hook_file)
+            os.chmod(hook_file, st.st_mode | stat.S_IEXEC)
+        except Exception:
+            pass
+        log_success(f"Pre-commit compliance hook registered successfully at: {hook_file}")
+    except Exception as e:
+        log_error(f"Failed to register pre-commit hook: {e}")
+        sys.exit(1)
+
 async def run_team_deliberate_async(args):
     workspace = get_workspace_path(args.workspace)
     proposal_id = get_proposal_id(args, workspace)
@@ -1574,6 +1607,14 @@ def main():
     p_vote.add_argument("--max-cycles", type=int, default=5, help="Maximum number of debate/voting cycles.")
     p_vote.add_argument("--async", action="store_true", dest="async_mode", help="Run voting in the background.")
 
+    # Command: register-skill
+    p_reg = subparsers.add_parser("register-skill", help="Expose local skills to agent workspace.")
+    p_reg.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+
+    # Command: register-hook (DEC-138)
+    p_hook = subparsers.add_parser("register-hook", help="Register client-side git pre-commit hook (DEC-138).")
+    p_hook.add_argument("-w", "--workspace", help="Path to the workspace folder.")
+
     # Command: list
     p_list = subparsers.add_parser("list", help="List all proposals in the workspace database.")
     p_list.add_argument("-w", "--workspace", help="Path to the workspace folder.")
@@ -1737,6 +1778,8 @@ def main():
         cmd_audit_request(args)
     elif args.command == "audit-report-import":
         cmd_audit_report_import(args)
+    elif args.command == "register-hook":
+        cmd_register_hook(args)
 
 if __name__ == "__main__":
     main()
