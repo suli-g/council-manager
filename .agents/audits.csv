@@ -1,5 +1,5 @@
 timestamp;audit_id;summary;alignment_score;auditor_team
-2026-05-07T14:30:00;AUDIT-001;P1-01 alignment assessment: 60%. Architecture/Spec divergence noted in models and auth.;60%;F
+2026-07-23T12:44:43;AUDIT-001;The change is a low-risk, single-line addition to the roadmap CSV registering a new TODO task, but it contains metadata inconsistencies that should be corrected before merge.;72%;External
 2026-05-18T11:00:00;AUDIT-002;P1-01 & P1-05 alignment: 75%. GitHubStrategy bypasses APIHandler auth for file downloads, missing unit tests for core logic.;75%;F
 2026-05-26T16:00:00;AUDIT-003;P1-02 alignment assessment: 90%. Hierarchical extraction and versioning implemented;100%;90%
 2026-05-26T18:00:00;AUDIT-004;P1-06 & Project Health assessment: 100%. Structured config implemented;100%;100% test pass rate.
