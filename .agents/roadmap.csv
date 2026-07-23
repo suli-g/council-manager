@@ -47,3 +47,4 @@ phase;id;task;status;notes
 6;P6-11a;README.md Audit: Scan for Absolute Machine File Paths;DONE;v0.9.18
 6;P6-11b;README.md Refactoring: Replace Absolute Paths with Portable Relative Links;DONE;v0.9.19
 6;P6-12a;Configurable Multi-Dialect Database Routing (.env);TODO;v0.9.20
+6;P6-24v0.9.21;Automated Secret Obfuscation for Audits and Diffs;TODO;v0.9.21
