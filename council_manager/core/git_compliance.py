@@ -1,3 +1,11 @@
+"""
+Automated Git Commit Compliance Verification (P6-04, v0.9.2).
+
+Performs pre-commit checks on staged changes to ensure that source code 
+modifications are supported by ratified decisions and that manual updates 
+to CSV files are blocked.
+"""
+
 import sys
 import subprocess
 from pathlib import Path

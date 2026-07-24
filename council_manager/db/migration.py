@@ -1,3 +1,10 @@
+"""
+Bidirectional SQLite DB and CSV Tables Migration Module.
+
+Synchronizes persistent records between the canonical relational database (SQLite) 
+and the version-controlled append-only CSV tables in the `.agents/` directory.
+"""
+
 import csv
 from datetime import datetime, date
 from pathlib import Path

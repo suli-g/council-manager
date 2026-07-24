@@ -1,3 +1,10 @@
+"""
+Configuration and Environment Settings Module.
+
+Defines Pydantic BaseSettings loading from environment variables or .env file 
+for workspace paths, API key integrations, database routing, and LLM timeouts.
+"""
+
 from pathlib import Path
 from pydantic import Field, AliasChoices
 from pydantic_settings import BaseSettings, SettingsConfigDict

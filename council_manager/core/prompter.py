@@ -1,3 +1,11 @@
+"""
+API Prompter and Response Parsing Module.
+
+Formats structured prompts for specialist personas, manages request payloads, 
+handles async HTTP connection routing to Gemini or local Ollama endpoints, 
+and parses structured JSON outputs safely.
+"""
+
 from typing import List, Optional
 import json
 import re

@@ -1,3 +1,11 @@
+"""
+FastAPI Backend Application and Routing Services.
+
+Hosts endpoints for retrieving active teams, roadmaps, decisions, 
+scheduling background task worker deliberations, and broadcasting TUI 
+WebSocket event notifications.
+"""
+
 import sys
 from pathlib import Path
 from typing import Generator

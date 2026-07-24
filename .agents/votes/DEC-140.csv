@@ -1,8 +1,8 @@
 voter_id;team_id;vote
-V-A;A;A
-V-B;B;A
-V-C;C;A
-V-D;D;A
-V-E;E;A
-V-F;F;A
-V-G;G;A
+V-A;A;Option A: Append explicit user-data exemption clause to LICENSE file
+V-B;B;Option A: Append explicit user-data exemption clause to LICENSE file
+V-C;C;Option A: Append explicit user-data exemption clause to LICENSE file
+V-D;D;Option A: Append explicit user-data exemption clause to LICENSE file
+V-E;E;Option A: Append explicit user-data exemption clause to LICENSE file
+V-F;F;Option A: Append explicit user-data exemption clause to LICENSE file
+V-G;G;Option A: Append explicit user-data exemption clause to LICENSE file

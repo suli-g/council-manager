@@ -171,8 +171,19 @@ ALT-1351;DEC-135;Keep Status Quo;Identified during voting cycle;Non-consensus ch
 ALT-1361;DEC-136;Keep Status Quo;Identified during voting cycle;Non-consensus choice
 ALT-1371;DEC-137;Option B: Manual workflow without specialized CLI commands;Identified during voting cycle;Non-consensus choice
 ALT-1381;DEC-138;Option B: Implement server-side git hooks;Identified during voting cycle;Non-consensus choice
-ALT-1391;DEC-139;Option B: Keep project unlicensed (defaults to All Rights Reserved, no exemption);Identified during voting cycle;Non-consensus choice
-ALT-1401;DEC-140;Option B: Keep LICENSE file unchanged and clarify only in README;Identified during voting cycle;Non-consensus choice
-ALT-1411;DEC-141;Option B: Keep hardcoded local SQLite connection paths;Identified during voting cycle;Non-consensus choice
-ALT-1421;DEC-142;Option B: Retain current transient behavior (templates deleted post-import);Identified during voting cycle;Non-consensus choice
-ALT-1431;DEC-143;Option B: Retain manual oversight without automated redaction filters;Identified during voting cycle;Non-consensus choice
+ALT-1391;DEC-139;Option A: Add proprietary All Rights Reserved license to the project;Approved ratified path.;None
+ALT-1392;DEC-139;Option B: Keep project unlicensed;Alternative choice considered.;Rejected in favor of option A.
+ALT-1401;DEC-140;Option A: Append explicit user-data exemption clause to LICENSE file;Approved ratified path.;None
+ALT-1402;DEC-140;Option B: Keep LICENSE file unchanged and clarify only in README;Alternative choice considered.;Rejected in favor of option A.
+ALT-1411;DEC-141;Option A: Implement config-driven dialect routing loaded from environment and install pymysql driver;Approved ratified path.;None
+ALT-1412;DEC-141;Option B: Keep hardcoded local SQLite connection paths;Alternative choice considered.;Rejected in favor of option A.
+ALT-1421;DEC-142;Option A: Ratify archiving requests and reports under external_audits/yyMM/ and commit them to git;Approved ratified path.;None
+ALT-1422;DEC-142;Option B: Retain current transient behavior (templates deleted post-import);Alternative choice considered.;Rejected in favor of option A.
+ALT-1431;DEC-143;Option A: Set explicit timeout_cfg in AsyncClient constructor;Approved ratified path.;None
+ALT-1432;DEC-143;Option B: Retain default client-level timeouts;Alternative choice considered.;Rejected in favor of option A.
+ALT-1441;DEC-144;Option A: Remove duplicate register-skill subparser registration;Approved ratified path.;None
+ALT-1442;DEC-144;Option B: Keep the codebase unchanged;Alternative choice considered.;Rejected in favor of option A.
+ALT-1451;DEC-145;Option A: Implement automated secret obfuscation filters for exported git diffs and logs;Approved ratified path.;None
+ALT-1452;DEC-145;Option B: Retain manual oversight without automated redaction filters;Alternative choice considered.;Rejected in favor of option A.
+ALT-1461;DEC-146;Option A: Write complete module-level docstrings across all lacking package files;Approved ratified path.;None
+ALT-1462;DEC-146;Option B: Keep the codebase unchanged;Alternative choice considered.;Rejected in favor of option A.

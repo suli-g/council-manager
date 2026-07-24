@@ -1,37 +1,17 @@
-Proprietary License Agreement (All Rights Reserved)
+PROPRIETARY SOFTWARE LICENSE AGREEMENT
 
-Copyright (c) 2026 suli-g. All rights reserved.
+This Proprietary Software License Agreement (the "Agreement") is a legal agreement between the copyright holders ("Licensor") and you ("Licensee") for the software product accompanying this Agreement (the "Software").
 
-================================================================================
-EXEMPTION NOTICE (USER GOVERNANCE DATA):
-This proprietary license restricts the modification and redistribution of the 
-Software's core execution source code (including but not limited to cli.py, 
-orchestrator.py, models.py, prompter.py, server, and TUI implementation logic).
+1. LICENSE GRANT AND RESTRICTIONS
+Licensor hereby grants Licensee a limited, non-exclusive, non-transferable, non-sublicensable license to view, inspect, and audit the source code of the Software for educational, evaluation, and quality review purposes only. 
 
-Exempt from this License:
-User-generated governance metadata, configurations, and deliberation files 
-residing inside project directories (specifically the `.agents/` folder structure, 
-including roadmap.csv, decisions.csv, alternatives.csv, votes_manifest.csv, 
-and local specialist rationales) do not contain the Software's execution source 
-code, in whole or in part, and are completely exempt from these license 
-restrictions. Users are fully authorized to generate, distribute, and execute 
-such data to govern their own separate repositories using Council Manager.
-================================================================================
+Any other use, including but not limited to execution of the Software, in whole or in part, modification, translation, redistribution, or deployment in a production environment, is strictly prohibited without prior written authorization from Licensor.
 
-This software and all associated documentation files (the "Software") are the
-exclusive intellectual property of suli-g.
+2. INTELLECTUAL PROPERTY RIGHTS
+All title, ownership rights, and intellectual property rights in and to the Software (including but not limited to any code, images, animations, text, and documentation incorporated into the Software) are owned by Licensor. All rights not expressly granted are reserved by Licensor.
 
-Permission is hereby granted to view the source code of this Software for review
-and auditing purposes only. 
+3. SPECIAL EXEMPTION FOR USER-GENERATED GOVERNANCE DATA
+Notwithstanding the restrictions in Section 1, all user-generated governance metadata and deliberation tracking files created or modified by this Software (including but not limited to files in the ".agents/" directory, decisions registry records, alternatives logs, vote files, and roadmap task lists) are completely exempt from the license restrictions of this Agreement. Licensee retains full ownership, control, and permission to run, execute, modify, and distribute all such user-generated metadata files for any purpose, provided that such files do not contain the Software's own proprietary source code.
 
-Commercial use, modification, redistribution, sublicensing, or execution of the
-Software, in whole or in part, in source or binary forms, is strictly prohibited
-without prior written authorization from the copyright holder.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+4. TERMINATION
+This license terminates automatically if Licensee breaches any terms of this Agreement. Upon termination, Licensee must destroy all copies of the Software in their possession.

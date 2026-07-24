@@ -1,8 +1,8 @@
 voter_id;team_id;vote
-V-A;A;Adopt Proposal
-V-B;B;Adopt Proposal
-V-C;C;Adopt Proposal
-V-D;D;Keep Status Quo
-V-E;E;Adopt Proposal
-V-F;F;Adopt Proposal
-V-G;G;Adopt Proposal
+V-A;A;Option A: Remove duplicate register-skill subparser registration
+V-B;B;Option A: Remove duplicate register-skill subparser registration
+V-C;C;Option A: Remove duplicate register-skill subparser registration
+V-D;D;Option A: Remove duplicate register-skill subparser registration
+V-E;E;Option A: Remove duplicate register-skill subparser registration
+V-F;F;Option A: Remove duplicate register-skill subparser registration
+V-G;G;Option A: Remove duplicate register-skill subparser registration

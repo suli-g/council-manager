@@ -1,8 +1,8 @@
 voter_id;team_id;vote
-V-A;A;Option A: Implement automated secret obfuscation filters for exported git diffs and logs
-V-B;B;Option A: Implement automated secret obfuscation filters for exported git diffs and logs
-V-C;C;Option A: Implement automated secret obfuscation filters for exported git diffs and logs
-V-D;D;Option A: Implement automated secret obfuscation filters for exported git diffs and logs
-V-E;E;Option A: Implement automated secret obfuscation filters for exported git diffs and logs
-V-F;F;Option A: Implement automated secret obfuscation filters for exported git diffs and logs
-V-G;G;Option A: Implement automated secret obfuscation filters for exported git diffs and logs
+V-A;A;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-B;B;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-C;C;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-D;D;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-E;E;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-F;F;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-G;G;Option A: Set explicit timeout_cfg in AsyncClient constructor

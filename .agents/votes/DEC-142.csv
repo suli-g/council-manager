@@ -1,8 +1,8 @@
 voter_id;team_id;vote
-V-A;A;A
-V-B;B;A
-V-C;C;A
-V-D;D;A
-V-E;E;A
-V-F;F;A
-V-G;G;A
+V-A;A;Option A: Ratify archiving requests and reports under external_audits/yyMM/ and commit them to git
+V-B;B;Option A: Ratify archiving requests and reports under external_audits/yyMM/ and commit them to git
+V-C;C;Option A: Ratify archiving requests and reports under external_audits/yyMM/ and commit them to git
+V-D;D;Option A: Ratify archiving requests and reports under external_audits/yyMM/ and commit them to git
+V-E;E;Option A: Ratify archiving requests and reports under external_audits/yyMM/ and commit them to git
+V-F;F;Option A: Ratify archiving requests and reports under external_audits/yyMM/ and commit them to git
+V-G;G;Option A: Ratify archiving requests and reports under external_audits/yyMM/ and commit them to git

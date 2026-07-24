@@ -1,3 +1,10 @@
+"""
+Pipe-and-Filter Context Compaction Pipeline (P6-02, v0.9.1).
+
+Constructs structured, token-optimized context blocks summarizing active 
+teams, recent ratified decisions, and roadmap tasks for local LLM consumption.
+"""
+
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
 from pathlib import Path
