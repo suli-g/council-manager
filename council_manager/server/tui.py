@@ -1,3 +1,11 @@
+"""
+Textual TUI Dashboard and User Interaction Interface.
+
+Runs the terminal dashboard display, monitors background task execution events 
+via WebSocket connections, and displays interactive modal popups for 
+proposal deliberations and ratification flows.
+"""
+
 from pathlib import Path
 from datetime import datetime
 from typing import Generator, List, Dict, Any, Optional

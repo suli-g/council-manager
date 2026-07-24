@@ -1,3 +1,10 @@
+"""
+SQLAlchemy Relational Database Schemas and Object-Relational Models.
+
+Defines schemas for Projects, Proposals, Alternatives, Decisions, 
+AuditLogs, RoadmapTasks, and BackgroundTasks.
+"""
+
 from datetime import datetime, date, timezone
 from typing import List, Dict, Any
 from sqlalchemy import String, Integer, Float, DateTime, Date, ForeignKey, JSON

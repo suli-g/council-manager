@@ -1,3 +1,11 @@
+"""
+Database Session Lifecycle and Engine Connection Pool Manager.
+
+Provides factory session instances, executes migrations, registers 
+workspace SQLite databases dynamically, and enforces SQLite foreign key 
+integrity listeners.
+"""
+
 from pathlib import Path
 from typing import Generator
 from sqlalchemy import create_engine, event

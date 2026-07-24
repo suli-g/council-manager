@@ -1,3 +1,10 @@
+"""
+Consensus Deliberation and Voting Workflow Orchestrator.
+
+Manages the lifecycle of a proposal from inception, through multi-team 
+async deliberation, consensus voting loops, and final ratification.
+"""
+
 import asyncio
 from datetime import datetime, timezone, date
 from pathlib import Path

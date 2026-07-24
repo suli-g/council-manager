@@ -1,3 +1,11 @@
+"""
+Council Manager Command-Line Interface (CLI).
+
+Handles command-line parsing, subparser definition, and execution routing 
+for all workspace onboarding, project initialization, CSV migrations, 
+deliberations, voting loops, external audits, and compliance checks.
+"""
+
 import argparse
 import asyncio
 import os
@@ -1715,9 +1723,6 @@ def main():
     p_dash = subparsers.add_parser("dashboard", help="Launch the interactive Terminal UI dashboard.")
     p_dash.add_argument("-w", "--workspace", help="Path to the workspace folder.")
 
-    # Command: register-skill
-    p_reg = subparsers.add_parser("register-skill", help="Explicitly register all local workspace skills (council-manager, project-council) in skills.json.")
-    p_reg.add_argument("-w", "--workspace", help="Path to the workspace folder.")
 
     args = parser.parse_args()
     if args.debug:

@@ -1,0 +1,17 @@
+PROPRIETARY SOFTWARE LICENSE AGREEMENT
+
+This Proprietary Software License Agreement (the "Agreement") is a legal agreement between the copyright holders ("Licensor") and you ("Licensee") for the software product accompanying this Agreement (the "Software").
+
+1. LICENSE GRANT AND RESTRICTIONS
+Licensor hereby grants Licensee a limited, non-exclusive, non-transferable, non-sublicensable license to view, inspect, and audit the source code of the Software for educational, evaluation, and quality review purposes only. 
+
+Any other use, including but not limited to execution of the Software, in whole or in part, modification, translation, redistribution, or deployment in a production environment, is strictly prohibited without prior written authorization from Licensor.
+
+2. INTELLECTUAL PROPERTY RIGHTS
+All title, ownership rights, and intellectual property rights in and to the Software (including but not limited to any code, images, animations, text, and documentation incorporated into the Software) are owned by Licensor. All rights not expressly granted are reserved by Licensor.
+
+3. SPECIAL EXEMPTION FOR USER-GENERATED GOVERNANCE DATA
+Notwithstanding the restrictions in Section 1, all user-generated governance metadata and deliberation tracking files created or modified by this Software (including but not limited to files in the ".agents/" directory, decisions registry records, alternatives logs, vote files, and roadmap task lists) are completely exempt from the license restrictions of this Agreement. Licensee retains full ownership, control, and permission to run, execute, modify, and distribute all such user-generated metadata files for any purpose, provided that such files do not contain the Software's own proprietary source code.
+
+4. TERMINATION
+This license terminates automatically if Licensee breaches any terms of this Agreement. Upon termination, Licensee must destroy all copies of the Software in their possession.

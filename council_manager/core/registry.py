@@ -1,3 +1,10 @@
+"""
+Active Team and Specialist Agent Registry.
+
+Manages query lookups for registered specialist personas, vote weights, 
+and system prompts, loading directly from SQLite or CSV tables.
+"""
+
 from pathlib import Path
 from typing import List, Optional
 from council_manager.db import db_manager, Team

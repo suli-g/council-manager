@@ -1,8 +1,8 @@
 voter_id;team_id;vote
-V-A;A;Keep Status Quo
-V-B;B;Adopt Proposal
-V-C;C;Adopt Proposal
-V-D;D;Keep Status Quo
-V-E;E;Adopt Proposal
-V-F;F;Adopt Proposal
-V-G;G;Adopt Proposal
+V-A;A;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-B;B;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-C;C;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-D;D;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-E;E;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-F;F;Option A: Set explicit timeout_cfg in AsyncClient constructor
+V-G;G;Option A: Set explicit timeout_cfg in AsyncClient constructor

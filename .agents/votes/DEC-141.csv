@@ -1,0 +1,8 @@
+voter_id;team_id;vote
+V-A;A;Option A: Implement config-driven dialect routing loaded from environment and install pymysql driver
+V-B;B;Option A: Implement config-driven dialect routing loaded from environment and install pymysql driver
+V-C;C;Option A: Implement config-driven dialect routing loaded from environment and install pymysql driver
+V-D;D;Option A: Implement config-driven dialect routing loaded from environment and install pymysql driver
+V-E;E;Option A: Implement config-driven dialect routing loaded from environment and install pymysql driver
+V-F;F;Option A: Implement config-driven dialect routing loaded from environment and install pymysql driver
+V-G;G;Option A: Implement config-driven dialect routing loaded from environment and install pymysql driver
