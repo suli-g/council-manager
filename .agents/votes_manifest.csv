@@ -107,3 +107,8 @@ DEC-151;External Install via Git/Pip;docs/.agents/votes/DEC-151.csv;2026-07-21T1
 DEC-152;Documentation Audit & CLI Verification;docs/.agents/votes/DEC-152.csv;2026-07-21T14:59:40
 DEC-153;Absolute to Relative Paths;docs/.agents/votes/DEC-153.csv;2026-07-21T15:16:50
 DEC-154;Subtask Decomposition & Roadmap Shift;docs/.agents/votes/DEC-154.csv;2026-07-21T19:55:12
+DEC-155;PROPOSAL: Let's add to the roa...;docs/.agents/votes/DEC-155.csv;2026-07-24T09:33:58
+DEC-156;PROPOSAL: Let's add to the ext...;docs/.agents/votes/DEC-156.csv;2026-07-24T10:16:15
+DEC-157;Multi-Agent Endpoint Config;docs/.agents/votes/DEC-157.csv;2026-08-01T16:48:20
+DEC-159;Fix AI council inference valid...;docs/.agents/votes/DEC-159.csv;2026-08-31T14:46:42
+DEC-160;Implement recursive schema res...;docs/.agents/votes/DEC-160.csv;2026-09-01T07:19:30

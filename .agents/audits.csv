@@ -32,7 +32,4 @@ timestamp;audit_id;summary;alignment_score;auditor_team
 2026-07-04T01:42:00;AUDIT-031;Phase 6 Initiation & v0.8.x Governance Alignment Audit: 100%. Verified: (1) WebSocket ConnectionManager and /ws/workspace endpoint;100%;(3) Worker progress event broadcasting via /tasks/{id}/events
 2026-07-23T12:44:43;AUDIT-032;The change is a low-risk, single-line addition to the roadmap CSV registering a new TODO task, but it contains metadata inconsistencies that should be corrected before merge.;72%;External
 2026-07-24T10:02:58;AUDIT-033;Several changes are sound (module docstrings, LICENSE exemption clause, CLI bugfix as described), but the diff contains multiple serious governance-integrity violations — a ratification that contradicts its own vote tally, an overwritten historical audit record, and reused DEC-IDs whose original proposal content has been silently replaced.;38%;External
-<<<<<<< Updated upstream
-=======
 2026-07-24T15:04:51;AUDIT-20260724;DEC-156 is correctly documented, voted, and roadmap-scheduled, but the mandatory Linnaean-signature enforcement mechanism itself has not been implemented in code or templates.;94%;External
->>>>>>> Stashed changes

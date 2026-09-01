@@ -187,3 +187,12 @@ ALT-1451;DEC-145;Option A: Implement automated secret obfuscation filters for ex
 ALT-1452;DEC-145;Option B: Retain manual oversight without automated redaction filters;Alternative choice considered.;Rejected in favor of option A.
 ALT-1461;DEC-146;Option A: Write complete module-level docstrings across all lacking package files;Approved ratified path.;None
 ALT-1462;DEC-146;Option B: Keep the codebase unchanged;Alternative choice considered.;Rejected in favor of option A.
+ALT-1551;DEC-155;Option A: Adopt Proposal;Separates concerns, reduces coupling, and formally structures job specs.;None
+ALT-1552;DEC-155;Option B: Keep Status Quo;Keeps simplicity of local directories.;Maintains manual file tampering and warning overrides.
+ALT-1561;DEC-156;Option A: Adopt Proposal;Enforces strict binomial nomenclature labels for model taxonomies.;None
+ALT-1562;DEC-156;Option B: Keep Status Quo;Maintains standard technical name conventions.;Provides no distinct taxonomic classification.
+ALT-1571;DEC-157;Centralized agents.cfg for endpoints and API keys;Identified during voting cycle;Non-consensus choice
+ALT-1572;DEC-157;Decentralized per-agent config files;Identified during voting cycle;Non-consensus choice
+ALT-1573;DEC-157;Database-backed dynamic configuration;Identified during voting cycle;Non-consensus choice
+ALT-1591;DEC-159;Adopt Proposal;Identified during voting cycle;Non-consensus choice
+ALT-1601;DEC-160;Keep Status Quo;Identified during voting cycle;Non-consensus choice

@@ -1,7 +1,7 @@
 """
 SQLAlchemy Relational Database Schemas and Object-Relational Models.
 
-Defines schemas for Projects, Proposals, Alternatives, Decisions, 
+Defines schemas for Projects, Proposals, Alternatives, Decisions,
 AuditLogs, RoadmapTasks, and BackgroundTasks.
 """
 
@@ -10,23 +10,38 @@ from typing import List, Dict, Any
 from sqlalchemy import String, Integer, Float, DateTime, Date, ForeignKey, JSON
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class Project(Base):
     __tablename__ = "projects"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
+    )
 
-    proposals: Mapped[List["Proposal"]] = relationship(back_populates="project", cascade="all, delete-orphan")
-    decisions: Mapped[List["Decision"]] = relationship(back_populates="project", cascade="all, delete-orphan")
-    audit_logs: Mapped[List["AuditLog"]] = relationship(back_populates="project", cascade="all, delete-orphan")
-    audit_decisions: Mapped[List["AuditDecision"]] = relationship(back_populates="project", cascade="all, delete-orphan")
-    roadmap_tasks: Mapped[List["RoadmapTask"]] = relationship(back_populates="project", cascade="all, delete-orphan")
-    background_tasks: Mapped[List["BackgroundTask"]] = relationship(back_populates="project", cascade="all, delete-orphan")
-
+    proposals: Mapped[List["Proposal"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+    decisions: Mapped[List["Decision"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+    audit_logs: Mapped[List["AuditLog"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+    audit_decisions: Mapped[List["AuditDecision"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+    roadmap_tasks: Mapped[List["RoadmapTask"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+    background_tasks: Mapped[List["BackgroundTask"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
 
 
 class Team(Base):
@@ -42,15 +57,29 @@ class Proposal(Base):
     __tablename__ = "proposals"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"), nullable=False)
+    project_id: Mapped[str] = mapped_column(
+        String, ForeignKey("projects.id"), nullable=False
+    )
     topic: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
-    options: Mapped[List[str]] = mapped_column(JSON, nullable=False)  # List of string options
+    options: Mapped[List[str]] = mapped_column(
+        JSON, nullable=False
+    )  # List of string options
     status: Mapped[str] = mapped_column(String, default="DELIBERATION_PENDING")
-    rationales: Mapped[List[Dict[str, Any]]] = mapped_column(JSON, default=list)  # List of deliberation dicts
-    votes: Mapped[List[Dict[str, Any]]] = mapped_column(JSON, default=list)  # List of votes cast
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None), onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+    rationales: Mapped[List[Dict[str, Any]]] = mapped_column(
+        JSON, default=list
+    )  # List of deliberation dicts
+    votes: Mapped[List[Dict[str, Any]]] = mapped_column(
+        JSON, default=list
+    )  # List of votes cast
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
 
     project: Mapped["Project"] = relationship(back_populates="proposals")
 
@@ -59,21 +88,29 @@ class Decision(Base):
     __tablename__ = "decisions"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)  # e.g., 'DEC-001'
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"), nullable=False)
-    date: Mapped[date] = mapped_column(Date, default=lambda: datetime.now(timezone.utc).date())
+    project_id: Mapped[str] = mapped_column(
+        String, ForeignKey("projects.id"), nullable=False
+    )
+    date: Mapped[Date] = mapped_column(
+        Date, default=lambda: datetime.now(timezone.utc).date()
+    )
     topic: Mapped[str] = mapped_column(String, nullable=False)
     decision: Mapped[str] = mapped_column(String, nullable=False)
     rationale: Mapped[str] = mapped_column(String, nullable=False)
 
     project: Mapped["Project"] = relationship(back_populates="decisions")
-    alternatives: Mapped[List["Alternative"]] = relationship(back_populates="decision", cascade="all, delete-orphan")
+    alternatives: Mapped[List["Alternative"]] = relationship(
+        back_populates="decision", cascade="all, delete-orphan"
+    )
 
 
 class Alternative(Base):
     __tablename__ = "alternatives"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)  # e.g., 'ALT-001'
-    decision_id: Mapped[str] = mapped_column(String, ForeignKey("decisions.id"), nullable=False)
+    decision_id: Mapped[str] = mapped_column(
+        String, ForeignKey("decisions.id"), nullable=False
+    )
     option: Mapped[str] = mapped_column(String, nullable=False)
     pros: Mapped[str] = mapped_column(String, nullable=False)
     cons: Mapped[str] = mapped_column(String, nullable=False)
@@ -85,8 +122,12 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)  # e.g., 'AUDIT-001'
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"), nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+    project_id: Mapped[str] = mapped_column(
+        String, ForeignKey("projects.id"), nullable=False
+    )
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
+    )
     summary: Mapped[str] = mapped_column(String, nullable=False)
     alignment_score: Mapped[float] = mapped_column(Float, nullable=False)
     auditor_team: Mapped[str] = mapped_column(String, default="F")
@@ -98,7 +139,9 @@ class RoadmapTask(Base):
     __tablename__ = "roadmap_tasks"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)  # e.g., 'P1-01'
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String, ForeignKey("projects.id"), primary_key=True
+    )
     phase: Mapped[int] = mapped_column(Integer, nullable=False)
     task: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)  # 'TODO', 'DONE'
@@ -111,13 +154,27 @@ class BackgroundTask(Base):
     __tablename__ = "background_tasks"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"), nullable=False)
-    task_type: Mapped[str] = mapped_column(String, nullable=False)  # 'DELIBERATION', 'VOTING'
-    proposal_id: Mapped[str] = mapped_column(String, ForeignKey("proposals.id"), nullable=False)
-    status: Mapped[str] = mapped_column(String, default="PENDING")  # 'PENDING', 'RUNNING', 'COMPLETED', 'FAILED'
+    project_id: Mapped[str] = mapped_column(
+        String, ForeignKey("projects.id"), nullable=False
+    )
+    task_type: Mapped[str] = mapped_column(
+        String, nullable=False
+    )  # 'DELIBERATION', 'VOTING'
+    proposal_id: Mapped[str] = mapped_column(
+        String, ForeignKey("proposals.id"), nullable=False
+    )
+    status: Mapped[str] = mapped_column(
+        String, default="PENDING"
+    )  # 'PENDING', 'RUNNING', 'COMPLETED', 'FAILED'
     error_message: Mapped[str] = mapped_column(String, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None), onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
 
     project: Mapped["Project"] = relationship(back_populates="background_tasks")
     proposal: Mapped["Proposal"] = relationship()
@@ -128,12 +185,13 @@ class AuditDecision(Base):
 
     audit_id: Mapped[str] = mapped_column(String, primary_key=True)
     decision_id: Mapped[str] = mapped_column(String, primary_key=True)
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("projects.id"), primary_key=True)
-    status: Mapped[str] = mapped_column(String, nullable=False)  # 'FIXED', 'RESOLVED', 'PENDING'
+    project_id: Mapped[str] = mapped_column(
+        String, ForeignKey("projects.id"), primary_key=True
+    )
+    status: Mapped[str] = mapped_column(
+        String, nullable=False
+    )  # 'FIXED', 'RESOLVED', 'PENDING'
     re_audit_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     notes: Mapped[str | None] = mapped_column(String, nullable=True)
 
     project: Mapped["Project"] = relationship(back_populates="audit_decisions")
-
-
-
