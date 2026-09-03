@@ -6,12 +6,25 @@ handles async HTTP connection routing to Gemini or local Ollama endpoints,
 and parses structured JSON outputs safely.
 """
 
-from typing import List, Optional
+from typing import (
+    List,
+    Optional,
+    Union,
+    Any,
+    Type,
+    Sequence,
+    Iterable,
+    Tuple,
+    Dict,
+    Mapping,
+    get_origin,
+    get_args,
+)
 import json
 import re
 from google import genai
 from google.genai import types
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from council_manager.config import settings
 
 def clean_and_parse_json(text: str) -> dict:
@@ -91,13 +104,56 @@ def format_rationale(rationale: any) -> str:
     return str(rationale)
 
 
-def get_simple_json_template(schema: BaseModel) -> str:
-    """Generate a clean, flat JSON template string showing the expected fields and descriptions."""
-    template = {}
-    for name, field in schema.model_fields.items():
-        desc = field.description or str(field.annotation)
-        template[name] = f"<{desc}>"
-    return json.dumps(template, indent=2)
+def get_simple_json_template(
+    schema: Union[BaseModel, Type[BaseModel]], max_depth: int = 5
+) -> str:
+    """Generate a clean JSON template string showing the expected fields and descriptions recursively."""
+
+    def _resolve_field(
+        annotation: Any, description: Optional[str] = None, depth: int = 0
+    ) -> Any:
+        if depth >= max_depth:
+            return f"<{description or str(annotation)}>"
+
+        origin = get_origin(annotation)
+        args = get_args(annotation)
+
+        if origin is Union:
+            non_none = [a for a in args if a is not type(None)]
+            if len(non_none) == 1:
+                return _resolve_field(non_none[0], description, depth)
+            elif non_none:
+                return _resolve_field(non_none[0], description, depth)
+
+        if origin in (list, List, Sequence, Iterable, tuple, Tuple):
+            if args:
+                item_template = _resolve_field(args[0], None, depth + 1)
+                return [item_template]
+            return [f"<{description or 'item'}>"]
+
+        if origin in (dict, Dict, Mapping):
+            return {"<key>": f"<{description or 'value'}>"}
+
+        if isinstance(annotation, type) and issubclass(annotation, BaseModel):
+            model_template = {}
+            for fname, ffield in annotation.model_fields.items():
+                fdesc = ffield.description
+                model_template[fname] = _resolve_field(
+                    ffield.annotation, fdesc, depth + 1
+                )
+            return model_template
+
+        desc = description or str(annotation)
+        return f"<{desc}>"
+
+    model_cls = schema if isinstance(schema, type) else schema.__class__
+    if isinstance(model_cls, type) and issubclass(model_cls, BaseModel):
+        template = {}
+        for name, field in model_cls.model_fields.items():
+            desc = field.description
+            template[name] = _resolve_field(field.annotation, desc, depth=1)
+        return json.dumps(template, indent=2)
+    return "{}"
 
 
 class AgentPrompter:
@@ -272,8 +328,8 @@ class AgentPrompter:
         self,
         system_instruction: str,
         prompt: str,
-        schema: Optional[BaseModel] = None,
-        temperature: float = 0.7
+        schema: Optional[Union[BaseModel, Type[BaseModel]]] = None,
+        temperature: float = 0.7,
     ) -> str:
         import httpx
         provider = settings.llm_provider.lower()
@@ -336,8 +392,8 @@ class AgentPrompter:
         self,
         system_instruction: str,
         prompt: str,
-        schema: Optional[BaseModel] = None,
-        temperature: float = 0.7
+        schema: Optional[Union[BaseModel, Type[BaseModel]]] = None,
+        temperature: float = 0.7,
     ) -> str:
         import httpx
         provider = settings.llm_provider.lower()
@@ -692,45 +748,48 @@ class AgentPrompter:
         system_instruction = (
             "You are an AI assistant designed to bootstrap project councils. "
             "Given a project description, you must classify the project and define a council of exactly 7 teams (A to G) that are best suited to govern this project.\n\n"
-            "Your response must include:\n"
+            "Your response must be a JSON object containing:\n"
             "- selected_template: 'software', 'education', 'marketing', 'general', or 'custom'.\n"
-            "- teams: A list of exactly 7 teams.\n\n"
-            "For the teams:\n"
-            "- The IDs must be exactly 'A', 'B', 'C', 'D', 'E', 'F', 'G'.\n"
+            "- teams: A list of exactly 7 team objects.\n\n"
+            "Each team object in the 'teams' list MUST contain:\n"
+            "- 'id': The team ID, exactly one of: 'A', 'B', 'C', 'D', 'E', 'F', 'G'.\n"
+            "- 'name': The name of the team (e.g. 'Functional Specialists').\n"
+            "- 'paradigm_specialty': The paradigm specialty and focus area (e.g. 'Functional Programming, Immutability').\n\n"
+            "Team Constraints:\n"
             "- Team F must always represent the Auditors/Project Managers (focused on strategic alignment, quality assurance, requirement tracking, and auditing).\n"
             "- Team G must always represent the Contrarians (focused on devil's advocacy, design friction, and critical analysis of assumptions).\n"
             "- Teams A, B, C, D, E should represent the key specialist paradigms for the domain.\n\n"
-            "For example:\n"
+            "Example Team Configurations:\n"
             "- For 'software':\n"
-            "  A: Functional Specialists (Functional Programming, Immutability)\n"
-            "  B: OOP Specialists (Object-Oriented Programming, Design Patterns)\n"
-            "  C: Imperative Specialists (Explicit State, Procedural logic)\n"
-            "  D: Declarative Specialists (Logic engines, Config-driven, DSLs)\n"
-            "  E: Dynamic Specialists (Reflection, Metaprogramming)\n"
+            "  A: name='Functional Specialists', paradigm_specialty='Functional Programming, Immutability'\n"
+            "  B: name='OOP Specialists', paradigm_specialty='Object-Oriented Programming, Design Patterns'\n"
+            "  C: name='Imperative Specialists', paradigm_specialty='Explicit State, Procedural logic'\n"
+            "  D: name='Declarative Specialists', paradigm_specialty='Logic engines, Config-driven, DSLs'\n"
+            "  E: name='Dynamic Specialists', paradigm_specialty='Reflection, Metaprogramming'\n"
             "- For 'education' (curriculum, teaching, pedagogy):\n"
-            "  A: Pedagogy Specialists (Learning theories, student needs)\n"
-            "  B: Curriculum Setters (Subject matter experts, syllabus design)\n"
-            "  C: Assessment Designers (Testing, grading rubrics, evaluations)\n"
-            "  D: Instructional Technology Specialists (E-learning, digital tools)\n"
-            "  E: Student Experience Designers (Engagement, accessibility, student feedback)\n"
+            "  A: name='Pedagogy Specialists', paradigm_specialty='Learning theories, student needs'\n"
+            "  B: name='Curriculum Setters', paradigm_specialty='Subject matter experts, syllabus design'\n"
+            "  C: name='Assessment Designers', paradigm_specialty='Testing, grading rubrics, evaluations'\n"
+            "  D: name='Instructional Technology Specialists', paradigm_specialty='E-learning, digital tools'\n"
+            "  E: name='Student Experience Designers', paradigm_specialty='Engagement, accessibility, student feedback'\n"
             "- For 'marketing' (campaigns, branding, growth):\n"
-            "  A: Brand Strategists (Brand identity, positioning)\n"
-            "  B: Copywriters & Content Creators (Messaging, creative writing)\n"
-            "  C: Media Buyers & Analysts (Ad spend, ROI, channel selection)\n"
-            "  D: SEO & Growth Engineers (Conversion rate, traffic, search optimization)\n"
-            "  E: Public Relations Specialists (Press, community engagement)\n"
+            "  A: name='Brand Strategists', paradigm_specialty='Brand identity, positioning'\n"
+            "  B: name='Copywriters & Content Creators', paradigm_specialty='Messaging, creative writing'\n"
+            "  C: name='Media Buyers & Analysts', paradigm_specialty='Ad spend, ROI, channel selection'\n"
+            "  D: name='SEO & Growth Engineers', paradigm_specialty='Conversion rate, traffic, search optimization'\n"
+            "  E: name='Public Relations Specialists', paradigm_specialty='Press, community engagement'\n"
             "- For 'general' (business operations, general projects):\n"
-            "  A: Strategy & Finance (Planning, budgeting, ROI)\n"
-            "  B: Operations & Execution (Process efficiency, delivery)\n"
-            "  C: Customer Experience (User feedback, support, retention)\n"
-            "  D: Compliance & Legal (Regulatory, risk management, contracts)\n"
-            "  E: Human Resources & Talent (Team culture, staffing, training)"
+            "  A: name='Strategy & Finance', paradigm_specialty='Planning, budgeting, ROI'\n"
+            "  B: name='Operations & Execution', paradigm_specialty='Process efficiency, delivery'\n"
+            "  C: name='Customer Experience', paradigm_specialty='User feedback, support, retention'\n"
+            "  D: name='Compliance & Legal', paradigm_specialty='Regulatory, risk management, contracts'\n"
+            "  E: name='Human Resources & Talent', paradigm_specialty='Team culture, staffing, training'"
         )
 
         prompt = (
             f"Please suggest a project-specific council for the following project description:\n"
             f"Description: {description}\n\n"
-            f"Return a structured JSON containing the selected_template and the list of 7 teams."
+            f"Return a structured JSON containing the 'selected_template' and the 'teams' list of 7 team objects, each with 'id', 'name', and 'paradigm_specialty'."
         )
 
         if settings.llm_provider.lower() != "google":
@@ -758,7 +817,29 @@ class AgentPrompter:
 class TeamInference(BaseModel):
     id: str = Field(description="The team ID, which must be exactly one of: 'A', 'B', 'C', 'D', 'E', 'F', 'G'")
     name: str = Field(description="The name of the team (e.g. 'Pedagogy Specialists', 'Curriculum Setters')")
-    paradigm_specialty: str = Field(description="The team's paradigm specialty and focus area (e.g. 'Learning theories, student needs')")
+    paradigm_specialty: str = Field(default="", description="The team's paradigm specialty and focus area (e.g. 'Learning theories, student needs')")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_fields(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Check for alternative field keys
+            if not data.get("paradigm_specialty"):
+                if data.get("specialty"):
+                    data["paradigm_specialty"] = data["specialty"]
+                elif data.get("paradigm"):
+                    data["paradigm_specialty"] = data["paradigm"]
+                elif data.get("focus"):
+                    data["paradigm_specialty"] = data["focus"]
+                elif data.get("name") and isinstance(data["name"], str):
+                    # Check if name is formatted as "Name (Specialty)"
+                    match = re.match(r"^([^(]+)\(([^)]+)\)$", data["name"].strip())
+                    if match:
+                        data["name"] = match.group(1).strip()
+                        data["paradigm_specialty"] = match.group(2).strip()
+                    else:
+                        data["paradigm_specialty"] = data["name"]
+        return data
 
 
 class CouncilInferenceResponse(BaseModel):

@@ -329,5 +329,65 @@ def test_infer_project_council_mocked():
     mock_client.models.generate_content.assert_called_once()
 
 
+def test_get_simple_json_template_recursive():
+    import json
+    from council_manager.core.prompter import get_simple_json_template, CouncilInferenceResponse
+    
+    template_str = get_simple_json_template(CouncilInferenceResponse)
+    template = json.loads(template_str)
+    
+    assert "selected_template" in template
+    assert "teams" in template
+    assert isinstance(template["teams"], list)
+    assert len(template["teams"]) == 1
+    team_obj = template["teams"][0]
+    assert "id" in team_obj
+    assert "name" in team_obj
+    assert "paradigm_specialty" in team_obj
+
+
+def test_team_inference_normalizer_fallback():
+    from council_manager.core.prompter import TeamInference, CouncilInferenceResponse
+
+    # 1. Name with parenthesis format (the exact issue reported in Issue #3)
+    team1 = TeamInference.model_validate({
+        "id": "A",
+        "name": "Contrarians (Devil's Advocacy, Question identification)"
+    })
+    assert team1.id == "A"
+    assert team1.name == "Contrarians"
+    assert team1.paradigm_specialty == "Devil's Advocacy, Question identification"
+
+    # 2. Key named 'specialty'
+    team2 = TeamInference.model_validate({
+        "id": "B",
+        "name": "OOP Specialists",
+        "specialty": "Design Patterns & Polymorphism"
+    })
+    assert team2.id == "B"
+    assert team2.name == "OOP Specialists"
+    assert team2.paradigm_specialty == "Design Patterns & Polymorphism"
+
+    # 3. Full CouncilInferenceResponse with 7 teams missing paradigm_specialty key
+    raw_payload = {
+        "selected_template": "software",
+        "teams": [
+            {"id": "A", "name": "Functional Specialists (Pure Functions, Pipelines)"},
+            {"id": "B", "name": "OOP Specialists (Design Patterns)"},
+            {"id": "C", "name": "Imperative Specialists (Explicit State)"},
+            {"id": "D", "name": "Declarative Specialists (Logic Engines)"},
+            {"id": "E", "name": "Dynamic Specialists (Metaprogramming)"},
+            {"id": "F", "name": "Auditors (Strategic Alignment)"},
+            {"id": "G", "name": "Contrarians (Devil's Advocacy)"}
+        ]
+    }
+    parsed = CouncilInferenceResponse.model_validate(raw_payload)
+    assert parsed.selected_template == "software"
+    assert len(parsed.teams) == 7
+    assert parsed.teams[0].name == "Functional Specialists"
+    assert parsed.teams[0].paradigm_specialty == "Pure Functions, Pipelines"
+
+
+
 
 

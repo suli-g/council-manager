@@ -1,0 +1,8 @@
+voter_id;team_id;vote
+V-A;A;Database-backed dynamic configuration
+V-B;B;Database-backed dynamic configuration
+V-C;C;Centralized agents.cfg for endpoints and API keys
+V-D;D;Database-backed dynamic configuration
+V-E;E;Database-backed dynamic configuration
+V-F;F;Database-backed dynamic configuration
+V-G;G;Database-backed dynamic configuration

@@ -24,6 +24,7 @@ phase;id;task;status;notes
 4;P4-05;Minor Version Bump to 0.7.0;DONE;Bump the minor version to 0.7.0 in pyproject.toml, lockfiles, and CHANGELOG.md.
 5;P5-01;Create and publish local agent skill integration adapter;DONE;Create a .agents/skills/council-manager/ folder with SKILL.md to expose the CLI tools to workspace agents.
 5;P5-02;Implement project-specific council generation and skill customization;DONE;Generate custom teams.csv and bespoke agent skill based on project domain/description (Implemented via hybrid template/inference flow).
+5;P5-03v0.9.3;Fix AI council inference Pydantic validation and recursive schema resolution (Issue #3);DONE;v0.9.3
 6;P6-01v0.9.0;roadmap-update CLI command implementation;DONE;Ratified under DEC-133
 6;P6-02a;Runtime Tool Pre-Execution Gatekeeper Middleware;DONE;v0.9.2
 6;P6-02b-1;Keypair Management: Asymmetric Key Generation & CLI Setup;TODO;v0.9.3
@@ -48,3 +49,5 @@ phase;id;task;status;notes
 6;P6-11b;README.md Refactoring: Replace Absolute Paths with Portable Relative Links;DONE;v0.9.19
 6;P6-12a;Configurable Multi-Dialect Database Routing (.env);TODO;v0.9.20
 6;P6-12b;Automated Secret Obfuscation for Audits and Diffs;TODO;v0.9.21
+6;P6-13;Implement Council Job Request System;TODO;v0.9.22
+6;P6-14;Enforce Linnaean Nomenclature LLM Signatures;TODO;v0.9.23
