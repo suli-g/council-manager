@@ -196,3 +196,4 @@ ALT-1572;DEC-157;Decentralized per-agent config files;Identified during voting c
 ALT-1573;DEC-157;Database-backed dynamic configuration;Identified during voting cycle;Non-consensus choice
 ALT-1591;DEC-159;Adopt Proposal;Identified during voting cycle;Non-consensus choice
 ALT-1601;DEC-160;Keep Status Quo;Identified during voting cycle;Non-consensus choice
+ALT-1611;DEC-161;Increment minor version (0.10.0);Identified during voting cycle;Non-consensus choice

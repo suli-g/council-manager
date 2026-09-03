@@ -142,3 +142,4 @@ DEC-156;2026-07-24;PROPOSAL: Require external auditors to sign reports using Lin
 DEC-157;2026-08-01;Multi-Agent Endpoint Config;Environment variables for endpoints/API keys;Configurable Multi-Agent Endpoints & API Keys via agents.cfg
 DEC-159;2026-08-31;Fix AI council inference valid...;Keep Status Quo;Fix AI council inference validation errors by improving system instructions and enhancing get_simple_json_template recursive schema resolution
 DEC-160;2026-09-01;Implement recursive schema res...;Adopt Proposal;Implement recursive schema resolution in get_simple_json_template and add explicit JSON schema instructions in infer_project_council (Issue #3)
+DEC-161;2026-09-03;Minor Version Bump;Skip version bump, keep 0.9.0;Bump project minor version to 0.10.0

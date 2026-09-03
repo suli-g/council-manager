@@ -1,0 +1,8 @@
+voter_id;team_id;vote
+V-A;A;Skip version bump, keep 0.9.0
+V-B;B;Increment minor version (0.10.0)
+V-C;C;Increment minor version (0.10.0)
+V-D;D;Increment minor version (0.10.0)
+V-E;E;Increment minor version (0.10.0)
+V-F;F;Increment minor version (0.10.0)
+V-G;G;Skip version bump, keep 0.9.0
